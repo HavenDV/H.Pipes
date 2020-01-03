@@ -4,8 +4,30 @@
     <LangVersion>8</LangVersion>
     <AssemblyTitle>Named Pipe Wrapper library</AssemblyTitle>
     <AssemblyDescription>A simple, easy to use, strongly-typed wrapper around .NET named pipes.</AssemblyDescription>
-    <Version>1.4.0.0</Version>
+    <Version>1.5.0.0</Version>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>NamedPipeWrapper.NetStandard</PackageId>
+    <Description>Create named pipe servers that can handle multiple client connections simultaneously.
+
+Send strongly-typed messages between clients and servers: any serializable .NET object can be sent over a pipe and will be automatically serialized/deserialized, including cyclical references and complex object graphs.
+
+Messages are sent and received asynchronously on a separate background thread and marshalled back to the calling thread (typically the UI).
+
+Supports large messages - up to 300 MiB.
+
+Requires .NET Standard 2.0</Description>
+    <Authors>havendv -&gt; Matt Watson</Authors>
+    <PackageLicenseExpression></PackageLicenseExpression>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/HavenDV/NamedPipeWrapper.NetStandard</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/HavenDV/NamedPipeWrapper.NetStandard</RepositoryUrl>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
 </Project>

@@ -1,10 +1,13 @@
-# Named Pipe Wrapper for .NET 4.0
+# Named Pipe Wrapper for .NET Standard 2.0
 
 A simple, easy to use, strongly-typed wrapper around .NET named pipes.
 
 # NuGet Package
 
-Available as a [NuGet package](https://www.nuget.org/packages/NamedPipeWrapper/).
+Available as a [NuGet package](https://www.nuget.org/packages/NamedPipeWrapper.NetStandard/).
+```
+Install-Package NamedPipeWrapper.NetStandard -Version 1.5.0
+```
 
 # Features
 
@@ -15,7 +18,7 @@ Available as a [NuGet package](https://www.nuget.org/packages/NamedPipeWrapper/)
 
 # Requirements
 
-Requires .NET 4.0 full.
+Requires .NET Standard 2.0.
 
 # Usage
 
