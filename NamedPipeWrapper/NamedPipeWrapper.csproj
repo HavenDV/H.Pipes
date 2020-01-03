@@ -23,6 +23,7 @@ Requires .NET Standard 2.0</Description>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/HavenDV/NamedPipeWrapper.NetStandard</PackageProjectUrl>
     <RepositoryUrl>https://github.com/HavenDV/NamedPipeWrapper.NetStandard</RepositoryUrl>
+    <Product>NamedPipeWrapper.NetStandard</Product>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\LICENSE.txt">
