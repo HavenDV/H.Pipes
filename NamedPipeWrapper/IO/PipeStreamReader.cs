@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
-using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -19,7 +17,7 @@ namespace NamedPipeWrapper.IO
         /// <summary>
         /// Gets the underlying <c>PipeStream</c> object.
         /// </summary>
-        public PipeStream BaseStream { get; private set; }
+        public PipeStream BaseStream { get; }
 
         /// <summary>
         /// Gets a value indicating whether the pipe is connected or not.

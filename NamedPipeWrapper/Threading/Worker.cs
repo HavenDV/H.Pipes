@@ -1,25 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace NamedPipeWrapper.Threading
 {
-    class Worker
+    internal class Worker
     {
         private readonly TaskScheduler _callbackThread;
 
-        private static TaskScheduler CurrentTaskScheduler
-        {
-            get
-            {
-                return (SynchronizationContext.Current != null
-                            ? TaskScheduler.FromCurrentSynchronizationContext()
-                            : TaskScheduler.Default);
-            }
-        }
+        private static TaskScheduler CurrentTaskScheduler =>
+            (SynchronizationContext.Current != null
+                ? TaskScheduler.FromCurrentSynchronizationContext()
+                : TaskScheduler.Default);
 
         public event WorkerSucceededEventHandler Succeeded;
         public event WorkerExceptionEventHandler Error;
@@ -54,14 +46,12 @@ namespace NamedPipeWrapper.Threading
 
         private void Succeed()
         {
-            if (Succeeded != null)
-                Succeeded();
+            Succeeded?.Invoke();
         }
 
         private void Fail(Exception exception)
         {
-            if (Error != null)
-                Error(exception);
+            Error?.Invoke(exception);
         }
 
         private void Callback(Action action)
