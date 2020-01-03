@@ -8,7 +8,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageId>NamedPipeWrapper.NetStandard</PackageId>
+    <PackageId>NamedPipeWrapper.NetStandard.StrongNamed</PackageId>
     <Description>Create named pipe servers that can handle multiple client connections simultaneously.
 
 Send strongly-typed messages between clients and servers: any serializable .NET object can be sent over a pipe and will be automatically serialized/deserialized, including cyclical references and complex object graphs.
@@ -23,7 +23,6 @@ Requires .NET Standard 2.0</Description>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/HavenDV/NamedPipeWrapper.NetStandard</PackageProjectUrl>
     <RepositoryUrl>https://github.com/HavenDV/NamedPipeWrapper.NetStandard</RepositoryUrl>
-    <Product>NamedPipeWrapper.NetStandard</Product>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\LICENSE.txt">
