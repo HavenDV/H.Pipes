@@ -17,10 +17,12 @@ namespace NamedPipeWrapper
         where TRead : class
         where TWrite : class
     {
+        #region Properties
+
         /// <summary>
         /// Gets the connection's unique identifier.
         /// </summary>
-        public readonly int Id;
+        public int Id { get; }
 
         /// <summary>
         /// Gets the connection's name.
@@ -30,39 +32,49 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Gets a value indicating whether the pipe is connected or not.
         /// </summary>
-        public bool IsConnected { get { return _streamWrapper.IsConnected; } }
+        public bool IsConnected => PipeStreamWrapper.IsConnected;
+
+        private PipeStreamWrapper<TRead, TWrite> PipeStreamWrapper { get; }
+        private AutoResetEvent WriteSignal { get; } = new AutoResetEvent(false);
+
+        /// <summary>
+        /// To support Multithread, we should use BlockingCollection.
+        /// </summary>
+        private BlockingCollection<TWrite> WriteQueue { get; } = new BlockingCollection<TWrite>();
+
+        private bool NotifiedSucceeded { get; set; }
+
+        #endregion
+
+        #region Events
 
         /// <summary>
         /// Invoked when the named pipe connection terminates.
         /// </summary>
-        public event ConnectionEventHandler<TRead, TWrite> Disconnected;
+        public event ConnectionEventHandler<TRead, TWrite>? Disconnected;
 
         /// <summary>
         /// Invoked whenever a message is received from the other end of the pipe.
         /// </summary>
-        public event ConnectionMessageEventHandler<TRead, TWrite> ReceiveMessage;
+        public event ConnectionMessageEventHandler<TRead, TWrite>? ReceiveMessage;
 
         /// <summary>
         /// Invoked when an exception is thrown during any read/write operation over the named pipe.
         /// </summary>
-        public event ConnectionExceptionEventHandler<TRead, TWrite> Error;
+        public event ConnectionExceptionEventHandler<TRead, TWrite>? Error;
 
-        private readonly PipeStreamWrapper<TRead, TWrite> _streamWrapper;
+        #endregion
 
-        private readonly AutoResetEvent _writeSignal = new AutoResetEvent(false);
-        /// <summary>
-        /// To support Multithread, we should use BlockingCollection.
-        /// </summary>
-        private readonly BlockingCollection<TWrite> _writeQueue = new BlockingCollection<TWrite>();
-
-        private bool _notifiedSucceeded;
+        #region Constructors
 
         internal NamedPipeConnection(int id, string name, PipeStream serverStream)
         {
             Id = id;
             Name = name;
-            _streamWrapper = new PipeStreamWrapper<TRead, TWrite>(serverStream);
+            PipeStreamWrapper = new PipeStreamWrapper<TRead, TWrite>(serverStream);
         }
+
+        #endregion
 
         /// <summary>
         /// Begins reading from and writing to the named pipe on a background thread.
@@ -89,8 +101,8 @@ namespace NamedPipeWrapper
         /// <param name="message"></param>
         public void PushMessage(TWrite message)
         {
-            _writeQueue.Add(message);
-            _writeSignal.Set();
+            WriteQueue.Add(message);
+            WriteSignal.Set();
         }
 
         /// <summary>
@@ -106,8 +118,8 @@ namespace NamedPipeWrapper
         /// </summary>
         private void CloseImpl()
         {
-            _streamWrapper.Dispose();
-            _writeSignal.Set();
+            PipeStreamWrapper.Dispose();
+            WriteSignal.Set();
         }
 
         /// <summary>
@@ -116,10 +128,10 @@ namespace NamedPipeWrapper
         private void OnSucceeded(object o, EventArgs args)
         {
             // Only notify observers once
-            if (_notifiedSucceeded)
+            if (NotifiedSucceeded)
                 return;
 
-            _notifiedSucceeded = true;
+            NotifiedSucceeded = true;
 
             Disconnected?.Invoke(this);
         }
@@ -140,18 +152,18 @@ namespace NamedPipeWrapper
         private void ReadPipe()
         {
 
-            while (IsConnected && _streamWrapper.CanRead)
+            while (IsConnected && PipeStreamWrapper.CanRead)
             {
                 try
                 {
-                    var obj = _streamWrapper.ReadObject();
+                    var obj = PipeStreamWrapper.ReadObject();
                     if (obj == null)
                     {
                         CloseImpl();
                         return;
                     }
-                    if (ReceiveMessage != null)
-                        ReceiveMessage(this, obj);
+
+                    ReceiveMessage?.Invoke(this, obj);
                 }
                 catch
                 {
@@ -168,7 +180,7 @@ namespace NamedPipeWrapper
         private void WritePipe()
         {
 
-            while (IsConnected && _streamWrapper.CanWrite)
+            while (IsConnected && PipeStreamWrapper.CanWrite)
             {
                 try
                 {
@@ -176,8 +188,8 @@ namespace NamedPipeWrapper
                     //_writeSignal.WaitOne();
                     //while (_writeQueue.Count > 0)
                     {
-                        _streamWrapper.WriteObject(_writeQueue.Take());
-                        _streamWrapper.WaitForPipeDrain();
+                        PipeStreamWrapper.WriteObject(WriteQueue.Take());
+                        PipeStreamWrapper.WaitForPipeDrain();
                     }
                 }
                 catch
@@ -186,18 +198,6 @@ namespace NamedPipeWrapper
                 }
             }
 
-        }
-    }
-
-    static class ConnectionFactory
-    {
-        private static int _lastId;
-
-        public static NamedPipeConnection<TRead, TWrite> CreateConnection<TRead, TWrite>(PipeStream pipeStream)
-            where TRead : class
-            where TWrite : class
-        {
-            return new NamedPipeConnection<TRead, TWrite>(++_lastId, "Client " + _lastId, pipeStream);
         }
     }
 
