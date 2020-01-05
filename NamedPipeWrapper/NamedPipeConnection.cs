@@ -62,7 +62,12 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Invoked when an exception is thrown during any read/write operation over the named pipe.
         /// </summary>
-        public event EventHandler<ConnectionExceptionEventArgs<TRead, TWrite>>? Error;
+        public event EventHandler<ConnectionExceptionEventArgs<TRead, TWrite>>? ExceptionOccurred;
+
+        private void OnExceptionOccurred(Exception exception)
+        {
+            ExceptionOccurred?.Invoke(this, new ConnectionExceptionEventArgs<TRead, TWrite>(this, exception));
+        }
 
         #endregion
 
@@ -99,12 +104,12 @@ namespace NamedPipeWrapper
                     }
                     catch (Exception exception)
                     {
-                        OnError(exception);
+                        OnExceptionOccurred(exception);
                     }
                 }
 
                 OnSucceeded();
-            }, OnError);
+            }, OnExceptionOccurred);
 
             WriteWorker = new Worker(() =>
             {
@@ -117,12 +122,12 @@ namespace NamedPipeWrapper
                     }
                     catch (Exception exception)
                     {
-                        OnError(exception);
+                        OnExceptionOccurred(exception);
                     }
                 }
 
                 OnSucceeded();
-            }, OnError);
+            }, OnExceptionOccurred);
         }
 
         /// <summary>
@@ -148,15 +153,6 @@ namespace NamedPipeWrapper
             NotifiedSucceeded = true;
 
             Disconnected?.Invoke(this, new ConnectionEventArgs<TRead, TWrite>(this));
-        }
-
-        /// <summary>
-        ///     Invoked on the UI thread.
-        /// </summary>
-        /// <param name="exception"></param>
-        private void OnError(Exception exception)
-        {
-            Error?.Invoke(this, new ConnectionExceptionEventArgs<TRead, TWrite>(this, exception));
         }
 
         #region IDisposable

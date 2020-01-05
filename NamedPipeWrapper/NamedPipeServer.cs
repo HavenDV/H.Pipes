@@ -67,7 +67,12 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Invoked whenever an exception is thrown during a read or write operation.
         /// </summary>
-        public event EventHandler<ExceptionEventArgs>? Error;
+        public event EventHandler<ExceptionEventArgs>? ExceptionOccurred;
+
+        private void OnExceptionOccurred(Exception exception)
+        {
+            ExceptionOccurred?.Invoke(this, new ExceptionEventArgs(exception));
+        }
 
         #endregion
 
@@ -94,7 +99,7 @@ namespace NamedPipeWrapper
                 {
                     WaitForConnection(PipeName);
                 }
-            }, OnError);
+            }, OnExceptionOccurred);
         }
 
         /// <summary>
@@ -175,7 +180,7 @@ namespace NamedPipeWrapper
                 connection = ConnectionFactory.CreateConnection<TRead, TWrite>(dataPipe);
                 connection.ReceiveMessage += ClientOnReceiveMessage;
                 connection.Disconnected += ClientOnDisconnected;
-                connection.Error += ConnectionOnError;
+                connection.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
                 connection.Open();
 
                 lock (Connections)
@@ -223,23 +228,6 @@ namespace NamedPipeWrapper
             }
 
             ClientDisconnected?.Invoke(this, args);
-        }
-
-        /// <summary>
-        ///     Invoked on the UI thread.
-        /// </summary>
-        private void ConnectionOnError(object sender, ConnectionExceptionEventArgs<TRead, TWrite> args)
-        {
-            OnError(args.Exception);
-        }
-
-        /// <summary>
-        ///     Invoked on the UI thread.
-        /// </summary>
-        /// <param name="exception"></param>
-        private void OnError(Exception exception)
-        {
-            Error?.Invoke(this, new ExceptionEventArgs(exception));
         }
 
         private string GetNextConnectionPipeName(string pipeName)

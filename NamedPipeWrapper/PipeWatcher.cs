@@ -30,14 +30,19 @@ namespace NamedPipeWrapper
         #region Events
 
         /// <summary>
-        /// When any pipe created
+        /// When any pipe created.
         /// </summary>
         public event EventHandler<NameEventArgs>? Created;
 
         /// <summary>
-        /// When any pipe deleted
+        /// When any pipe deleted.
         /// </summary>
         public event EventHandler<NameEventArgs>? Deleted;
+
+        /// <summary>
+        /// When any exception is thrown.
+        /// </summary>
+        public event EventHandler<ExceptionEventArgs>? ExceptionOccurred;
 
         private void OnCreated(string name)
         {
@@ -47,6 +52,11 @@ namespace NamedPipeWrapper
         private void OnDeleted(string name)
         {
             Deleted?.Invoke(this, new NameEventArgs(name));
+        }
+
+        private void OnExceptionOccurred(Exception exception)
+        {
+            ExceptionOccurred?.Invoke(this, new ExceptionEventArgs(exception));
         }
 
         #endregion
@@ -70,18 +80,25 @@ namespace NamedPipeWrapper
 
         private void OnElapsed(object sender, ElapsedEventArgs args)
         {
-            var pipes = GetActivePipes();
-
-            foreach (var name in pipes.Except(LastPipes))
+            try
             {
-                OnCreated(name);
-            }
-            foreach (var name in LastPipes.Except(pipes))
-            {
-                OnDeleted(name);
-            }
+                var pipes = GetActivePipes();
 
-            LastPipes = pipes;
+                foreach (var name in pipes.Except(LastPipes))
+                {
+                    OnCreated(name);
+                }
+                foreach (var name in LastPipes.Except(pipes))
+                {
+                    OnDeleted(name);
+                }
+
+                LastPipes = pipes;
+            }
+            catch (Exception exception)
+            {
+                OnExceptionOccurred(exception);
+            }
         }
 
         #endregion
