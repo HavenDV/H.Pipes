@@ -3,6 +3,7 @@ using NamedPipeWrapper.Threading;
 using System;
 using System.Collections.Generic;
 using System.IO.Pipes;
+using System.Linq;
 
 namespace NamedPipeWrapper
 {
@@ -31,32 +32,40 @@ namespace NamedPipeWrapper
         where TRead : class
         where TWrite : class
     {
+        #region Events
+
         /// <summary>
         /// Invoked whenever a client connects to the server.
         /// </summary>
-        public event ConnectionEventHandler<TRead, TWrite> ClientConnected;
+        public event ConnectionEventHandler<TRead, TWrite>? ClientConnected;
 
         /// <summary>
         /// Invoked whenever a client disconnects from the server.
         /// </summary>
-        public event ConnectionEventHandler<TRead, TWrite> ClientDisconnected;
+        public event ConnectionEventHandler<TRead, TWrite>? ClientDisconnected;
 
         /// <summary>
         /// Invoked whenever a client sends a message to the server.
         /// </summary>
-        public event ConnectionMessageEventHandler<TRead, TWrite> ClientMessage;
+        public event ConnectionMessageEventHandler<TRead, TWrite>? ClientMessage;
 
         /// <summary>
         /// Invoked whenever an exception is thrown during a read or write operation.
         /// </summary>
         public event EventHandler<ExceptionEventArgs>? Error;
 
-        private readonly string _pipeName;
-        private readonly List<NamedPipeConnection<TRead, TWrite>> _connections = new List<NamedPipeConnection<TRead, TWrite>>();
+        #endregion
 
-        private int _nextPipeId;
+        #region Properties
+
+        private string PipeName { get; }
+        private List<NamedPipeConnection<TRead, TWrite>> Connections { get; } = new List<NamedPipeConnection<TRead, TWrite>>();
+
+        private int NextPipeId { get; set; }
 
         private volatile bool _shouldKeepRunning;
+
+        #endregion
 
         /// <summary>
         /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName"/>.
@@ -64,7 +73,7 @@ namespace NamedPipeWrapper
         /// <param name="pipeName">Name of the pipe to listen on</param>
         public NamedPipeServer(string pipeName)
         {
-            _pipeName = pipeName;
+            PipeName = pipeName;
         }
 
         /// <summary>
@@ -86,11 +95,11 @@ namespace NamedPipeWrapper
         /// <param name="message"></param>
         public void PushMessage(TWrite message)
         {
-            lock (_connections)
+            lock (Connections)
             {
-                foreach (var client in _connections)
+                foreach (var connection in Connections)
                 {
-                    client.PushMessage(message);
+                    connection.PushMessage(message);
                 }
             }
         }
@@ -102,12 +111,11 @@ namespace NamedPipeWrapper
         /// <param name="clientName"></param>
         public void PushMessage(TWrite message, string clientName)
         {
-            lock (_connections)
+            lock (Connections)
             {
-                foreach (var client in _connections)
+                foreach (var connection in Connections.Where(connection => connection.Name == clientName))
                 {
-                    if (client.Name == clientName)
-                        client.PushMessage(message);
+                    connection.PushMessage(message);
                 }
             }
         }
@@ -119,18 +127,18 @@ namespace NamedPipeWrapper
         {
             _shouldKeepRunning = false;
 
-            lock (_connections)
+            lock (Connections)
             {
-                foreach (var client in _connections.ToArray())
+                foreach (var connection in Connections)
                 {
-                    client.Close();
+                    connection.Close();
                 }
             }
 
             // If background thread is still listening for a client to connect,
             // initiate a dummy connection that will allow the thread to exit.
             //dummy connection will use the local server name.
-            var dummyClient = new NamedPipeClient<TRead, TWrite>(_pipeName, ".");
+            var dummyClient = new NamedPipeClient<TRead, TWrite>(PipeName, ".");
             dummyClient.Start();
             dummyClient.WaitForConnection(TimeSpan.FromSeconds(2));
             dummyClient.Stop();
@@ -143,15 +151,15 @@ namespace NamedPipeWrapper
         {
             while (_shouldKeepRunning)
             {
-                WaitForConnection(_pipeName);
+                WaitForConnection(PipeName);
             }
         }
 
         private void WaitForConnection(string pipeName)
         {
-            NamedPipeServerStream handshakePipe = null;
-            NamedPipeServerStream dataPipe = null;
-            NamedPipeConnection<TRead, TWrite> connection = null;
+            NamedPipeServerStream? handshakePipe = null;
+            NamedPipeServerStream? dataPipe = null;
+            NamedPipeConnection<TRead, TWrite>? connection = null;
 
             var connectionPipeName = GetNextConnectionPipeName(pipeName);
 
@@ -175,9 +183,9 @@ namespace NamedPipeWrapper
                 connection.Error += ConnectionOnError;
                 connection.Open();
 
-                lock (_connections)
+                lock (Connections)
                 {
-                    _connections.Add(connection);
+                    Connections.Add(connection);
                 }
 
                 ClientOnConnected(connection);
@@ -196,28 +204,27 @@ namespace NamedPipeWrapper
 
         private void ClientOnConnected(NamedPipeConnection<TRead, TWrite> connection)
         {
-            if (ClientConnected != null)
-                ClientConnected(connection);
+            ClientConnected?.Invoke(connection);
         }
 
         private void ClientOnReceiveMessage(NamedPipeConnection<TRead, TWrite> connection, TRead message)
         {
-            if (ClientMessage != null)
-                ClientMessage(connection, message);
+            ClientMessage?.Invoke(connection, message);
         }
 
-        private void ClientOnDisconnected(NamedPipeConnection<TRead, TWrite> connection)
+        private void ClientOnDisconnected(NamedPipeConnection<TRead, TWrite>? connection)
         {
             if (connection == null)
-                return;
-
-            lock (_connections)
             {
-                _connections.Remove(connection);
+                return;
             }
 
-            if (ClientDisconnected != null)
-                ClientDisconnected(connection);
+            lock (Connections)
+            {
+                Connections.Remove(connection);
+            }
+
+            ClientDisconnected?.Invoke(connection);
         }
 
         /// <summary>
@@ -239,16 +246,18 @@ namespace NamedPipeWrapper
 
         private string GetNextConnectionPipeName(string pipeName)
         {
-            return $"{pipeName}_{++_nextPipeId}";
+            return $"{pipeName}_{++NextPipeId}";
         }
 
-        private static void Cleanup(NamedPipeServerStream pipe)
+        private static void Cleanup(NamedPipeServerStream? pipe)
         {
-            if (pipe == null) return;
-            using (var x = pipe)
+            if (pipe == null)
             {
-                x.Close();
+                return;
             }
+
+            pipe.Close(); 
+            pipe.Dispose();
         }
 
         #endregion
