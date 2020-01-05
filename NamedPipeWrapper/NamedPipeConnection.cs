@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO.Pipes;
 using System.Runtime.Serialization;
-using System.Threading;
 using NamedPipeWrapper.IO;
 using NamedPipeWrapper.Threading;
 using System.Collections.Concurrent;
@@ -13,7 +12,7 @@ namespace NamedPipeWrapper
     /// </summary>
     /// <typeparam name="TRead">Reference type to read from the named pipe</typeparam>
     /// <typeparam name="TWrite">Reference type to write to the named pipe</typeparam>
-    public class NamedPipeConnection<TRead, TWrite>
+    public sealed class NamedPipeConnection<TRead, TWrite> : IDisposable
         where TRead : class
         where TWrite : class
     {
@@ -35,7 +34,6 @@ namespace NamedPipeWrapper
         public bool IsConnected => PipeStreamWrapper.IsConnected;
 
         private PipeStreamWrapper<TRead, TWrite> PipeStreamWrapper { get; }
-        private AutoResetEvent WriteSignal { get; } = new AutoResetEvent(false);
 
         /// <summary>
         /// To support Multithread, we should use BlockingCollection.
@@ -102,24 +100,6 @@ namespace NamedPipeWrapper
         public void PushMessage(TWrite message)
         {
             WriteQueue.Add(message);
-            WriteSignal.Set();
-        }
-
-        /// <summary>
-        /// Closes the named pipe connection and underlying <c>PipeStream</c>.
-        /// </summary>
-        public void Close()
-        {
-            CloseImpl();
-        }
-
-        /// <summary>
-        ///     Invoked on the background thread.
-        /// </summary>
-        private void CloseImpl()
-        {
-            PipeStreamWrapper.Dispose();
-            WriteSignal.Set();
         }
 
         /// <summary>
@@ -151,7 +131,6 @@ namespace NamedPipeWrapper
         /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="TRead"/> is not marked as serializable.</exception>
         private void ReadPipe()
         {
-
             while (IsConnected && PipeStreamWrapper.CanRead)
             {
                 try
@@ -159,7 +138,6 @@ namespace NamedPipeWrapper
                     var obj = PipeStreamWrapper.ReadObject();
                     if (obj == null)
                     {
-                        CloseImpl();
                         return;
                     }
 
@@ -199,6 +177,19 @@ namespace NamedPipeWrapper
             }
 
         }
+
+        #region IDisposable
+
+        /// <summary>
+        /// Dispose internal resources
+        /// </summary>
+        public void Dispose()
+        {
+            PipeStreamWrapper.Dispose();
+            WriteQueue.Dispose();
+        }
+
+        #endregion
     }
 
     /// <summary>

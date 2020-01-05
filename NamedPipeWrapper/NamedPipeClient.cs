@@ -10,7 +10,7 @@ namespace NamedPipeWrapper
     /// Wraps a <see cref="NamedPipeClientStream"/>.
     /// </summary>
     /// <typeparam name="TReadWrite">Reference type to read from and write to the named pipe</typeparam>
-    public class NamedPipeClient<TReadWrite> : NamedPipeClient<TReadWrite, TReadWrite> where TReadWrite : class
+    public sealed class NamedPipeClient<TReadWrite> : NamedPipeClient<TReadWrite, TReadWrite> where TReadWrite : class
     {
         /// <summary>
         /// Constructs a new <c>NamedPipeClient</c> to connect to the <see cref="NamedPipeServer{TReadWrite}"/> specified by <paramref name="pipeName"/>.
@@ -27,7 +27,7 @@ namespace NamedPipeWrapper
     /// </summary>
     /// <typeparam name="TRead">Reference type to read from the named pipe</typeparam>
     /// <typeparam name="TWrite">Reference type to write to the named pipe</typeparam>
-    public class NamedPipeClient<TRead, TWrite>
+    public class NamedPipeClient<TRead, TWrite> : IDisposable
         where TRead : class
         where TWrite : class
     {
@@ -46,7 +46,7 @@ namespace NamedPipeWrapper
         private AutoResetEvent ConnectedEvent { get; } = new AutoResetEvent(false);
         private AutoResetEvent DisconnectedEvent { get; } = new AutoResetEvent(false);
 
-        private volatile bool _closedExplicitly;
+        private bool IsDisposed { get; set; }
 
         #region Events
 
@@ -74,7 +74,7 @@ namespace NamedPipeWrapper
         /// </summary>
         /// <param name="pipeName">Name of the server's pipe</param>
         /// <param name="serverName">the Name of the server, default is  local machine</param>
-        public NamedPipeClient(string pipeName, string serverName)
+        public NamedPipeClient(string pipeName, string serverName = ".")
         {
             PipeName = pipeName;
             ServerName = serverName;
@@ -87,7 +87,6 @@ namespace NamedPipeWrapper
         /// </summary>
         public void Start()
         {
-            _closedExplicitly = false;
             var worker = new Worker();
             worker.Error += (sender, args) => OnError(args.Exception);
             worker.DoWork(ListenSync);
@@ -100,16 +99,6 @@ namespace NamedPipeWrapper
         public void PushMessage(TWrite message)
         {
             Connection?.PushMessage(message);
-        }
-
-        /// <summary>
-        /// Closes the named pipe.
-        /// </summary>
-        public void Stop()
-        {
-            _closedExplicitly = true;
-
-            Connection?.Close();
         }
 
         #region Wait for connection/disconnection
@@ -202,7 +191,7 @@ namespace NamedPipeWrapper
             DisconnectedEvent.Set();
 
             // Reconnect
-            if (AutoReconnect && !_closedExplicitly)
+            if (AutoReconnect && !IsDisposed)
             {
                 Start();
             }
@@ -228,6 +217,22 @@ namespace NamedPipeWrapper
         private void OnError(Exception exception)
         {
             Error?.Invoke(this, new ExceptionEventArgs(exception));
+        }
+
+        #endregion
+
+        #region IDisposable
+
+        /// <summary>
+        /// Dispose internal resources
+        /// </summary>
+        public void Dispose()
+        {
+            IsDisposed = true;
+
+            Connection?.Dispose();
+            ConnectedEvent.Dispose();
+            DisconnectedEvent.Dispose();
         }
 
         #endregion

@@ -29,10 +29,21 @@ namespace NamedPipeWrapper
     /// </summary>
     /// <typeparam name="TRead">Reference type to read from the named pipe</typeparam>
     /// <typeparam name="TWrite">Reference type to write to the named pipe</typeparam>
-    public class NamedPipeServer<TRead, TWrite>
+    public class NamedPipeServer<TRead, TWrite> : IDisposable
         where TRead : class
         where TWrite : class
     {
+        #region Properties
+
+        private string PipeName { get; }
+        private List<NamedPipeConnection<TRead, TWrite>> Connections { get; } = new List<NamedPipeConnection<TRead, TWrite>>();
+
+        private int NextPipeId { get; set; }
+
+        private volatile bool _shouldKeepRunning;
+
+        #endregion
+
         #region Events
 
         /// <summary>
@@ -54,17 +65,6 @@ namespace NamedPipeWrapper
         /// Invoked whenever an exception is thrown during a read or write operation.
         /// </summary>
         public event EventHandler<ExceptionEventArgs>? Error;
-
-        #endregion
-
-        #region Properties
-
-        private string PipeName { get; }
-        private List<NamedPipeConnection<TRead, TWrite>> Connections { get; } = new List<NamedPipeConnection<TRead, TWrite>>();
-
-        private int NextPipeId { get; set; }
-
-        private volatile bool _shouldKeepRunning;
 
         #endregion
 
@@ -128,21 +128,15 @@ namespace NamedPipeWrapper
         {
             _shouldKeepRunning = false;
 
-            lock (Connections)
-            {
-                foreach (var connection in Connections)
-                {
-                    connection.Close();
-                }
-            }
+            Dispose();
 
             // If background thread is still listening for a client to connect,
             // initiate a dummy connection that will allow the thread to exit.
             //dummy connection will use the local server name.
-            var dummyClient = new NamedPipeClient<TRead, TWrite>(PipeName, ".");
+            var dummyClient = new NamedPipeClient<TRead, TWrite>(PipeName);
             dummyClient.Start();
             dummyClient.WaitForConnection(TimeSpan.FromSeconds(2));
-            dummyClient.Stop();
+            dummyClient.Dispose();
             dummyClient.WaitForDisconnection(TimeSpan.FromSeconds(2));
         }
 
@@ -259,6 +253,25 @@ namespace NamedPipeWrapper
 
             pipe.Close(); 
             pipe.Dispose();
+        }
+
+        #endregion
+
+        #region IDisposable
+
+        /// <summary>
+        /// Dispose internal resources
+        /// </summary>
+        public void Dispose()
+        {
+            lock (Connections)
+            {
+                foreach (var connection in Connections)
+                {
+                    connection.Dispose();
+                }
+                Connections.Clear();
+            }
         }
 
         #endregion
