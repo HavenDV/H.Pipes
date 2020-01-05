@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO.Pipes;
 using System.Linq;
+using NamedPipeWrapper.Args;
 using NamedPipeWrapper.Factories;
 
 namespace NamedPipeWrapper

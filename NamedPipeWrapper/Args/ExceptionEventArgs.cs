@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NamedPipeWrapper
+namespace NamedPipeWrapper.Args
 {
     /// <summary>
     /// 
