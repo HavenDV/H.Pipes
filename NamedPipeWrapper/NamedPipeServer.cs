@@ -162,7 +162,7 @@ namespace NamedPipeWrapper
                 var handshakeWrapper = new PipeStreamWrapper<string, string>(handshakePipe);
                 handshakeWrapper.WriteObject(connectionPipeName);
                 handshakeWrapper.WaitForPipeDrain();
-                handshakeWrapper.Close();
+                handshakeWrapper.Dispose();
 
                 // Wait for the client to connect to the data pipe
                 dataPipe = PipeServerFactory.CreatePipe(connectionPipeName);

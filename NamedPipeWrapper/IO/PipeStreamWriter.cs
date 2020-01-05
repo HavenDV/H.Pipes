@@ -12,14 +12,20 @@ namespace NamedPipeWrapper.IO
     /// into binary form and sends them over the named pipe for a <see cref="PipeStreamWriter{T}"/> to read and deserialize.
     /// </summary>
     /// <typeparam name="T">Reference type to serialize</typeparam>
-    public class PipeStreamWriter<T> where T : class
+    public sealed class PipeStreamWriter<T> : IDisposable where T : class
     {
+        #region Properties
+
         /// <summary>
         /// Gets the underlying <c>PipeStream</c> object.
         /// </summary>
-        public PipeStream BaseStream { get; private set; }
+        private PipeStream BaseStream { get; }
 
-        private readonly BinaryFormatter _binaryFormatter = new BinaryFormatter();
+        private BinaryFormatter BinaryFormatter { get; } = new BinaryFormatter();
+
+        #endregion
+
+        #region Constructors
 
         /// <summary>
         /// Constructs a new <c>PipeStreamWriter</c> object that writes to given <paramref name="stream"/>.
@@ -27,46 +33,33 @@ namespace NamedPipeWrapper.IO
         /// <param name="stream">Pipe to write to</param>
         public PipeStreamWriter(PipeStream stream)
         {
-            BaseStream = stream;
+            BaseStream = stream ?? throw new ArgumentNullException(nameof(stream));
         }
+
+        #endregion
 
         #region Private stream writers
 
         /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
         private byte[] Serialize(T obj)
         {
-            try
-            {
-                using (var memoryStream = new MemoryStream())
-                {
-                    _binaryFormatter.Serialize(memoryStream, obj);
-                    return memoryStream.ToArray();
-                }
-            }
-            catch
-            {
-                //if any exception in the serialize, it will stop named pipe wrapper, so there will ignore any exception.
-                return null;
-            }
+            using var stream = new MemoryStream();
+            BinaryFormatter.Serialize(stream, obj);
+
+            return stream.ToArray();
         }
 
-        private void WriteLength(int len)
+        private void WriteLength(int length)
         {
-            var lenbuf = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(len));
-            BaseStream.Write(lenbuf, 0, lenbuf.Length);
+            var buffer = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(length));
+
+            BaseStream.Write(buffer, 0, buffer.Length);
         }
 
         private void WriteObject(byte[] data)
         {
             BaseStream.Write(data, 0, data.Length);
         }
-
-        private void Flush()
-        {
-            BaseStream.Flush();
-        }
-
-        #endregion
 
         /// <summary>
         /// Writes an object to the pipe.  This method blocks until all data is sent.
@@ -76,13 +69,14 @@ namespace NamedPipeWrapper.IO
         public void WriteObject(T obj)
         {
             var data = Serialize(obj);
+
             WriteLength(data.Length);
             WriteObject(data);
             Flush();
         }
 
         /// <summary>
-        ///     Waits for the other end of the pipe to read all sent bytes.
+        /// Waits for the other end of the pipe to read all sent bytes.
         /// </summary>
         /// <exception cref="ObjectDisposedException">The pipe is closed.</exception>
         /// <exception cref="NotSupportedException">The pipe does not support write operations.</exception>
@@ -91,5 +85,24 @@ namespace NamedPipeWrapper.IO
         {
             BaseStream.WaitForPipeDrain();
         }
+
+        private void Flush()
+        {
+            BaseStream.Flush();
+        }
+
+        #endregion
+
+        #region IDisposable
+
+        /// <summary>
+        /// Dispose internal <see cref="PipeStream"/>
+        /// </summary>
+        public void Dispose()
+        {
+            BaseStream.Dispose();
+        }
+
+        #endregion
     }
 }

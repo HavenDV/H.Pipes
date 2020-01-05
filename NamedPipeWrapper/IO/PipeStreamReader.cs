@@ -12,19 +12,21 @@ namespace NamedPipeWrapper.IO
     /// into a .NET CLR object specified by <typeparamref name="T"/>.
     /// </summary>
     /// <typeparam name="T">Reference type to deserialize data to</typeparam>
-    public class PipeStreamReader<T> where T : class
+    public sealed class PipeStreamReader<T> : IDisposable where T : class
     {
-        /// <summary>
-        /// Gets the underlying <c>PipeStream</c> object.
-        /// </summary>
-        public PipeStream BaseStream { get; }
+        #region Properties
 
         /// <summary>
         /// Gets a value indicating whether the pipe is connected or not.
         /// </summary>
         public bool IsConnected { get; private set; }
 
-        private readonly BinaryFormatter _binaryFormatter = new BinaryFormatter();
+        private PipeStream BaseStream { get; }
+        private BinaryFormatter BinaryFormatter { get; } = new BinaryFormatter();
+
+        #endregion
+
+        #region Constructors
 
         /// <summary>
         /// Constructs a new <c>PipeStreamReader</c> object that reads data from the given <paramref name="stream"/>.
@@ -32,9 +34,11 @@ namespace NamedPipeWrapper.IO
         /// <param name="stream">Pipe to read from</param>
         public PipeStreamReader(PipeStream stream)
         {
-            BaseStream = stream;
+            BaseStream = stream ?? throw new ArgumentNullException(nameof(stream));
             IsConnected = stream.IsConnected;
         }
+
+        #endregion
 
         #region Private stream readers
 
@@ -46,31 +50,32 @@ namespace NamedPipeWrapper.IO
         /// <exception cref="IOException">Any I/O error occurred.</exception>
         private int ReadLength()
         {
-            const int lensize = sizeof (int);
-            var lenbuf = new byte[lensize];
-            var bytesRead = BaseStream.Read(lenbuf, 0, lensize);
+            var buffer = new byte[sizeof(int)];
+            var bytesRead = BaseStream.Read(buffer, 0, buffer.Length);
             if (bytesRead == 0)
             {
                 IsConnected = false;
                 return 0;
             }
-            if (bytesRead != lensize)
-                throw new IOException(string.Format("Expected {0} bytes but read {1}", lensize, bytesRead));
-            return IPAddress.NetworkToHostOrder(BitConverter.ToInt32(lenbuf, 0));
+
+            if (bytesRead != buffer.Length)
+            {
+                throw new IOException($"Expected {buffer.Length} bytes but read {bytesRead}");
+            }
+
+            return IPAddress.NetworkToHostOrder(BitConverter.ToInt32(buffer, 0));
         }
 
         /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
-        private T ReadObject(int len)
+        private T ReadObject(int length)
         {
-            var data = new byte[len];
-            BaseStream.Read(data, 0, len);
-            using (var memoryStream = new MemoryStream(data))
-            {
-                return (T) _binaryFormatter.Deserialize(memoryStream);
-            }
-        }
+            var data = new byte[length];
+            BaseStream.Read(data, 0, length);
 
-        #endregion
+            using var memoryStream = new MemoryStream(data);
+
+            return (T)BinaryFormatter.Deserialize(memoryStream);
+        }
 
         /// <summary>
         /// Reads the next object from the pipe.  This method blocks until an object is sent
@@ -78,10 +83,27 @@ namespace NamedPipeWrapper.IO
         /// </summary>
         /// <returns>The next object read from the pipe, or <c>null</c> if the pipe disconnected.</returns>
         /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
-        public T ReadObject()
+        public T? ReadObject()
         {
-            var len = ReadLength();
-            return len == 0 ? default(T) : ReadObject(len);
+            var length = ReadLength();
+
+            return length == 0
+                ? default
+                : ReadObject(length);
         }
+
+        #endregion
+
+        #region IDisposable
+
+        /// <summary>
+        /// Dispose internal <see cref="PipeStream"/>
+        /// </summary>
+        public void Dispose()
+        {
+            BaseStream.Dispose();
+        }
+
+        #endregion
     }
 }

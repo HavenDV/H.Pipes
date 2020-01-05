@@ -150,7 +150,7 @@ namespace NamedPipeWrapper
             // Get the name of the data pipe that should be used from now on by this NamedPipeClient
             var handshake = PipeClientFactory.Connect<string, string>(_pipeName,_serverName);
             var dataPipeName = handshake.ReadObject();
-            handshake.Close();
+            handshake.Dispose();
 
             // Connect to the actual data pipe
             var dataPipe = PipeClientFactory.CreateAndConnectPipe(dataPipeName,_serverName);

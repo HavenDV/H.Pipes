@@ -106,7 +106,7 @@ namespace NamedPipeWrapper
         /// </summary>
         private void CloseImpl()
         {
-            _streamWrapper.Close();
+            _streamWrapper.Dispose();
             _writeSignal.Set();
         }
 
