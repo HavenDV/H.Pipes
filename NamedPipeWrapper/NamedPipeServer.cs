@@ -62,12 +62,27 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Invoked whenever a client sends a message to the server.
         /// </summary>
-        public event EventHandler<ConnectionMessageEventArgs<TRead, TWrite>>? ClientMessage;
+        public event EventHandler<ConnectionMessageEventArgs<TRead, TWrite>>? MessageReceived;
 
         /// <summary>
         /// Invoked whenever an exception is thrown during a read or write operation.
         /// </summary>
         public event EventHandler<ExceptionEventArgs>? ExceptionOccurred;
+
+        private void OnClientConnected(ConnectionEventArgs<TRead, TWrite> args)
+        {
+            ClientConnected?.Invoke(this, args);
+        }
+
+        private void OnClientDisconnected(ConnectionEventArgs<TRead, TWrite> args)
+        {
+            ClientDisconnected?.Invoke(this, args);
+        }
+
+        private void OnMessageReceived(ConnectionMessageEventArgs<TRead, TWrite> args)
+        {
+            MessageReceived?.Invoke(this, args);
+        }
 
         private void OnExceptionOccurred(Exception exception)
         {
@@ -178,7 +193,7 @@ namespace NamedPipeWrapper
 
                 // Add the client's connection to the list of connections
                 connection = ConnectionFactory.CreateConnection<TRead, TWrite>(dataPipe);
-                connection.ReceiveMessage += ClientOnReceiveMessage;
+                connection.MessageReceived += (sender, args) => OnMessageReceived(args);
                 connection.Disconnected += ClientOnDisconnected;
                 connection.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
                 connection.Open();
@@ -188,31 +203,21 @@ namespace NamedPipeWrapper
                     Connections.Add(connection);
                 }
 
-                ClientOnConnected(new ConnectionEventArgs<TRead, TWrite>(connection));
+                OnClientConnected(new ConnectionEventArgs<TRead, TWrite>(connection));
             }
             // Catch the IOException that is raised if the pipe is broken or disconnected.
             catch (Exception e)
             {
                 Console.Error.WriteLine("Named pipe is broken or disconnected: {0}", e);
 
-                Cleanup(handshakePipe);
-                Cleanup(dataPipe);
+                handshakePipe?.Dispose();
+                dataPipe?.Dispose();
 
                 if (connection != null)
                 {
                     ClientOnDisconnected(this, new ConnectionEventArgs<TRead, TWrite>(connection));
                 }
             }
-        }
-
-        private void ClientOnConnected(ConnectionEventArgs<TRead, TWrite> args)
-        {
-            ClientConnected?.Invoke(this, args);
-        }
-
-        private void ClientOnReceiveMessage(object sender, ConnectionMessageEventArgs<TRead, TWrite> args)
-        {
-            ClientMessage?.Invoke(this, args);
         }
 
         private void ClientOnDisconnected(object sender, ConnectionEventArgs<TRead, TWrite> args)
@@ -227,23 +232,12 @@ namespace NamedPipeWrapper
                 Connections.Remove(args.Connection);
             }
 
-            ClientDisconnected?.Invoke(this, args);
+            OnClientDisconnected(args);
         }
 
         private string GetNextConnectionPipeName(string pipeName)
         {
             return $"{pipeName}_{++NextPipeId}";
-        }
-
-        private static void Cleanup(NamedPipeServerStream? pipe)
-        {
-            if (pipe == null)
-            {
-                return;
-            }
-
-            pipe.Close(); 
-            pipe.Dispose();
         }
 
         #endregion

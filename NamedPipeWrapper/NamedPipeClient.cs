@@ -56,7 +56,7 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Invoked whenever a message is received from the server.
         /// </summary>
-        public event EventHandler<ConnectionMessageEventArgs<TRead, TWrite>>? ServerMessage;
+        public event EventHandler<ConnectionMessageEventArgs<TRead, TWrite>>? MessageReceived;
 
         /// <summary>
         /// Invoked when the client disconnects from the server (e.g., the pipe is closed or broken).
@@ -67,6 +67,16 @@ namespace NamedPipeWrapper
         /// Invoked whenever an exception is thrown during a read or write operation on the named pipe.
         /// </summary>
         public event EventHandler<ExceptionEventArgs>? ExceptionOccurred;
+
+        private void OnMessageReceived(ConnectionMessageEventArgs<TRead, TWrite> args)
+        {
+            MessageReceived?.Invoke(this, args);
+        }
+
+        private void OnDisconnected(ConnectionEventArgs<TRead, TWrite> args)
+        {
+            Disconnected?.Invoke(this, args);
+        }
 
         private void OnExceptionOccurred(Exception exception)
         {
@@ -112,8 +122,8 @@ namespace NamedPipeWrapper
 
                 // Create a Connection object for the data pipe
                 Connection = ConnectionFactory.CreateConnection<TRead, TWrite>(dataPipe);
-                Connection.Disconnected += OnDisconnected;
-                Connection.ReceiveMessage += OnReceiveMessage;
+                Connection.Disconnected += ConnectionOnDisconnected;
+                Connection.MessageReceived += (sender, args) => OnMessageReceived(args);
                 Connection.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
                 Connection.Open();
 
@@ -188,9 +198,9 @@ namespace NamedPipeWrapper
 
         #region Private methods
 
-        private void OnDisconnected(object sender, ConnectionEventArgs<TRead, TWrite> args)
+        private void ConnectionOnDisconnected(object sender, ConnectionEventArgs<TRead, TWrite> args)
         {
-            Disconnected?.Invoke(this, args);
+            OnDisconnected(args);
 
             DisconnectedEvent.Set();
 
@@ -199,11 +209,6 @@ namespace NamedPipeWrapper
             {
                 Start();
             }
-        }
-
-        private void OnReceiveMessage(object sender, ConnectionMessageEventArgs<TRead, TWrite> args)
-        {
-            ServerMessage?.Invoke(this, args);
         }
 
         #endregion

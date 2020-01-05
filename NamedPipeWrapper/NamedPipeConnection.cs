@@ -57,12 +57,22 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Invoked whenever a message is received from the other end of the pipe.
         /// </summary>
-        public event EventHandler<ConnectionMessageEventArgs<TRead, TWrite>>? ReceiveMessage;
+        public event EventHandler<ConnectionMessageEventArgs<TRead, TWrite>>? MessageReceived;
 
         /// <summary>
         /// Invoked when an exception is thrown during any read/write operation over the named pipe.
         /// </summary>
         public event EventHandler<ConnectionExceptionEventArgs<TRead, TWrite>>? ExceptionOccurred;
+
+        private void OnDisconnected()
+        {
+            Disconnected?.Invoke(this, new ConnectionEventArgs<TRead, TWrite>(this));
+        }
+
+        private void OnMessageReceived(TRead message)
+        {
+            MessageReceived?.Invoke(this, new ConnectionMessageEventArgs<TRead, TWrite>(this, message));
+        }
 
         private void OnExceptionOccurred(Exception exception)
         {
@@ -100,7 +110,7 @@ namespace NamedPipeWrapper
                             return;
                         }
 
-                        ReceiveMessage?.Invoke(this, new ConnectionMessageEventArgs<TRead, TWrite>(this, obj));
+                        OnMessageReceived(obj);
                     }
                     catch (Exception exception)
                     {
@@ -152,7 +162,7 @@ namespace NamedPipeWrapper
 
             NotifiedSucceeded = true;
 
-            Disconnected?.Invoke(this, new ConnectionEventArgs<TRead, TWrite>(this));
+            OnDisconnected();
         }
 
         #region IDisposable
