@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO.Pipes;
 using System.Threading;
+using NamedPipeWrapper.Factories;
 using NamedPipeWrapper.Threading;
 
 namespace NamedPipeWrapper

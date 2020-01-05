@@ -1,7 +1,7 @@
 ﻿using System.IO.Pipes;
 using NamedPipeWrapper.IO;
 
-namespace NamedPipeWrapper
+namespace NamedPipeWrapper.Factories
 {
     internal static class PipeClientFactory
     {

@@ -1,6 +1,6 @@
 ﻿using System.IO.Pipes;
 
-namespace NamedPipeWrapper
+namespace NamedPipeWrapper.Factories
 {
     internal static class ConnectionFactory
     {
