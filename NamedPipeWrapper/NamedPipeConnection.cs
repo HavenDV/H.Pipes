@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using NamedPipeWrapper.IO;
 using NamedPipeWrapper.Threading;
 using System.Collections.Concurrent;
+using NamedPipeWrapper.Args;
 
 namespace NamedPipeWrapper
 {
@@ -49,17 +50,17 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Invoked when the named pipe connection terminates.
         /// </summary>
-        public event ConnectionEventHandler<TRead, TWrite>? Disconnected;
+        public event EventHandler<ConnectionEventArgs<TRead, TWrite>>? Disconnected;
 
         /// <summary>
         /// Invoked whenever a message is received from the other end of the pipe.
         /// </summary>
-        public event ConnectionMessageEventHandler<TRead, TWrite>? ReceiveMessage;
+        public event EventHandler<ConnectionMessageEventArgs<TRead, TWrite>>? ReceiveMessage;
 
         /// <summary>
         /// Invoked when an exception is thrown during any read/write operation over the named pipe.
         /// </summary>
-        public event ConnectionExceptionEventHandler<TRead, TWrite>? Error;
+        public event EventHandler<ConnectionExceptionEventArgs<TRead, TWrite>>? Error;
 
         #endregion
 
@@ -113,7 +114,7 @@ namespace NamedPipeWrapper
 
             NotifiedSucceeded = true;
 
-            Disconnected?.Invoke(this);
+            Disconnected?.Invoke(this, new ConnectionEventArgs<TRead, TWrite>(this));
         }
 
         /// <summary>
@@ -122,7 +123,7 @@ namespace NamedPipeWrapper
         /// <param name="exception"></param>
         private void OnError(Exception exception)
         {
-            Error?.Invoke(this, exception);
+            Error?.Invoke(this, new ConnectionExceptionEventArgs<TRead, TWrite>(this, exception));
         }
 
         /// <summary>
@@ -141,7 +142,7 @@ namespace NamedPipeWrapper
                         return;
                     }
 
-                    ReceiveMessage?.Invoke(this, obj);
+                    ReceiveMessage?.Invoke(this, new ConnectionMessageEventArgs<TRead, TWrite>(this, obj));
                 }
                 catch
                 {
@@ -191,36 +192,4 @@ namespace NamedPipeWrapper
 
         #endregion
     }
-
-    /// <summary>
-    /// Handles new connections.
-    /// </summary>
-    /// <param name="connection">The newly established connection</param>
-    /// <typeparam name="TRead">Reference type</typeparam>
-    /// <typeparam name="TWrite">Reference type</typeparam>
-    public delegate void ConnectionEventHandler<TRead, TWrite>(NamedPipeConnection<TRead, TWrite> connection)
-        where TRead : class
-        where TWrite : class;
-
-    /// <summary>
-    /// Handles messages received from a named pipe.
-    /// </summary>
-    /// <typeparam name="TRead">Reference type</typeparam>
-    /// <typeparam name="TWrite">Reference type</typeparam>
-    /// <param name="connection">Connection that received the message</param>
-    /// <param name="message">Message sent by the other end of the pipe</param>
-    public delegate void ConnectionMessageEventHandler<TRead, TWrite>(NamedPipeConnection<TRead, TWrite> connection, TRead message)
-        where TRead : class
-        where TWrite : class;
-
-    /// <summary>
-    /// Handles exceptions thrown during read/write operations.
-    /// </summary>
-    /// <typeparam name="TRead">Reference type</typeparam>
-    /// <typeparam name="TWrite">Reference type</typeparam>
-    /// <param name="connection">Connection that threw the exception</param>
-    /// <param name="exception">The exception that was thrown</param>
-    public delegate void ConnectionExceptionEventHandler<TRead, TWrite>(NamedPipeConnection<TRead, TWrite> connection, Exception exception)
-        where TRead : class
-        where TWrite : class;
 }

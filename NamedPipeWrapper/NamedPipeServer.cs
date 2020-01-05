@@ -50,17 +50,17 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Invoked whenever a client connects to the server.
         /// </summary>
-        public event ConnectionEventHandler<TRead, TWrite>? ClientConnected;
+        public event EventHandler<ConnectionEventArgs<TRead, TWrite>>? ClientConnected;
 
         /// <summary>
         /// Invoked whenever a client disconnects from the server.
         /// </summary>
-        public event ConnectionEventHandler<TRead, TWrite>? ClientDisconnected;
+        public event EventHandler<ConnectionEventArgs<TRead, TWrite>>? ClientDisconnected;
 
         /// <summary>
         /// Invoked whenever a client sends a message to the server.
         /// </summary>
-        public event ConnectionMessageEventHandler<TRead, TWrite>? ClientMessage;
+        public event EventHandler<ConnectionMessageEventArgs<TRead, TWrite>>? ClientMessage;
 
         /// <summary>
         /// Invoked whenever an exception is thrown during a read or write operation.
@@ -184,7 +184,7 @@ namespace NamedPipeWrapper
                     Connections.Add(connection);
                 }
 
-                ClientOnConnected(connection);
+                ClientOnConnected(new ConnectionEventArgs<TRead, TWrite>(connection));
             }
             // Catch the IOException that is raised if the pipe is broken or disconnected.
             catch (Exception e)
@@ -194,41 +194,44 @@ namespace NamedPipeWrapper
                 Cleanup(handshakePipe);
                 Cleanup(dataPipe);
 
-                ClientOnDisconnected(connection);
+                if (connection != null)
+                {
+                    ClientOnDisconnected(this, new ConnectionEventArgs<TRead, TWrite>(connection));
+                }
             }
         }
 
-        private void ClientOnConnected(NamedPipeConnection<TRead, TWrite> connection)
+        private void ClientOnConnected(ConnectionEventArgs<TRead, TWrite> args)
         {
-            ClientConnected?.Invoke(connection);
+            ClientConnected?.Invoke(this, args);
         }
 
-        private void ClientOnReceiveMessage(NamedPipeConnection<TRead, TWrite> connection, TRead message)
+        private void ClientOnReceiveMessage(object sender, ConnectionMessageEventArgs<TRead, TWrite> args)
         {
-            ClientMessage?.Invoke(connection, message);
+            ClientMessage?.Invoke(this, args);
         }
 
-        private void ClientOnDisconnected(NamedPipeConnection<TRead, TWrite>? connection)
+        private void ClientOnDisconnected(object sender, ConnectionEventArgs<TRead, TWrite> args)
         {
-            if (connection == null)
+            if (args.Connection == null)
             {
                 return;
             }
 
             lock (Connections)
             {
-                Connections.Remove(connection);
+                Connections.Remove(args.Connection);
             }
 
-            ClientDisconnected?.Invoke(connection);
+            ClientDisconnected?.Invoke(this, args);
         }
 
         /// <summary>
         ///     Invoked on the UI thread.
         /// </summary>
-        private void ConnectionOnError(NamedPipeConnection<TRead, TWrite> connection, Exception exception)
+        private void ConnectionOnError(object sender, ConnectionExceptionEventArgs<TRead, TWrite> args)
         {
-            OnError(exception);
+            OnError(args.Exception);
         }
 
         /// <summary>

@@ -54,12 +54,12 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Invoked whenever a message is received from the server.
         /// </summary>
-        public event ConnectionMessageEventHandler<TRead, TWrite>? ServerMessage;
+        public event EventHandler<ConnectionMessageEventArgs<TRead, TWrite>>? ServerMessage;
 
         /// <summary>
         /// Invoked when the client disconnects from the server (e.g., the pipe is closed or broken).
         /// </summary>
-        public event ConnectionEventHandler<TRead, TWrite>? Disconnected;
+        public event EventHandler<ConnectionEventArgs<TRead, TWrite>>? Disconnected;
 
         /// <summary>
         /// Invoked whenever an exception is thrown during a read or write operation on the named pipe.
@@ -185,9 +185,9 @@ namespace NamedPipeWrapper
             ConnectedEvent.Set();
         }
 
-        private void OnDisconnected(NamedPipeConnection<TRead, TWrite> connection)
+        private void OnDisconnected(object obj, ConnectionEventArgs<TRead, TWrite> args)
         {
-            Disconnected?.Invoke(connection);
+            Disconnected?.Invoke(this, args);
 
             DisconnectedEvent.Set();
 
@@ -198,17 +198,17 @@ namespace NamedPipeWrapper
             }
         }
 
-        private void OnReceiveMessage(NamedPipeConnection<TRead, TWrite> connection, TRead message)
+        private void OnReceiveMessage(object obj, ConnectionMessageEventArgs<TRead, TWrite> args)
         {
-            ServerMessage?.Invoke(connection, message);
+            ServerMessage?.Invoke(this, args);
         }
 
         /// <summary>
         ///     Invoked on the UI thread.
         /// </summary>
-        private void ConnectionOnError(NamedPipeConnection<TRead, TWrite> connection, Exception exception)
+        private void ConnectionOnError(object obj, ConnectionExceptionEventArgs<TRead, TWrite> args)
         {
-            OnError(exception);
+            OnError(args.Exception);
         }
 
         /// <summary>
