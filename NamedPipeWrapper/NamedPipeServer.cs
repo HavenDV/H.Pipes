@@ -43,6 +43,8 @@ namespace NamedPipeWrapper
 
         private volatile bool _shouldKeepRunning;
 
+        private Worker? ListenWorker { get; set; }
+
         #endregion
 
         #region Events
@@ -85,9 +87,14 @@ namespace NamedPipeWrapper
         public void Start()
         {
             _shouldKeepRunning = true;
-            var worker = new Worker();
-            worker.Error += (sender, args) => OnError(args.Exception);
-            worker.DoWork(ListenSync);
+
+            ListenWorker = new Worker(() =>
+            {
+                while (_shouldKeepRunning)
+                {
+                    WaitForConnection(PipeName);
+                }
+            }, OnError);
         }
 
         /// <summary>
@@ -142,14 +149,6 @@ namespace NamedPipeWrapper
         }
 
         #region Private methods
-
-        private void ListenSync()
-        {
-            while (_shouldKeepRunning)
-            {
-                WaitForConnection(PipeName);
-            }
-        }
 
         private void WaitForConnection(string pipeName)
         {
@@ -268,6 +267,8 @@ namespace NamedPipeWrapper
         /// </summary>
         public void Dispose()
         {
+            ListenWorker?.Dispose();
+
             lock (Connections)
             {
                 foreach (var connection in Connections)

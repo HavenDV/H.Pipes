@@ -47,6 +47,8 @@ namespace NamedPipeWrapper
         private AutoResetEvent ConnectedEvent { get; } = new AutoResetEvent(false);
         private AutoResetEvent DisconnectedEvent { get; } = new AutoResetEvent(false);
 
+        private Worker? ListenWorker { get; set; }
+
         private bool IsDisposed { get; set; }
 
         #region Events
@@ -88,9 +90,30 @@ namespace NamedPipeWrapper
         /// </summary>
         public void Start()
         {
-            var worker = new Worker();
-            worker.Error += (sender, args) => OnError(args.Exception);
-            worker.DoWork(ListenSync);
+            ListenWorker = new Worker(() =>
+            {
+                // Get the name of the data pipe that should be used from now on by this NamedPipeClient
+                var handshake = PipeClientFactory.Connect<string, string>(PipeName, ServerName);
+                var dataPipeName = handshake.ReadObject();
+                handshake.Dispose();
+
+                if (dataPipeName == null)
+                {
+                    throw new InvalidOperationException("dataPipeName is null");
+                }
+
+                // Connect to the actual data pipe
+                var dataPipe = PipeClientFactory.CreateAndConnectPipe(dataPipeName, ServerName);
+
+                // Create a Connection object for the data pipe
+                Connection = ConnectionFactory.CreateConnection<TRead, TWrite>(dataPipe);
+                Connection.Disconnected += OnDisconnected;
+                Connection.ReceiveMessage += OnReceiveMessage;
+                Connection.Error += ConnectionOnError;
+                Connection.Open();
+
+                ConnectedEvent.Set();
+            }, OnError);
         }
 
         /// <summary>
@@ -160,31 +183,6 @@ namespace NamedPipeWrapper
 
         #region Private methods
 
-        private void ListenSync()
-        {
-            // Get the name of the data pipe that should be used from now on by this NamedPipeClient
-            var handshake = PipeClientFactory.Connect<string, string>(PipeName, ServerName);
-            var dataPipeName = handshake.ReadObject();
-            handshake.Dispose();
-
-            if (dataPipeName == null)
-            {
-                throw new InvalidOperationException("dataPipeName is null");
-            }
-
-            // Connect to the actual data pipe
-            var dataPipe = PipeClientFactory.CreateAndConnectPipe(dataPipeName, ServerName);
-
-            // Create a Connection object for the data pipe
-            Connection = ConnectionFactory.CreateConnection<TRead, TWrite>(dataPipe);
-            Connection.Disconnected += OnDisconnected;
-            Connection.ReceiveMessage += OnReceiveMessage;
-            Connection.Error += ConnectionOnError;
-            Connection.Open();
-
-            ConnectedEvent.Set();
-        }
-
         private void OnDisconnected(object sender, ConnectionEventArgs<TRead, TWrite> args)
         {
             Disconnected?.Invoke(this, args);
@@ -230,6 +228,8 @@ namespace NamedPipeWrapper
         public void Dispose()
         {
             IsDisposed = true;
+
+            ListenWorker?.Dispose();
 
             Connection?.Dispose();
             ConnectedEvent.Dispose();

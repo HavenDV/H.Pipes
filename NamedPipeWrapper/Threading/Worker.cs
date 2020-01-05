@@ -1,52 +1,48 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using NamedPipeWrapper.Args;
 
 namespace NamedPipeWrapper.Threading
 {
-    internal class Worker
+    internal class Worker : IDisposable
     {
-        #region Events
+        #region Properties
 
-        public event EventHandler? Succeeded;
-        public event EventHandler<ExceptionEventArgs>? Error;
+        public Task Task { get; set; }
+        public CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
 
-        private void OnSucceeded()
+        #endregion
+
+        #region Constructors
+
+        public Worker(Action action, Action<Exception>? exceptionAction = null)
         {
-            Succeeded?.Invoke(this, EventArgs.Empty);
-        }
-
-        private void OnError(Exception exception)
-        {
-            Error?.Invoke(this, new ExceptionEventArgs(exception));
+            Task = Task.Factory.StartNew(() =>
+            {
+                try
+                {
+                    action?.Invoke();
+                }
+                catch (Exception exception)
+                {
+                    exceptionAction?.Invoke(exception);
+                }
+            }, CancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
         }
 
         #endregion
 
-        #region Public methods
+        #region IDisposable
 
-        public void DoWork(Action action)
+        /// <summary>
+        /// Dispose internal resources
+        /// </summary>
+        public void Dispose()
         {
-            new Task(DoWorkImpl, action, CancellationToken.None, TaskCreationOptions.LongRunning).Start();
-        }
+            CancellationTokenSource.Cancel();
+            CancellationTokenSource.Dispose();
 
-        #endregion
-
-        #region Private methods
-
-        private void DoWorkImpl(object oAction)
-        {
-            var action = (Action) oAction;
-            try
-            {
-                action();
-                OnSucceeded();
-            }
-            catch (Exception exception)
-            {
-                OnError(exception);
-            }
+            Task.Dispose();
         }
 
         #endregion
