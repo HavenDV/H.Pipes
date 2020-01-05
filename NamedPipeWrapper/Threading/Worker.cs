@@ -6,29 +6,57 @@ namespace NamedPipeWrapper.Threading
 {
     internal class Worker
     {
-        private readonly TaskScheduler _callbackThread;
+        #region Properties
 
-        private static TaskScheduler CurrentTaskScheduler =>
-            (SynchronizationContext.Current != null
-                ? TaskScheduler.FromCurrentSynchronizationContext()
-                : TaskScheduler.Default);
+        private TaskScheduler TaskScheduler { get; }
 
-        public event WorkerSucceededEventHandler Succeeded;
-        public event WorkerExceptionEventHandler Error;
+        #endregion
 
-        public Worker() : this(CurrentTaskScheduler)
+        #region Events
+
+        public event EventHandler? Succeeded;
+        public event EventHandler<ExceptionEventArgs>? Error;
+
+        private void OnSucceeded()
+        {
+            Succeeded?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void OnError(Exception exception)
+        {
+            Error?.Invoke(this, new ExceptionEventArgs(exception));
+        }
+
+        #endregion
+
+        #region Constructors
+
+        public Worker(TaskScheduler taskScheduler)
+        {
+            TaskScheduler = taskScheduler ?? throw new ArgumentNullException(nameof(taskScheduler));
+        }
+
+        /// <summary>
+        /// Create worker with current task scheduler
+        /// </summary>
+        public Worker() : this(SynchronizationContext.Current != null
+            ? TaskScheduler.FromCurrentSynchronizationContext()
+            : TaskScheduler.Default)
         {
         }
 
-        public Worker(TaskScheduler callbackThread)
-        {
-            _callbackThread = callbackThread;
-        }
+        #endregion
+
+        #region Public methods
 
         public void DoWork(Action action)
         {
             new Task(DoWorkImpl, action, CancellationToken.None, TaskCreationOptions.LongRunning).Start();
         }
+
+        #endregion
+
+        #region Private methods
 
         private void DoWorkImpl(object oAction)
         {
@@ -36,30 +64,19 @@ namespace NamedPipeWrapper.Threading
             try
             {
                 action();
-                Callback(Succeed);
+                Callback(OnSucceeded);
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                Callback(() => Fail(e));
+                Callback(() => OnError(exception));
             }
-        }
-
-        private void Succeed()
-        {
-            Succeeded?.Invoke();
-        }
-
-        private void Fail(Exception exception)
-        {
-            Error?.Invoke(exception);
         }
 
         private void Callback(Action action)
         {
-            Task.Factory.StartNew(action, CancellationToken.None, TaskCreationOptions.None, _callbackThread);
+            Task.Factory.StartNew(action, CancellationToken.None, TaskCreationOptions.None, TaskScheduler);
         }
-    }
 
-    internal delegate void WorkerSucceededEventHandler();
-    internal delegate void WorkerExceptionEventHandler(Exception exception);
+        #endregion
+    }
 }

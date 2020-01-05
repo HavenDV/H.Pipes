@@ -72,12 +72,12 @@ namespace NamedPipeWrapper
         {
             var readWorker = new Worker();
             readWorker.Succeeded += OnSucceeded;
-            readWorker.Error += OnError;
+            readWorker.Error += (sender, args) => OnError(args.Exception);
             readWorker.DoWork(ReadPipe);
 
             var writeWorker = new Worker();
             writeWorker.Succeeded += OnSucceeded;
-            writeWorker.Error += OnError;
+            writeWorker.Error += (sender, args) => OnError(args.Exception);
             writeWorker.DoWork(WritePipe);
         }
 
@@ -113,7 +113,7 @@ namespace NamedPipeWrapper
         /// <summary>
         ///     Invoked on the UI thread.
         /// </summary>
-        private void OnSucceeded()
+        private void OnSucceeded(object o, EventArgs args)
         {
             // Only notify observers once
             if (_notifiedSucceeded)
@@ -121,8 +121,7 @@ namespace NamedPipeWrapper
 
             _notifiedSucceeded = true;
 
-            if (Disconnected != null)
-                Disconnected(this);
+            Disconnected?.Invoke(this);
         }
 
         /// <summary>
@@ -131,8 +130,7 @@ namespace NamedPipeWrapper
         /// <param name="exception"></param>
         private void OnError(Exception exception)
         {
-            if (Error != null)
-                Error(this, exception);
+            Error?.Invoke(this, exception);
         }
 
         /// <summary>

@@ -49,7 +49,7 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Invoked whenever an exception is thrown during a read or write operation.
         /// </summary>
-        public event PipeExceptionEventHandler Error;
+        public event EventHandler<ExceptionEventArgs>? Error;
 
         private readonly string _pipeName;
         private readonly List<NamedPipeConnection<TRead, TWrite>> _connections = new List<NamedPipeConnection<TRead, TWrite>>();
@@ -75,7 +75,7 @@ namespace NamedPipeWrapper
         {
             _shouldKeepRunning = true;
             var worker = new Worker();
-            worker.Error += OnError;
+            worker.Error += (sender, args) => OnError(args.Exception);
             worker.DoWork(ListenSync);
         }
 
@@ -234,13 +234,12 @@ namespace NamedPipeWrapper
         /// <param name="exception"></param>
         private void OnError(Exception exception)
         {
-            if (Error != null)
-                Error(exception);
+            Error?.Invoke(this, new ExceptionEventArgs(exception));
         }
 
         private string GetNextConnectionPipeName(string pipeName)
         {
-            return string.Format("{0}_{1}", pipeName, ++_nextPipeId);
+            return $"{pipeName}_{++_nextPipeId}";
         }
 
         private static void Cleanup(NamedPipeServerStream pipe)
