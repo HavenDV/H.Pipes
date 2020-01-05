@@ -7,12 +7,6 @@ namespace NamedPipeWrapper.Threading
 {
     internal class Worker
     {
-        #region Properties
-
-        private TaskScheduler TaskScheduler { get; }
-
-        #endregion
-
         #region Events
 
         public event EventHandler? Succeeded;
@@ -26,24 +20,6 @@ namespace NamedPipeWrapper.Threading
         private void OnError(Exception exception)
         {
             Error?.Invoke(this, new ExceptionEventArgs(exception));
-        }
-
-        #endregion
-
-        #region Constructors
-
-        public Worker(TaskScheduler taskScheduler)
-        {
-            TaskScheduler = taskScheduler ?? throw new ArgumentNullException(nameof(taskScheduler));
-        }
-
-        /// <summary>
-        /// Create worker with current task scheduler
-        /// </summary>
-        public Worker() : this(SynchronizationContext.Current != null
-            ? TaskScheduler.FromCurrentSynchronizationContext()
-            : TaskScheduler.Default)
-        {
         }
 
         #endregion
@@ -65,17 +41,12 @@ namespace NamedPipeWrapper.Threading
             try
             {
                 action();
-                Callback(OnSucceeded);
+                OnSucceeded();
             }
             catch (Exception exception)
             {
-                Callback(() => OnError(exception));
+                OnError(exception);
             }
-        }
-
-        private void Callback(Action action)
-        {
-            Task.Factory.StartNew(action, CancellationToken.None, TaskCreationOptions.None, TaskScheduler);
         }
 
         #endregion

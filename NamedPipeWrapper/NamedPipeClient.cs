@@ -185,7 +185,7 @@ namespace NamedPipeWrapper
             ConnectedEvent.Set();
         }
 
-        private void OnDisconnected(object obj, ConnectionEventArgs<TRead, TWrite> args)
+        private void OnDisconnected(object sender, ConnectionEventArgs<TRead, TWrite> args)
         {
             Disconnected?.Invoke(this, args);
 
@@ -198,7 +198,7 @@ namespace NamedPipeWrapper
             }
         }
 
-        private void OnReceiveMessage(object obj, ConnectionMessageEventArgs<TRead, TWrite> args)
+        private void OnReceiveMessage(object sender, ConnectionMessageEventArgs<TRead, TWrite> args)
         {
             ServerMessage?.Invoke(this, args);
         }
@@ -206,7 +206,7 @@ namespace NamedPipeWrapper
         /// <summary>
         ///     Invoked on the UI thread.
         /// </summary>
-        private void ConnectionOnError(object obj, ConnectionExceptionEventArgs<TRead, TWrite> args)
+        private void ConnectionOnError(object sender, ConnectionExceptionEventArgs<TRead, TWrite> args)
         {
             OnError(args.Exception);
         }
