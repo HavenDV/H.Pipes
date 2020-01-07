@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamedPipeWrapper", "NamedPipeWrapper\NamedPipeWrapper.csproj", "{73152691-3CDE-46DF-8D04-7117747DFFE7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NamedPipeWrapper", "NamedPipeWrapper\NamedPipeWrapper.csproj", "{73152691-3CDE-46DF-8D04-7117747DFFE7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NamedPipeWrapper.Tests", "UnitTests\NamedPipeWrapper.Tests.csproj", "{5E77C76A-E765-445A-96E5-681CB5B9A68B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NamedPipeWrapper.Tests", "UnitTests\NamedPipeWrapper.Tests.csproj", "{5E77C76A-E765-445A-96E5-681CB5B9A68B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleCLI", "ExampleCLI\ExampleCLI.csproj", "{82BCEFD9-194E-4FF7-A28B-CA1AE2A87BAC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExampleCLI", "ExampleCLI\ExampleCLI.csproj", "{82BCEFD9-194E-4FF7-A28B-CA1AE2A87BAC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleGUI", "ExampleGUI\ExampleGUI.csproj", "{199E5EF6-D1FA-4662-BDD4-1D49A747AFF9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExampleGUI", "ExampleGUI\ExampleGUI.csproj", "{199E5EF6-D1FA-4662-BDD4-1D49A747AFF9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E5162CF4-2D87-429E-991A-C37962DE5215}"
 	ProjectSection(SolutionItems) = preProject
@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LICENSE.txt = LICENSE.txt
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Pipes.Json", "H.Pipes.Json\H.Pipes.Json.csproj", "{525826A0-BE89-46DA-8B39-0E590C3DE2E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +77,18 @@ Global
 		{199E5EF6-D1FA-4662-BDD4-1D49A747AFF9}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{199E5EF6-D1FA-4662-BDD4-1D49A747AFF9}.Release|x86.ActiveCfg = Release|Any CPU
 		{199E5EF6-D1FA-4662-BDD4-1D49A747AFF9}.Release|x86.Build.0 = Release|Any CPU
+		{525826A0-BE89-46DA-8B39-0E590C3DE2E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{525826A0-BE89-46DA-8B39-0E590C3DE2E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{525826A0-BE89-46DA-8B39-0E590C3DE2E1}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{525826A0-BE89-46DA-8B39-0E590C3DE2E1}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{525826A0-BE89-46DA-8B39-0E590C3DE2E1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{525826A0-BE89-46DA-8B39-0E590C3DE2E1}.Debug|x86.Build.0 = Debug|Any CPU
+		{525826A0-BE89-46DA-8B39-0E590C3DE2E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{525826A0-BE89-46DA-8B39-0E590C3DE2E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{525826A0-BE89-46DA-8B39-0E590C3DE2E1}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{525826A0-BE89-46DA-8B39-0E590C3DE2E1}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{525826A0-BE89-46DA-8B39-0E590C3DE2E1}.Release|x86.ActiveCfg = Release|Any CPU
+		{525826A0-BE89-46DA-8B39-0E590C3DE2E1}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
