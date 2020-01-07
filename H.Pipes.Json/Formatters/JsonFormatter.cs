@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using NamedPipeWrapper.Formatters;
 using Newtonsoft.Json;
 
 namespace H.Pipes.Formatters

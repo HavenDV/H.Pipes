@@ -1,16 +1,15 @@
 ﻿using System.IO;
-using Wire;
 
 namespace H.Pipes.Formatters
 {
-    public class WireFormatter : IFormatter
+    public class BinaryFormatter : IFormatter
     {
-        private Serializer Serializer { get; } = new Serializer();
+        private System.Runtime.Serialization.Formatters.Binary.BinaryFormatter InternalFormatter { get; } = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
 
         public byte[] Serialize(object obj)
         {
             using var stream = new MemoryStream();
-            Serializer.Serialize(obj, stream);
+            InternalFormatter.Serialize(stream, obj);
 
             return stream.ToArray();
         }
@@ -19,7 +18,7 @@ namespace H.Pipes.Formatters
         {
             using var memoryStream = new MemoryStream(bytes);
 
-            return (T)Serializer.Deserialize(memoryStream);
+            return (T)InternalFormatter.Deserialize(memoryStream);
         }
     }
 }

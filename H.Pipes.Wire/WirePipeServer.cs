@@ -1,13 +1,12 @@
 ﻿using H.Pipes.Formatters;
-using NamedPipeWrapper;
 
 namespace H.Pipes
 {
     /// <summary>
-    /// Wraps a <see cref="NamedPipeServer{T}"/> and provides multiple simultaneous client connection handling.
+    /// Wraps a <see cref="PipeServer{T}"/> and provides multiple simultaneous client connection handling.
     /// </summary>
     /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
-    public class WirePipeServer<T> : NamedPipeServer<T>
+    public class WirePipeServer<T> : PipeServer<T>
         where T : class
     {
         #region Constructors

@@ -1,14 +1,13 @@
 ﻿using System;
 using H.Pipes.Formatters;
-using NamedPipeWrapper;
 
 namespace H.Pipes
 {
     /// <summary>
-    /// Wraps a <see cref="NamedPipeClient{T}"/>.
+    /// Wraps a <see cref="PipeClient{T}"/>.
     /// </summary>
     /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
-    public class JsonPipeClient<T> : NamedPipeClient<T>
+    public class JsonPipeClient<T> : PipeClient<T>
         where T : class
     {
         #region Constructors
