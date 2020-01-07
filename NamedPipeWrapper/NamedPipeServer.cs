@@ -177,7 +177,7 @@ namespace NamedPipeWrapper
                 }
             }, OnExceptionOccurred);
 
-            await source.Task;
+            await source.Task.ConfigureAwait(false);
         }
 
         /// <summary>
