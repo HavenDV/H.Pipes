@@ -106,7 +106,7 @@ namespace NamedPipeWrapper.Tests
             {
                 try
                 {
-                    using var source = new CancellationTokenSource(100);
+                    using var source = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
                     using var pipe = await PipeServerFactory.CreateAndWaitAsync("test", source.Token).ConfigureAwait(false);
                 }
                 catch (TaskCanceledException)
