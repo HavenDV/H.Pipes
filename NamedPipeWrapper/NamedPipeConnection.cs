@@ -108,7 +108,7 @@ namespace NamedPipeWrapper
                         var obj = await PipeStreamWrapper.ReadObjectAsync(cancellationToken).ConfigureAwait(false);
                         if (obj == null)
                         {
-                            return;
+                            break;
                         }
 
                         OnMessageReceived(obj);
@@ -132,23 +132,14 @@ namespace NamedPipeWrapper
         /// </summary>
         /// <param name="value"></param>
         /// <param name="cancellationToken"></param>
-        public async Task<bool> WriteAsync(TWrite value, CancellationToken cancellationToken = default)
+        public async Task WriteAsync(TWrite value, CancellationToken cancellationToken = default)
         {
             if (!IsConnected || !PipeStreamWrapper.CanWrite)
             {
-                return false;
+                throw new InvalidOperationException("Client is not connected");
             }
 
-            try
-            {
-                await PipeStreamWrapper.WriteObjectAsync(value, cancellationToken).ConfigureAwait(false);
-
-                return true;
-            }
-            catch (TaskCanceledException)
-            {
-                return false;
-            }
+            await PipeStreamWrapper.WriteObjectAsync(value, cancellationToken).ConfigureAwait(false);
         }
 
         #endregion

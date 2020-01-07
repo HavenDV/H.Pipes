@@ -120,7 +120,7 @@ namespace NamedPipeWrapper
             Connection.Start();
         }
 
-        public async Task DisconnectAsync()
+        public async Task DisconnectAsync(CancellationToken _ = default)
         {
             if (Connection == null) // nullable detection system is not very smart
             {
@@ -133,18 +133,20 @@ namespace NamedPipeWrapper
         }
 
         /// <summary>
-        ///     Sends a message to the server over a named pipe.
+        /// Sends a message to the server over a named pipe. <br/>
+        /// If client is not connected, <see cref="InvalidOperationException"/> is occurred
         /// </summary>
         /// <param name="value">Message to send to the server.</param>
         /// <param name="cancellationToken"></param>
-        public async Task<bool> WriteAsync(TWrite value, CancellationToken cancellationToken = default)
+        /// <exception cref="InvalidOperationException"></exception>
+        public async Task WriteAsync(TWrite value, CancellationToken cancellationToken = default)
         {
-            if (Connection == null)
+            if (Connection == null) // nullable detection system is not very smart
             {
-                return false;
+                throw new InvalidOperationException("Client is not connected");
             }
 
-            return await Connection.WriteAsync(value, cancellationToken).ConfigureAwait(false);
+            await Connection.WriteAsync(value, cancellationToken).ConfigureAwait(false);
         }
 
         #region IDisposable

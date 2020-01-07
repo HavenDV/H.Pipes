@@ -39,8 +39,9 @@ namespace NamedPipeWrapper
     {
         #region Properties
 
-        private string PipeName { get; }
-        private List<NamedPipeConnection<TRead, TWrite>> Connections { get; } = new List<NamedPipeConnection<TRead, TWrite>>();
+        public string PipeName { get; }
+        public List<NamedPipeConnection<TRead, TWrite>> Connections { get; } = new List<NamedPipeConnection<TRead, TWrite>>();
+        public List<NamedPipeConnection<TRead, TWrite>> ConnectedClients => Connections.Where(connection => connection.IsConnected).ToList();
 
         private int NextPipeId { get; set; }
 
@@ -189,7 +190,7 @@ namespace NamedPipeWrapper
         public async Task WriteAsync(TWrite value, Predicate<NamedPipeConnection<TRead, TWrite>>? predicate = null, CancellationToken cancellationToken = default)
         {
             var tasks = Connections
-                .Where(connection => predicate == null || predicate(connection))
+                .Where(connection => connection.IsConnected && (predicate == null || predicate(connection)))
                 .Select(connection => connection.WriteAsync(value, cancellationToken))
                 .ToList();
 
