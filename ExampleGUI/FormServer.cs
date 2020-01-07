@@ -1,78 +1,117 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using NamedPipeWrapper;
 
 namespace ExampleGUI
 {
-    public partial class FormServer : Form
+    public sealed partial class FormServer : Form, IAsyncDisposable
     {
-        private readonly NamedPipeServer<string> _server = new NamedPipeServer<string>(Constants.PIPE_NAME);
-        private readonly ISet<string> _clients = new HashSet<string>();
+        private NamedPipeServer<string> Server { get; } = new NamedPipeServer<string>(Constants.PIPE_NAME);
+        private ISet<string> Clients { get; } = new HashSet<string>();
 
         public FormServer()
         {
             InitializeComponent();
+
             Load += OnLoad;
         }
 
-        private void OnLoad(object sender, EventArgs eventArgs)
+        private async void OnLoad(object sender, EventArgs eventArgs)
         {
-            _server.ClientConnected += OnClientConnected;
-            _server.ClientDisconnected += OnClientDisconnected;
-            _server.ClientMessage += (client, message) => AddLine("<b>" + client.Name + "</b>: " + message);
-            _server.Start();
+            Server.ClientConnected += async (o, args) =>
+            {
+                Clients.Add(args.Connection.Name);
+                UpdateClientList();
+
+                AddLine($"{args.Connection.Name} connected!");
+
+                try
+                {
+                    await args.Connection.WriteAsync("Welcome! You are now connected to the server.").ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    OnExceptionOccurred(exception);
+                }
+            };
+            Server.ClientDisconnected += (o, args) =>
+            {
+                Clients.Remove(args.Connection.Name);
+                UpdateClientList();
+
+                AddLine($"{args.Connection.Name} disconnected!");
+            };
+            Server.MessageReceived += (o, args) => AddLine($"{args.Connection.Name}: {args.Message}");
+            Server.ExceptionOccurred += (o, args) => OnExceptionOccurred(args.Exception);
+
+            try
+            {
+                AddLine("Server starting...");
+
+                await Server.StartAsync().ConfigureAwait(false);
+
+                AddLine("Server is started!");
+            }
+            catch (Exception exception)
+            {
+                OnExceptionOccurred(exception);
+            }
         }
 
-        private void OnClientConnected(NamedPipeConnection<string, string> connection)
+        private void OnExceptionOccurred(Exception exception)
         {
-            _clients.Add(connection.Name);
-            AddLine("<b>" + connection.Name + "</b> connected!");
-            UpdateClientList();
-            connection.PushMessage("Welcome!  You are now connected to the server.");
+            AddLine($"Exception: {exception}");
         }
 
-        private void OnClientDisconnected(NamedPipeConnection<string, string> connection)
-        {
-            _clients.Remove(connection.Name);
-            AddLine("<b>" + connection.Name + "</b> disconnected!");
-            UpdateClientList();
-        }
-
-        private void AddLine(string html)
+        private void AddLine(string text)
         {
             richTextBoxMessages.Invoke(new Action(delegate
-                {
-                    richTextBoxMessages.Text += Environment.NewLine + "<div>" + html + "</div>";
-                }));
+            {
+                richTextBoxMessages.Text += $@"{text}{Environment.NewLine}";
+            }));
         }
 
         private void UpdateClientList()
         {
-            listBoxClients.Invoke(new Action(UpdateClientListImpl));
-        }
-
-        private void UpdateClientListImpl()
-        {
-            listBoxClients.Items.Clear();
-            foreach (var client in _clients)
+            listBoxClients.Invoke(new Action(() =>
             {
-                listBoxClients.Items.Add(client);
-            }
+                listBoxClients.Items.Clear();
+                foreach (var client in Clients)
+                {
+                    listBoxClients.Items.Add(client);
+                }
+            }));
         }
 
-        private void buttonSend_Click(object sender, EventArgs e)
+        private async void ButtonSend_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(textBoxMessage.Text))
+            {
                 return;
+            }
 
-            _server.PushMessage(textBoxMessage.Text);
-            textBoxMessage.Text = "";
+            try
+            {
+                AddLine($"Sent to {Server.ConnectedClients.Count} clients");
+
+                await Server.WriteAsync(textBoxMessage.Text).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                OnExceptionOccurred(exception);
+            }
+
+            textBoxMessage.Invoke(new Action(delegate
+            {
+                textBoxMessage.Text = "";
+            }));
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await Server.DisposeAsync().ConfigureAwait(false);
         }
     }
 }

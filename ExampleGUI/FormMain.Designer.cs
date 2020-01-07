@@ -40,7 +40,7 @@
             this.buttonClient.TabIndex = 0;
             this.buttonClient.Text = "&Client";
             this.buttonClient.UseVisualStyleBackColor = true;
-            this.buttonClient.Click += new System.EventHandler(this.buttonClient_Click);
+            this.buttonClient.Click += new System.EventHandler(this.ButtonClient_Click);
             // 
             // buttonServer
             // 
@@ -50,7 +50,7 @@
             this.buttonServer.TabIndex = 1;
             this.buttonServer.Text = "&Server";
             this.buttonServer.UseVisualStyleBackColor = true;
-            this.buttonServer.Click += new System.EventHandler(this.buttonServer_Click);
+            this.buttonServer.Click += new System.EventHandler(this.ButtonServer_Click);
             // 
             // FormMain
             // 

@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 namespace ExampleGUI
@@ -16,17 +10,23 @@ namespace ExampleGUI
             InitializeComponent();
         }
 
-        private void buttonClient_Click(object sender, EventArgs e)
+        private async void ButtonClient_Click(object sender, EventArgs e)
         {
             Hide();
-            new FormClient().ShowDialog(this);
+
+            await using var client = new FormClient();
+            client.ShowDialog(this);
+
             Close();
         }
 
-        private void buttonServer_Click(object sender, EventArgs e)
+        private async void ButtonServer_Click(object sender, EventArgs e)
         {
             Hide();
-            new FormServer().ShowDialog(this);
+
+            await using var server = new FormServer();
+            server.ShowDialog(this);
+
             Close();
         }
     }

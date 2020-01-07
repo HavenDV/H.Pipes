@@ -1,63 +1,86 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using NamedPipeWrapper;
 
 namespace ExampleGUI
 {
-    public partial class FormClient : Form
+    public partial class FormClient : Form, IAsyncDisposable
     {
-        private readonly NamedPipeClient<string> _client = new NamedPipeClient<string>(Constants.PIPE_NAME);
+        private NamedPipeClient<string> Client { get; set; }
 
         public FormClient()
         {
             InitializeComponent();
+
             Load += OnLoad;
         }
 
-        private void OnLoad(object sender, EventArgs eventArgs)
+        private async void OnLoad(object sender, EventArgs eventArgs)
         {
-            _client.ServerMessage += OnServerMessage;
-            _client.Disconnected += OnDisconnected;
-            _client.Start();
+            Client = new NamedPipeClient<string>(Constants.PIPE_NAME);
+            Client.MessageReceived += (o, args) => AddLine("MessageReceived: " + args.Message);
+            Client.Disconnected += (o, args) => AddLine("Disconnected from server");
+            Client.ExceptionOccurred += (o, args) => OnExceptionOccurred(args.Exception);
+
+            try
+            {
+                AddLine("Client connecting...");
+
+                await Client.ConnectAsync().ConfigureAwait(false);
+
+                AddLine("Client is connected!");
+            }
+            catch (Exception exception)
+            {
+                OnExceptionOccurred(exception);
+            }
         }
 
-        private void OnServerMessage(NamedPipeConnection<string, string> connection, string message)
+        private void OnExceptionOccurred(Exception exception)
+        {
+            AddLine($"Exception: {exception}");
+        }
+
+        private void AddLine(string text)
         {
             richTextBoxMessages.Invoke(new Action(delegate
-                {
-                    AddLine("<b>Server</b>: " + message);
-                }));
+            {
+                richTextBoxMessages.Text += $@"{text}{Environment.NewLine}";
+            }));
         }
 
-        private void OnDisconnected(NamedPipeConnection<string, string> connection)
-        {
-            richTextBoxMessages.Invoke(new Action(delegate
-                {
-                    AddLine("<b>Disconnected from server</b>");
-                }));
-        }
-
-        private void AddLine(string html)
-        {
-            richTextBoxMessages.Invoke(new Action(delegate
-                {
-                    richTextBoxMessages.Text += Environment.NewLine + "<div>" + html + "</div>";
-                }));
-        }
-
-        private void buttonSend_Click(object sender, EventArgs e)
+        private async void ButtonSend_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(textBoxMessage.Text))
+            {
                 return;
+            }
 
-            _client.PushMessage(textBoxMessage.Text);
-            textBoxMessage.Text = "";
+            try
+            {
+                if (!Client.IsConnected)
+                {
+                    AddLine("Client is not connected");
+                    return;
+                }
+
+                await Client.WriteAsync(textBoxMessage.Text).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                OnExceptionOccurred(exception);
+            }
+
+            textBoxMessage.Invoke(new Action(delegate
+            {
+                textBoxMessage.Text = "";
+            }));
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await Client.DisposeAsync().ConfigureAwait(false);
         }
     }
 }
