@@ -71,7 +71,7 @@ namespace ConsoleApp
                             {
                                 Id = new Random().Next(),
                                 Text = message,
-                            }, cancellationToken: source.Token);
+                            }, cancellationToken: source.Token).ConfigureAwait(false);
                         }
                         catch (Exception exception)
                         {

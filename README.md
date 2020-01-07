@@ -1,19 +1,19 @@
-# Named Pipe Wrapper for .NET Standard 2.0
+# Async Named Pipe Wrapper for .NET Standard 2.0
 
-A simple, easy to use, strongly-typed wrapper around .NET named pipes.
+A simple, easy to use, strongly-typed, async wrapper around .NET named pipes.
 
 # NuGet Package
 
-Available as a [NuGet package](https://www.nuget.org/packages/NamedPipeWrapper.NetStandard/).
+Available as a [NuGet package](https://www.nuget.org/packages/H.Pipes/).
 ```
-Install-Package NamedPipeWrapper.NetStandard -Version 1.5.0
+Install-Package H.Pipes -Version 1.0.0
 ```
 
 # Features
 
 *  Create named pipe servers that can handle multiple client connections simultaneously.
 *  Send strongly-typed messages between clients and servers: any serializable .NET object can be sent over a pipe and will be automatically serialized/deserialized, including cyclical references and complex object graphs.
-*  Messages are sent and received asynchronously on a separate background thread and marshalled back to the calling thread (typically the UI).
+*  Async
 *  Supports large messages - up to 300 MiB.
 
 # Requirements
@@ -25,43 +25,53 @@ Requires .NET Standard 2.0.
 Server:
 
 ```csharp
-var server = new NamedPipeServer<SomeClass>("MyServerPipe");
+await using var server = new PipeServer<MyMessage>(pipeName);
+server.ClientConnected += async (o, args) =>
+{
+    Console.WriteLine($"Client {args.Connection.Id} is now connected!");
 
-server.ClientConnected += delegate(NamedPipeConnection<SomeClass> conn)
+    await args.Connection.WriteAsync(new MyMessage
     {
-        Console.WriteLine("Client {0} is now connected!", conn.Id);
-        conn.PushMessage(new SomeClass { Text: "Welcome!" });
-    };
+        Id = new Random().Next(),
+        Text = "Welcome!"
+    });
+};
+server.ClientDisconnected += (o, args) =>
+{
+    Console.WriteLine($"Client {args.Connection.Id} disconnected");
+};
+server.MessageReceived += (sender, args) =>
+{
+    Console.WriteLine($"Client {args.Connection.Id} says: {args.Message}");
+};
+server.ExceptionOccurred += (o, args) => OnExceptionOccurred(args.Exception);
 
-server.ClientMessage += delegate(NamedPipeConnection<SomeClass> conn, SomeClass message)
-    {
-        Console.WriteLine("Client {0} says: {1}", conn.Id, message.Text);
-    };
+await server.StartAsync();
 
-// Start up the server asynchronously and begin listening for connections.
-// This method will return immediately while the server runs in a separate background thread.
-server.Start();
-
-// ...
+await Task.Delay(Timeout.InfiniteTimeSpan);
 ```
 
 Client:
 
 ```csharp
-var client = new NamedPipeClient<SomeClass>("MyServerPipe");
+await using var client = new PipeClient<MyMessage>(pipeName);
+client.MessageReceived += (o, args) => Console.WriteLine("MessageReceived: " + args.Message);
+client.Disconnected += (o, args) => Console.WriteLine("Disconnected from server");
+client.Connected += (o, args) => Console.WriteLine("Connected to server");
+client.ExceptionOccurred += (o, args) => OnExceptionOccurred(args.Exception);
 
-client.ServerMessage += delegate(NamedPipeConnection<SomeClass> conn, SomeClass message)
-    {
-        Console.WriteLine("Server says: {0}", message.Text);
-    };
+await client.ConnectAsync();
 
-// Start up the client asynchronously and connect to the specified server pipe.
-// This method will return immediately while the client runs in a separate background thread.
-client.Start();
+await client.WriteAsync(new MyMessage
+{
+    Id = new Random().Next(),
+    Text = "Hello!",
+});
 
+await Task.Delay(Timeout.InfiniteTimeSpan);
 // ...
 ```
 
 # MIT License
 
-Named Pipe Wrapper for .NET is licensed under the [MIT license](LICENSE.txt).
+H.Pipes is licensed under the [MIT license](LICENSE.txt).
