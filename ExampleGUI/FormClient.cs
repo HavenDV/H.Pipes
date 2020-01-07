@@ -24,6 +24,7 @@ namespace ExampleGUI
             Client = new NamedPipeClient<string>(PipeName);
             Client.MessageReceived += (o, args) => AddLine("MessageReceived: " + args.Message);
             Client.Disconnected += (o, args) => AddLine("Disconnected from server");
+            Client.Connected += (o, args) => AddLine("Connected to server");
             Client.ExceptionOccurred += (o, args) => OnExceptionOccurred(args.Exception);
 
             try
@@ -31,8 +32,6 @@ namespace ExampleGUI
                 AddLine("Client connecting...");
 
                 await Client.ConnectAsync().ConfigureAwait(false);
-
-                AddLine("Client is connected!");
             }
             catch (Exception exception)
             {

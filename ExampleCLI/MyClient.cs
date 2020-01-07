@@ -25,6 +25,7 @@ namespace ExampleCLI
                 await using var client = new NamedPipeClient<string>(pipeName);
                 client.MessageReceived += (o, args) => Console.WriteLine("MessageReceived: " + args.Message);
                 client.Disconnected += (o, args) => Console.WriteLine("Disconnected from server");
+                client.Connected += (o, args) => Console.WriteLine("Connected to server");
                 client.ExceptionOccurred += (o, args) => OnExceptionOccurred(args.Exception);
 
                 // Dispose is not required
@@ -53,8 +54,6 @@ namespace ExampleCLI
                 Console.WriteLine("Client connecting...");
 
                 await client.ConnectAsync(source.Token).ConfigureAwait(false);
-
-                Console.WriteLine("Client is connected!");
 
                 await Task.Delay(Timeout.InfiniteTimeSpan, source.Token).ConfigureAwait(false);
             }

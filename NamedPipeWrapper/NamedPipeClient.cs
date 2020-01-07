@@ -32,19 +32,29 @@ namespace NamedPipeWrapper
         where TRead : class
         where TWrite : class
     {
+        private volatile bool _isConnecting;
+
         /// <summary>
         /// Gets or sets whether the client should attempt to reconnect when the pipe breaks
         /// due to an error or the other end terminating the connection. <br/>
         /// Default value is <see langword="true"/>.
         /// </summary>
         public bool AutoReconnect { get; set; }
+        public TimeSpan ReconnectionInterval { get; }
 
         public bool IsConnected => Connection != null;
+
+        public bool IsConnecting
+        {
+            get => _isConnecting;
+            private set => _isConnecting = value;
+        }
 
         private string PipeName { get; }
         private string ServerName { get; }
 
         private NamedPipeConnection<TRead, TWrite>? Connection { get; set; }
+        private System.Timers.Timer ReconnectionTimer { get; }
 
         #region Events
 
@@ -57,6 +67,11 @@ namespace NamedPipeWrapper
         /// Invoked when the client disconnects from the server (e.g., the pipe is closed or broken).
         /// </summary>
         public event EventHandler<ConnectionEventArgs<TRead, TWrite>>? Disconnected;
+
+        /// <summary>
+        /// Invoked after each the client connect to the server (include reconnects).
+        /// </summary>
+        public event EventHandler<ConnectionEventArgs<TRead, TWrite>>? Connected;
 
         /// <summary>
         /// Invoked whenever an exception is thrown during a read or write operation on the named pipe.
@@ -73,6 +88,11 @@ namespace NamedPipeWrapper
             Disconnected?.Invoke(this, args);
         }
 
+        private void OnConnected(ConnectionEventArgs<TRead, TWrite> args)
+        {
+            Connected?.Invoke(this, args);
+        }
+
         private void OnExceptionOccurred(Exception exception)
         {
             ExceptionOccurred?.Invoke(this, new ExceptionEventArgs(exception));
@@ -83,15 +103,34 @@ namespace NamedPipeWrapper
         #region Constructors
 
         /// <summary>
-        /// Constructs a new <c>NamedPipeClient</c> to connect to the <see cref="NamedPipeServer{TRead, TWrite}"/> specified by <paramref name="pipeName"/>.
+        /// Constructs a new <see cref="NamedPipeClient{TRead, TWrite}"/> to connect to the <see cref="NamedPipeServer{TRead, TWrite}"/> specified by <paramref name="pipeName"/>. <br/>
+        /// Default reconnection interval - <see langword="100 ms"/>
         /// </summary>
         /// <param name="pipeName">Name of the server's pipe</param>
         /// <param name="serverName">the Name of the server, default is  local machine</param>
-        public NamedPipeClient(string pipeName, string serverName = ".")
+        /// <param name="reconnectionInterval">Default reconnection interval - <see langword="100 ms"/></param>
+        public NamedPipeClient(string pipeName, string serverName = ".", TimeSpan? reconnectionInterval = default)
         {
             PipeName = pipeName;
             ServerName = serverName;
             AutoReconnect = true;
+
+            ReconnectionInterval = reconnectionInterval ?? TimeSpan.FromMilliseconds(100);
+            ReconnectionTimer = new System.Timers.Timer(ReconnectionInterval.TotalMilliseconds);
+            ReconnectionTimer.Elapsed += async (sender, args) =>
+            {
+                try
+                {
+                    if (!IsConnected && !IsConnecting)
+                    {
+                        await ConnectAsync();
+                    }
+                }
+                catch (Exception exception)
+                {
+                    OnExceptionOccurred(exception);
+                }
+            };
         }
 
         #endregion
@@ -102,25 +141,49 @@ namespace NamedPipeWrapper
         /// <exception cref="InvalidOperationException"></exception>
         public async Task ConnectAsync(CancellationToken cancellationToken = default)
         {
-            if (IsConnected)
+            try
             {
-                throw new InvalidOperationException("Already connected");
+                IsConnecting = true;
+
+                ReconnectionTimer.Start();
+                if (IsConnected)
+                {
+                    throw new InvalidOperationException("Already connected");
+                }
+
+                var connectionPipeName = await GetConnectionPipeName(cancellationToken).ConfigureAwait(false);
+
+                // Connect to the actual data pipe
+                var dataPipe = await PipeClientFactory.CreateAndConnectAsync(connectionPipeName, ServerName, cancellationToken).ConfigureAwait(false);
+
+                // Create a Connection object for the data pipe
+                Connection = ConnectionFactory.Create<TRead, TWrite>(dataPipe);
+                Connection.Disconnected += async (sender, args) =>
+                {
+                    await DisconnectInternalAsync();
+
+                    OnDisconnected(args);
+                };
+                Connection.MessageReceived += (sender, args) => OnMessageReceived(args);
+                Connection.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
+                Connection.Start();
+
+                OnConnected(new ConnectionEventArgs<TRead, TWrite>(Connection));
             }
-
-            var connectionPipeName = await GetConnectionPipeName(cancellationToken).ConfigureAwait(false);
-
-            // Connect to the actual data pipe
-            var dataPipe = await PipeClientFactory.CreateAndConnectAsync(connectionPipeName, ServerName, cancellationToken).ConfigureAwait(false);
-
-            // Create a Connection object for the data pipe
-            Connection = ConnectionFactory.Create<TRead, TWrite>(dataPipe);
-            Connection.Disconnected += (sender, args) => OnDisconnected(args);
-            Connection.MessageReceived += (sender, args) => OnMessageReceived(args);
-            Connection.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
-            Connection.Start();
+            finally
+            {
+                IsConnecting = false;
+            }
         }
 
         public async Task DisconnectAsync(CancellationToken _ = default)
+        {
+            ReconnectionTimer.Stop();
+
+            await DisconnectInternalAsync().ConfigureAwait(false);
+        }
+
+        private async Task DisconnectInternalAsync()
         {
             if (Connection == null) // nullable detection system is not very smart
             {
@@ -141,6 +204,10 @@ namespace NamedPipeWrapper
         /// <exception cref="InvalidOperationException"></exception>
         public async Task WriteAsync(TWrite value, CancellationToken cancellationToken = default)
         {
+            if (!IsConnected && AutoReconnect && !IsConnecting)
+            {
+                await ConnectAsync(cancellationToken);
+            }
             if (Connection == null) // nullable detection system is not very smart
             {
                 throw new InvalidOperationException("Client is not connected");
