@@ -1,18 +1,30 @@
 ﻿using System.IO.Pipes;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NamedPipeWrapper.Factories
 {
-    internal static class PipeServerFactory
+    public static class PipeServerFactory
     {
-        public static NamedPipeServerStream CreateAndConnectPipe(string pipeName)
+        public static async Task<NamedPipeServerStream> CreateAndWaitAsync(string pipeName, CancellationToken cancellationToken = default)
         {
-            var pipe = CreatePipe(pipeName);
-            pipe.WaitForConnection();
+            var pipe = Create(pipeName);
 
-            return pipe;
+            try
+            {
+                await pipe.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
+
+                return pipe;
+            }
+            catch
+            {
+                pipe.Dispose();
+
+                throw;
+            }
         }
 
-        public static NamedPipeServerStream CreatePipe(string pipeName)
+        public static NamedPipeServerStream Create(string pipeName)
         {
             return new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough, 0, 0);
         }

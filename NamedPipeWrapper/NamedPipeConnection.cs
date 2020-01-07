@@ -1,9 +1,10 @@
 ﻿using System;
 using System.IO.Pipes;
 using NamedPipeWrapper.IO;
-using NamedPipeWrapper.Threading;
-using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Tasks;
 using NamedPipeWrapper.Args;
+using NamedPipeWrapper.Utilities;
 
 namespace NamedPipeWrapper
 {
@@ -12,7 +13,7 @@ namespace NamedPipeWrapper
     /// </summary>
     /// <typeparam name="TRead">Reference type to read from the named pipe</typeparam>
     /// <typeparam name="TWrite">Reference type to write to the named pipe</typeparam>
-    public sealed class NamedPipeConnection<TRead, TWrite> : IDisposable
+    public sealed class NamedPipeConnection<TRead, TWrite> : IAsyncDisposable
         where TRead : class
         where TWrite : class
     {
@@ -33,17 +34,10 @@ namespace NamedPipeWrapper
         /// </summary>
         public bool IsConnected => PipeStreamWrapper.IsConnected;
 
+        public bool IsStarted => ReadWorker != null;
+
         private PipeStreamWrapper<TRead, TWrite> PipeStreamWrapper { get; }
-
-        /// <summary>
-        /// To support Multithread, we should use BlockingCollection.
-        /// </summary>
-        private BlockingCollection<TWrite> WriteQueue { get; } = new BlockingCollection<TWrite>();
-
-        private bool NotifiedSucceeded { get; set; }
-
         private Worker? ReadWorker { get; set; }
-        private Worker? WriteWorker { get; set; }
 
         #endregion
 
@@ -83,28 +77,35 @@ namespace NamedPipeWrapper
 
         #region Constructors
 
-        internal NamedPipeConnection(int id, string name, PipeStream serverStream)
+        internal NamedPipeConnection(int id, string name, PipeStream stream)
         {
             Id = id;
             Name = name;
-            PipeStreamWrapper = new PipeStreamWrapper<TRead, TWrite>(serverStream);
+            PipeStreamWrapper = new PipeStreamWrapper<TRead, TWrite>(stream);
         }
 
         #endregion
+
+        #region Public methods
 
         /// <summary>
         /// Begins reading from and writing to the named pipe on a background thread.
         /// This method returns immediately.
         /// </summary>
-        public void Open()
+        public void Start()
         {
-            ReadWorker = new Worker(() =>
+            if (IsStarted)
             {
-                while (IsConnected && PipeStreamWrapper.CanRead)
+                throw new InvalidOperationException("Connection already started");
+            }
+
+            ReadWorker = new Worker(async cancellationToken =>
+            {
+                while (!cancellationToken.IsCancellationRequested && IsConnected && PipeStreamWrapper.CanRead)
                 {
                     try
                     {
-                        var obj = PipeStreamWrapper.ReadObject();
+                        var obj = await PipeStreamWrapper.ReadObjectAsync(cancellationToken).ConfigureAwait(false);
                         if (obj == null)
                         {
                             return;
@@ -112,71 +113,61 @@ namespace NamedPipeWrapper
 
                         OnMessageReceived(obj);
                     }
+                    catch (TaskCanceledException)
+                    {
+                        throw;
+                    }
                     catch (Exception exception)
                     {
                         OnExceptionOccurred(exception);
                     }
                 }
 
-                OnSucceeded();
+                OnDisconnected();
             }, OnExceptionOccurred);
+        }
 
-            WriteWorker = new Worker(() =>
+        /// <summary>
+        /// Writes the specified <paramref name="value"/> and waits other end reading
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="cancellationToken"></param>
+        public async Task<bool> WriteAsync(TWrite value, CancellationToken cancellationToken = default)
+        {
+            if (!IsConnected || !PipeStreamWrapper.CanWrite)
             {
-                while (IsConnected && PipeStreamWrapper.CanWrite)
-                {
-                    try
-                    {
-                        PipeStreamWrapper.WriteObject(WriteQueue.Take());
-                        PipeStreamWrapper.WaitForPipeDrain();
-                    }
-                    catch (Exception exception)
-                    {
-                        OnExceptionOccurred(exception);
-                    }
-                }
+                return false;
+            }
 
-                OnSucceeded();
-            }, OnExceptionOccurred);
+            try
+            {
+                await PipeStreamWrapper.WriteObjectAsync(value, cancellationToken).ConfigureAwait(false);
+
+                return true;
+            }
+            catch (TaskCanceledException)
+            {
+                return false;
+            }
         }
 
-        /// <summary>
-        /// Adds the specified <paramref name="message"/> to the write queue.
-        /// The message will be written to the named pipe by the background thread
-        /// at the next available opportunity.
-        /// </summary>
-        /// <param name="message"></param>
-        public void PushMessage(TWrite message)
-        {
-            WriteQueue.Add(message);
-        }
-
-        /// <summary>
-        ///     Invoked on the UI thread.
-        /// </summary>
-        private void OnSucceeded()
-        {
-            // Only notify observers once
-            if (NotifiedSucceeded)
-                return;
-
-            NotifiedSucceeded = true;
-
-            OnDisconnected();
-        }
+        #endregion
 
         #region IDisposable
 
         /// <summary>
         /// Dispose internal resources
         /// </summary>
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
-            WriteWorker?.Dispose();
-            ReadWorker?.Dispose();
+            if (ReadWorker != null)
+            {
+                await ReadWorker.DisposeAsync().ConfigureAwait(false);
+
+                ReadWorker = null;
+            }
 
             PipeStreamWrapper.Dispose();
-            WriteQueue.Dispose();
         }
 
         #endregion

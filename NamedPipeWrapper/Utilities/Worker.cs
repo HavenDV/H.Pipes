@@ -2,26 +2,31 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace NamedPipeWrapper.Threading
+namespace NamedPipeWrapper.Utilities
 {
-    internal class Worker : IDisposable
+    internal class Worker : IAsyncDisposable
     {
         #region Properties
 
         public Task Task { get; set; }
         public CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
 
+        private volatile bool _isDisposed;
+
         #endregion
 
         #region Constructors
 
-        public Worker(Action action, Action<Exception>? exceptionAction = null)
+        public Worker(Func<CancellationToken, Task> action, Action<Exception>? exceptionAction = null)
         {
-            Task = Task.Factory.StartNew(() =>
+            Task = Task.Factory.StartNew(async () =>
             {
                 try
                 {
-                    action?.Invoke();
+                    await action(CancellationTokenSource.Token).ConfigureAwait(false);
+                }
+                catch (TaskCanceledException)
+                {
                 }
                 catch (Exception exception)
                 {
@@ -37,11 +42,20 @@ namespace NamedPipeWrapper.Threading
         /// <summary>
         /// Dispose internal resources
         /// </summary>
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
-            CancellationTokenSource.Cancel();
-            CancellationTokenSource.Dispose();
+            if (_isDisposed)
+            {
+                return;
+            }
 
+            _isDisposed = true;
+
+            CancellationTokenSource.Cancel();
+            
+            await Task.ConfigureAwait(false);
+
+            CancellationTokenSource.Dispose();
             Task.Dispose();
         }
 

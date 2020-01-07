@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO.Pipes;
 using System.Threading;
+using System.Threading.Tasks;
 using NamedPipeWrapper.Args;
 using NamedPipeWrapper.Factories;
-using NamedPipeWrapper.Threading;
 
 namespace NamedPipeWrapper
 {
@@ -28,7 +28,7 @@ namespace NamedPipeWrapper
     /// </summary>
     /// <typeparam name="TRead">Reference type to read from the named pipe</typeparam>
     /// <typeparam name="TWrite">Reference type to write to the named pipe</typeparam>
-    public class NamedPipeClient<TRead, TWrite> : IDisposable
+    public class NamedPipeClient<TRead, TWrite> : IAsyncDisposable
         where TRead : class
         where TWrite : class
     {
@@ -39,17 +39,12 @@ namespace NamedPipeWrapper
         /// </summary>
         public bool AutoReconnect { get; set; }
 
+        public bool IsConnected => Connection != null;
+
         private string PipeName { get; }
         private string ServerName { get; }
 
         private NamedPipeConnection<TRead, TWrite>? Connection { get; set; }
-
-        private AutoResetEvent ConnectedEvent { get; } = new AutoResetEvent(false);
-        private AutoResetEvent DisconnectedEvent { get; } = new AutoResetEvent(false);
-
-        private Worker? ListenWorker { get; set; }
-
-        private bool IsDisposed { get; set; }
 
         #region Events
 
@@ -85,7 +80,7 @@ namespace NamedPipeWrapper
 
         #endregion
 
-
+        #region Constructors
 
         /// <summary>
         /// Constructs a new <c>NamedPipeClient</c> to connect to the <see cref="NamedPipeServer{TRead, TWrite}"/> specified by <paramref name="pipeName"/>.
@@ -99,134 +94,89 @@ namespace NamedPipeWrapper
             AutoReconnect = true;
         }
 
+        #endregion
+
         /// <summary>
         /// Connects to the named pipe server asynchronously.
-        /// This method returns immediately, possibly before the connection has been established.
         /// </summary>
-        public void Start()
+        /// <exception cref="InvalidOperationException"></exception>
+        public async Task ConnectAsync(CancellationToken cancellationToken = default)
         {
-            ListenWorker = new Worker(() =>
+            if (IsConnected)
             {
-                // Get the name of the data pipe that should be used from now on by this NamedPipeClient
-                var handshake = PipeClientFactory.Connect<string, string>(PipeName, ServerName);
-                var dataPipeName = handshake.ReadObject();
-                handshake.Dispose();
+                throw new InvalidOperationException("Already connected");
+            }
 
-                if (dataPipeName == null)
-                {
-                    throw new InvalidOperationException("dataPipeName is null");
-                }
+            var connectionPipeName = await GetConnectionPipeName(cancellationToken).ConfigureAwait(false);
 
-                // Connect to the actual data pipe
-                var dataPipe = PipeClientFactory.CreateAndConnectPipe(dataPipeName, ServerName);
+            // Connect to the actual data pipe
+            var dataPipe = await PipeClientFactory.CreateAndConnectAsync(connectionPipeName, ServerName, cancellationToken).ConfigureAwait(false);
 
-                // Create a Connection object for the data pipe
-                Connection = ConnectionFactory.CreateConnection<TRead, TWrite>(dataPipe);
-                Connection.Disconnected += ConnectionOnDisconnected;
-                Connection.MessageReceived += (sender, args) => OnMessageReceived(args);
-                Connection.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
-                Connection.Open();
+            // Create a Connection object for the data pipe
+            Connection = ConnectionFactory.Create<TRead, TWrite>(dataPipe);
+            Connection.Disconnected += (sender, args) => OnDisconnected(args);
+            Connection.MessageReceived += (sender, args) => OnMessageReceived(args);
+            Connection.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
+            Connection.Start();
+        }
 
-                ConnectedEvent.Set();
-            }, OnExceptionOccurred);
+        public async Task DisconnectAsync()
+        {
+            if (Connection == null) // nullable detection system is not very smart
+            {
+                return;
+            }
+
+            await Connection.DisposeAsync().ConfigureAwait(false);
+
+            Connection = null;
         }
 
         /// <summary>
         ///     Sends a message to the server over a named pipe.
         /// </summary>
-        /// <param name="message">Message to send to the server.</param>
-        public void PushMessage(TWrite message)
+        /// <param name="value">Message to send to the server.</param>
+        /// <param name="cancellationToken"></param>
+        public async Task<bool> WriteAsync(TWrite value, CancellationToken cancellationToken = default)
         {
-            Connection?.PushMessage(message);
-        }
-
-        #region Wait for connection/disconnection
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void WaitForConnection()
-        {
-            ConnectedEvent.WaitOne();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="millisecondsTimeout"></param>
-        public void WaitForConnection(int millisecondsTimeout)
-        {
-            ConnectedEvent.WaitOne(millisecondsTimeout);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="timeout"></param>
-        public void WaitForConnection(TimeSpan timeout)
-        {
-            ConnectedEvent.WaitOne(timeout);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void WaitForDisconnection()
-        {
-            DisconnectedEvent.WaitOne();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="millisecondsTimeout"></param>
-        public void WaitForDisconnection(int millisecondsTimeout)
-        {
-            DisconnectedEvent.WaitOne(millisecondsTimeout);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="timeout"></param>
-        public void WaitForDisconnection(TimeSpan timeout)
-        {
-            DisconnectedEvent.WaitOne(timeout);
-        }
-
-        #endregion
-
-        #region Private methods
-
-        private void ConnectionOnDisconnected(object sender, ConnectionEventArgs<TRead, TWrite> args)
-        {
-            OnDisconnected(args);
-
-            DisconnectedEvent.Set();
-
-            // Reconnect
-            if (AutoReconnect && !IsDisposed)
+            if (Connection == null)
             {
-                Start();
+                return false;
             }
-        }
 
-        #endregion
+            return await Connection.WriteAsync(value, cancellationToken).ConfigureAwait(false);
+        }
 
         #region IDisposable
 
         /// <summary>
         /// Dispose internal resources
         /// </summary>
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
-            IsDisposed = true;
+            if (Connection != null)
+            {
+                await Connection.DisposeAsync().ConfigureAwait(false);
 
-            ListenWorker?.Dispose();
+                Connection = null;
+            }
+        }
 
-            Connection?.Dispose();
-            ConnectedEvent.Dispose();
-            DisconnectedEvent.Dispose();
+        #endregion
+
+        #region Private methods
+
+        /// <summary>
+        /// Get the name of the data pipe that should be used from now on by this NamedPipeClient
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        /// <returns></returns>
+        private async Task<string> GetConnectionPipeName(CancellationToken cancellationToken = default)
+        {
+            using var handshake = await PipeClientFactory.ConnectAsync<string, string>(PipeName, ServerName, cancellationToken).ConfigureAwait(false);
+            var pipeName = await handshake.ReadObjectAsync(cancellationToken).ConfigureAwait(false);
+
+            return pipeName ?? throw new InvalidOperationException("Returned by server pipeName is null");
         }
 
         #endregion

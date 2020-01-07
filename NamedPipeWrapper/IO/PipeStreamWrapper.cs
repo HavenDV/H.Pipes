@@ -1,7 +1,8 @@
 ﻿using System;
-using System.IO;
 using System.IO.Pipes;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NamedPipeWrapper.IO
 {
@@ -70,29 +71,21 @@ namespace NamedPipeWrapper.IO
         /// </summary>
         /// <returns>The next object read from the pipe, or <c>null</c> if the pipe disconnected.</returns>
         /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="TRead"/> is not marked as serializable.</exception>
-        public TRead? ReadObject()
+        public async Task<TRead?> ReadObjectAsync(CancellationToken cancellationToken = default)
         {
-            return Reader.ReadObject();
+            return await Reader.ReadObjectAsync(cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Writes an object to the pipe.  This method blocks until all data is sent.
         /// </summary>
         /// <param name="obj">Object to write to the pipe</param>
+        /// <param name="cancellationToken"></param>
         /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="TRead"/> is not marked as serializable.</exception>
-        public void WriteObject(TWrite obj)
+        public async Task WriteObjectAsync(TWrite obj, CancellationToken cancellationToken = default)
         {
-            Writer.WriteObject(obj);
-        }
+            await Writer.WriteObjectAsync(obj, cancellationToken).ConfigureAwait(false);
 
-        /// <summary>
-        ///     Waits for the other end of the pipe to read all sent bytes.
-        /// </summary>
-        /// <exception cref="ObjectDisposedException">The pipe is closed.</exception>
-        /// <exception cref="NotSupportedException">The pipe does not support write operations.</exception>
-        /// <exception cref="IOException">The pipe is broken or another I/O error occurred.</exception>
-        public void WaitForPipeDrain()
-        {
             Writer.WaitForPipeDrain();
         }
 

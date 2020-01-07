@@ -6,7 +6,7 @@ namespace NamedPipeWrapper.Factories
     {
         private static int LastId { get; set; }
 
-        public static NamedPipeConnection<TRead, TWrite> CreateConnection<TRead, TWrite>(PipeStream pipeStream)
+        public static NamedPipeConnection<TRead, TWrite> Create<TRead, TWrite>(PipeStream pipeStream)
             where TRead : class
             where TWrite : class
         {

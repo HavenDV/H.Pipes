@@ -1,26 +1,40 @@
 ﻿using System.IO.Pipes;
+using System.Threading;
+using System.Threading.Tasks;
 using NamedPipeWrapper.IO;
 
 namespace NamedPipeWrapper.Factories
 {
-    internal static class PipeClientFactory
+    public static class PipeClientFactory
     {
-        public static PipeStreamWrapper<TRead, TWrite> Connect<TRead, TWrite>(string pipeName, string serverName)
+        public static async Task<PipeStreamWrapper<TRead, TWrite>> ConnectAsync<TRead, TWrite>(string pipeName, string serverName, CancellationToken cancellationToken = default)
             where TRead : class
             where TWrite : class
         {
-            return new PipeStreamWrapper<TRead, TWrite>(CreateAndConnectPipe(pipeName, serverName));
+            var pipe = await CreateAndConnectAsync(pipeName, serverName, cancellationToken).ConfigureAwait(false);
+
+            return new PipeStreamWrapper<TRead, TWrite>(pipe);
         }
 
-        public static NamedPipeClientStream CreateAndConnectPipe(string pipeName, string serverName)
+        public static async Task<NamedPipeClientStream> CreateAndConnectAsync(string pipeName, string serverName, CancellationToken cancellationToken = default)
         {
-            var pipe = CreatePipe(pipeName, serverName);
-            pipe.Connect();
+            var pipe = Create(pipeName, serverName);
 
-            return pipe;
+            try
+            {
+                await pipe.ConnectAsync(cancellationToken).ConfigureAwait(false);
+
+                return pipe;
+            }
+            catch
+            {
+                pipe.Dispose();
+
+                throw;
+            }
         }
 
-        private static NamedPipeClientStream CreatePipe(string pipeName, string serverName)
+        private static NamedPipeClientStream Create(string pipeName, string serverName)
         {
             return new NamedPipeClientStream(serverName, pipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.WriteThrough);
         }

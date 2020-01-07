@@ -155,7 +155,7 @@ namespace NamedPipeWrapper
         public static List<string> GetActivePipes()
         {
             return Directory
-                .GetFiles(@"\\.\pipe\")
+                .EnumerateFiles(@"\\.\pipe\")
                 .Select(path => path.Replace(@"\\.\pipe\", string.Empty))
                 .ToList();
         }

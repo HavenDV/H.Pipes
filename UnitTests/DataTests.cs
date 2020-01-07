@@ -1,328 +1,243 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Threading;
-using NUnit.Framework;
+using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NamedPipeWrapper.Factories;
 
 namespace NamedPipeWrapper.Tests
 {
-    [TestFixture]
-    internal class DataTests
+    [TestClass]
+    public class DataTests
     {
-        private const string PipeName = "data_test_pipe";
-
-        private NamedPipeServer<byte[]> _server;
-        private NamedPipeClient<byte[]> _client;
-
-        private string _expectedHash;
-        private string _actualHash;
-        private bool _clientDisconnected;
-
-        private DateTime _startTime;
-
-        private readonly ManualResetEvent _barrier = new ManualResetEvent(false);
-
-        #region Setup and teardown
-
-        [SetUp]
-        public void SetUp()
+        private static async Task BaseTestAsync(int numBytes, int count = 1, CancellationToken cancellationToken = default)
         {
             Trace.WriteLine("Setting up test...");
 
-            _barrier.Reset();
+            var completionSource = new TaskCompletionSource<bool>(false);
+            // ReSharper disable once AccessToModifiedClosure
+            cancellationToken.Register(() => completionSource.TrySetCanceled(cancellationToken));
 
-            _server = new NamedPipeServer<byte[]>(PipeName);
-            _client = new NamedPipeClient<byte[]>(PipeName);
+            const string pipeName = "data_test_pipe";
+            var server = new NamedPipeServer<byte[]>(pipeName);
+            var client = new NamedPipeClient<byte[]>(pipeName);
 
-            _expectedHash = null;
-            _actualHash = null;
-            _clientDisconnected = false;
+            var actualHash = (string)null;
+            var clientDisconnected = false;
 
-            _server.ClientDisconnected += ServerOnClientDisconnected;
-            _server.ClientMessage += ServerOnClientMessage;
+            server.ClientConnected += (sender, args) =>
+            {
+                Trace.WriteLine("Client connected");
+            };
+            server.ClientDisconnected += (sender, args) =>
+            {
+                Trace.WriteLine("Client disconnected");
+                clientDisconnected = true;
 
-            _server.Error += ServerOnError;
-            _client.Error += ClientOnError;
+                // ReSharper disable once AccessToModifiedClosure
+                completionSource.TrySetResult(true);
+            };
+            server.MessageReceived += (sender, args) =>
+            {
+                Trace.WriteLine($"Received {args.Message.Length} bytes from the client");
+                actualHash = Hash(args.Message);
 
-            _server.Start();
-            _client.Start();
+                // ReSharper disable once AccessToModifiedClosure
+                completionSource.TrySetResult(true);
+            };
 
-            // Give the client and server a few seconds to connect before sending data
-            Thread.Sleep(TimeSpan.FromSeconds(1));
+            server.ExceptionOccurred += (sender, args) => Trace.WriteLine(args.Exception.ToString());
+            client.ExceptionOccurred += (sender, args) => Trace.WriteLine(args.Exception.ToString());
+
+            await server.StartAsync(cancellationToken);
+            await client.ConnectAsync(cancellationToken);
 
             Trace.WriteLine("Client and server started");
             Trace.WriteLine("---");
 
-            _startTime = DateTime.Now;
-        }
+            var watcher = Stopwatch.StartNew();
 
-        private void ServerOnError(Exception exception)
-        {
-            throw new NotImplementedException();
-        }
+            for (var i = 0; i < count; i++)
+            {
+                Trace.WriteLine($"Generating {numBytes} bytes of random data...");
 
-        private void ClientOnError(Exception exception)
-        {
-            throw new NotImplementedException();
-        }
+                // Generate some random data and compute its SHA-1 hash
+                var data = new byte[numBytes];
+                new Random().NextBytes(data);
 
-        [TearDown]
-        public void TearDown()
-        {
-            Trace.WriteLine("---");
-            Trace.WriteLine("Stopping client and server...");
+                Trace.WriteLine($"Computing SHA-1 hash for {numBytes} bytes of data...");
 
-            _server.Stop();
-            _client.Stop();
+                var expectedHash = Hash(data);
 
-            _server.ClientDisconnected -= ServerOnClientDisconnected;
-            _server.ClientMessage -= ServerOnClientMessage;
+                Trace.WriteLine($"Sending {numBytes} bytes of data to the client...");
 
-            _server.Error -= ServerOnError;
-            _client.Error -= ClientOnError;
+                await client.WriteAsync(data, cancellationToken);
+
+                Trace.WriteLine($"Finished sending {numBytes} bytes of data to the client");
+
+                await completionSource.Task.ConfigureAwait(false);
+                
+                Assert.IsNotNull(actualHash, "Server should have received a zero-byte message from the client");
+                Assert.AreEqual(expectedHash, actualHash, "SHA-1 hashes for zero-byte message should match");
+                Assert.IsFalse(clientDisconnected, "Server should not disconnect the client for explicitly sending zero-length data");
+
+                Trace.WriteLine("---");
+
+                completionSource = new TaskCompletionSource<bool>(false);
+            }
+
+            Trace.WriteLine("Disposing client and server...");
+
+            await server.DisposeAsync();
+            await client.DisposeAsync();
 
             Trace.WriteLine("Client and server stopped");
-            Trace.WriteLine($"Test took {DateTime.Now - _startTime}");
+            Trace.WriteLine($"Test took {watcher.Elapsed}");
             Trace.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~");
         }
 
-        #endregion
-
-        #region Events
-
-        private void ServerOnClientDisconnected(NamedPipeConnection<byte[], byte[]> connection)
-        {
-            Trace.WriteLine("Client disconnected");
-            _clientDisconnected = true;
-            _barrier.Set();
-        }
-
-        private void ServerOnClientMessage(NamedPipeConnection<byte[], byte[]> connection, byte[] message)
-        {
-            Trace.WriteLine($"Received {message.Length} bytes from the client");
-            _actualHash = Hash(message);
-            _barrier.Set();
-        }
-
-        #endregion
-
         #region Tests
 
-        [Test]
-        public void TestEmptyMessageDoesNotDisconnectClient()
+        [TestMethod]
+        public async Task DisposeTest()
         {
-            SendMessageToServer(0);
-            _barrier.WaitOne(TimeSpan.FromSeconds(2));
-            Assert.NotNull(_actualHash, "Server should have received a zero-byte message from the client");
-            Assert.AreEqual(_expectedHash, _actualHash, "SHA-1 hashes for zero-byte message should match");
-            Assert.IsFalse(_clientDisconnected, "Server should not disconnect the client for explicitly sending zero-length data");
+            {
+                try
+                {
+                    using var source = new CancellationTokenSource(100);
+                    using var pipe = await PipeServerFactory.CreateAndWaitAsync("test", source.Token).ConfigureAwait(false);
+                }
+                catch (TaskCanceledException)
+                {
+                }
+            }
+
+            {
+                using var pipe = PipeServerFactory.Create("test");
+            }
         }
 
-        [Test]
-        public void TestMessageSize1B()
+        [TestMethod]
+        public async Task StartDisposeStart()
         {
-            const int numBytes = 1;
-            SendMessageToServer(numBytes);
-            _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
-            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-1 hashes for {numBytes} byte message should match");
-            Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
+            {
+                await using var pipe = new NamedPipeServer<string>("test");
+                await pipe.StartAsync();
+            }
+            {
+                await using var pipe = new NamedPipeServer<string>("test");
+                await pipe.StartAsync();
+            }
         }
 
-        [Test]
-        public void TestMessageSize2B()
+        [TestMethod]
+        public async Task DoubleStartWithSameName()
         {
-            const int numBytes = 2;
-            SendMessageToServer(numBytes);
-            _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
-            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-1 hashes for {numBytes} byte message should match");
-            Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
+            await using var pipe1 = new NamedPipeServer<string>("test");
+            await pipe1.StartAsync();
+            await using var pipe2 = new NamedPipeServer<string>("test");
+
+            await Assert.ThrowsExceptionAsync<IOException>(async () => await pipe2.StartAsync());
         }
 
-        [Test]
-        public void TestMessageSize3B()
+        [TestMethod]
+        public async Task StartStopStart()
         {
-            const int numBytes = 3;
-            SendMessageToServer(numBytes);
-            _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
-            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-1 hashes for {numBytes} byte message should match");
-            Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
+            await using var pipe = new NamedPipeServer<string>("test");
+            await pipe.StartAsync();
+            await pipe.StopAsync();
+            await pipe.StartAsync();
         }
 
-        [Test]
-        public void TestMessageSize9B()
+        [TestMethod]
+        public async Task TestEmptyMessageDoesNotDisconnectClient()
         {
-            const int numBytes = 9;
-            SendMessageToServer(numBytes);
-            _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
-            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-1 hashes for {numBytes} byte message should match");
-            Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
+            await BaseTestAsync(0);
         }
 
-        [Test]
-        public void TestMessageSize33B()
+        [TestMethod]
+        public async Task TestMessageSize1B()
         {
-            const int numBytes = 33;
-            SendMessageToServer(numBytes);
-            _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
-            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-1 hashes for {numBytes} byte message should match");
-            Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
+            await BaseTestAsync(1);
         }
 
-        [Test]
-        public void TestMessageSize129B()
+        [TestMethod]
+        public async Task TestMessageSize2B()
         {
-            const int numBytes = 129;
-            SendMessageToServer(numBytes);
-            _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
-            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-1 hashes for {numBytes} byte message should match");
-            Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
+            await BaseTestAsync(2);
         }
 
-        [Test]
-        public void TestMessageSize1K()
+        [TestMethod]
+        public async Task TestMessageSize3B()
         {
-            const int numBytes = 1025;
-            SendMessageToServer(numBytes);
-            _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
-            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-1 hashes for {numBytes} byte message should match");
-            Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
+            await BaseTestAsync(3);
         }
 
-        [Test]
-        public void TestMessageSize1M()
+        [TestMethod]
+        public async Task TestMessageSize9B()
         {
-            const int numBytes = 1024 * 1024 + 1;
-            SendMessageToServer(numBytes);
-            _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
-            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-1 hashes for {numBytes} byte message should match");
-            Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
+            await BaseTestAsync(9);
         }
 
-        [Test]
-        public void TestMessageSize100M()
+        [TestMethod]
+        public async Task TestMessageSize33B()
         {
-            const int numBytes = 1024 * 1024 * 100 + 1;
-            SendMessageToServer(numBytes);
-            _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
-            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-1 hashes for {numBytes} byte message should match");
-            Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
+            await BaseTestAsync(33);
         }
 
-        [Test]
-        public void TestMessageSize200M()
+        [TestMethod]
+        public async Task TestMessageSize129B()
         {
-            const int numBytes = 1024 * 1024 * 200 + 1;
-            SendMessageToServer(numBytes);
-            _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
-            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-1 hashes for {numBytes} byte message should match");
-            Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
+            await BaseTestAsync(129);
         }
 
-        [Test]
-        public void TestMessageSize300M()
+        [TestMethod]
+        public async Task TestMessageSize1K()
         {
-            const int numBytes = 1024 * 1024 * 300 + 1;
-            SendMessageToServer(numBytes);
-            _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
-            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-1 hashes for {numBytes} byte message should match");
-            Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
+            await BaseTestAsync(1025);
         }
 
-        [Test]
-        public void TestMessageSize100Mx3()
+        [TestMethod]
+        public async Task TestMessageSize1M()
         {
-            const int numBytes = 1024 * 1024 * 100 + 1;
-
-            _barrier.Reset();
-            SendMessageToServer(numBytes);
-            _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
-            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-1 hashes for {numBytes} byte message should match");
-            Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
-
-            Trace.WriteLine("...");
-
-            _barrier.Reset();
-            SendMessageToServer(numBytes);
-            _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
-            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-1 hashes for {numBytes} byte message should match");
-            Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
-
-            Trace.WriteLine("...");
-
-            _barrier.Reset();
-            SendMessageToServer(numBytes);
-            _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
-            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-1 hashes for {numBytes} byte message should match");
-            Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
+            await BaseTestAsync(1024 * 1024 + 1);
         }
 
-        [Test]
-        public void TestMessageSize300Mx3()
+        [TestMethod]
+        public async Task TestMessageSize100M()
         {
-            const int numBytes = 1024 * 1024 * 300 + 1;
+            await BaseTestAsync(1024 * 1024 * 100 + 1);
+        }
 
-            _barrier.Reset();
-            SendMessageToServer(numBytes);
-            _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
-            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-1 hashes for {numBytes} byte message should match");
-            Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
+        [TestMethod]
+        public async Task TestMessageSize200M()
+        {
+            await BaseTestAsync(1024 * 1024 * 200 + 1);
+        }
 
-            Trace.WriteLine("...");
+        [TestMethod]
+        public async Task TestMessageSize300M()
+        {
+            await BaseTestAsync(1024 * 1024 * 300 + 1);
+        }
 
-            _barrier.Reset();
-            SendMessageToServer(numBytes);
-            _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
-            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-1 hashes for {numBytes} byte message should match");
-            Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
+        [TestMethod]
+        public async Task TestMessageSize100Mx3()
+        {
+            await BaseTestAsync(1024 * 1024 * 100 + 1, 3);
+        }
 
-            Trace.WriteLine("...");
-
-            _barrier.Reset();
-            SendMessageToServer(numBytes);
-            _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
-            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-1 hashes for {numBytes} byte message should match");
-            Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
+        [TestMethod]
+        public async Task TestMessageSize300Mx3()
+        {
+            await BaseTestAsync(1024 * 1024 * 300 + 1, 3);
         }
 
         #endregion
 
         #region Helper methods
-
-        private void SendMessageToServer(int numBytes)
-        {
-            Trace.WriteLine($"Generating {numBytes} bytes of random data...");
-
-            // Generate some random data and compute its SHA-1 hash
-            var data = new byte[numBytes];
-            new Random().NextBytes(data);
-
-            Trace.WriteLine($"Computing SHA-1 hash for {numBytes} bytes of data...");
-
-            _expectedHash = Hash(data);
-
-            Trace.WriteLine($"Sending {numBytes} bytes of data to the client...");
-
-            _client.PushMessage(data);
-
-            Trace.WriteLine($"Finished sending {numBytes} bytes of data to the client");
-        }
 
         /// <summary>
         /// Computes the SHA-1 hash (lowercase) of the specified byte array.

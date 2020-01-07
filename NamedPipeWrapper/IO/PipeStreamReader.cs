@@ -4,6 +4,8 @@ using System.IO.Pipes;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NamedPipeWrapper.IO
 {
@@ -48,10 +50,10 @@ namespace NamedPipeWrapper.IO
         /// <returns>Number of bytes of data the client will be sending.</returns>
         /// <exception cref="InvalidOperationException">The pipe is disconnected, waiting to connect, or the handle has not been set.</exception>
         /// <exception cref="IOException">Any I/O error occurred.</exception>
-        private int ReadLength()
+        private async Task<int> ReadLengthAsync(CancellationToken cancellationToken = default)
         {
             var buffer = new byte[sizeof(int)];
-            var bytesRead = BaseStream.Read(buffer, 0, buffer.Length);
+            var bytesRead = await BaseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
             if (bytesRead == 0)
             {
                 IsConnected = false;
@@ -67,10 +69,10 @@ namespace NamedPipeWrapper.IO
         }
 
         /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
-        private T ReadObject(int length)
+        private async Task<T> ReadObjectAsync(int length, CancellationToken cancellationToken = default)
         {
             var data = new byte[length];
-            BaseStream.Read(data, 0, length);
+            await BaseStream.ReadAsync(data, 0, length, cancellationToken).ConfigureAwait(false);
 
             using var memoryStream = new MemoryStream(data);
 
@@ -83,13 +85,13 @@ namespace NamedPipeWrapper.IO
         /// </summary>
         /// <returns>The next object read from the pipe, or <c>null</c> if the pipe disconnected.</returns>
         /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
-        public T? ReadObject()
+        public async Task<T?> ReadObjectAsync(CancellationToken cancellationToken = default)
         {
-            var length = ReadLength();
+            var length = await ReadLengthAsync(cancellationToken).ConfigureAwait(false);
 
             return length == 0
                 ? default
-                : ReadObject(length);
+                : await ReadObjectAsync(length, cancellationToken).ConfigureAwait(false);
         }
 
         #endregion

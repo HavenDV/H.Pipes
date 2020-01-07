@@ -1,11 +1,14 @@
 ﻿using NamedPipeWrapper.IO;
-using NamedPipeWrapper.Threading;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Pipes;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using NamedPipeWrapper.Args;
 using NamedPipeWrapper.Factories;
+using NamedPipeWrapper.Utilities;
 
 namespace NamedPipeWrapper
 {
@@ -30,7 +33,7 @@ namespace NamedPipeWrapper
     /// </summary>
     /// <typeparam name="TRead">Reference type to read from the named pipe</typeparam>
     /// <typeparam name="TWrite">Reference type to write to the named pipe</typeparam>
-    public class NamedPipeServer<TRead, TWrite> : IDisposable
+    public class NamedPipeServer<TRead, TWrite> : IAsyncDisposable
         where TRead : class
         where TWrite : class
     {
@@ -41,9 +44,9 @@ namespace NamedPipeWrapper
 
         private int NextPipeId { get; set; }
 
-        private volatile bool _shouldKeepRunning;
-
         private Worker? ListenWorker { get; set; }
+
+        private volatile bool _isDisposed;
 
         #endregion
 
@@ -91,6 +94,8 @@ namespace NamedPipeWrapper
 
         #endregion
 
+        #region Constructors
+
         /// <summary>
         /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName"/>.
         /// </summary>
@@ -100,144 +105,125 @@ namespace NamedPipeWrapper
             PipeName = pipeName;
         }
 
+        #endregion
+
+        #region Public methods
+
         /// <summary>
         /// Begins listening for client connections in a separate background thread.
-        /// This method returns immediately.
+        /// This method waits when pipe will be created(or throws exception).
         /// </summary>
-        public void Start()
+        /// <exception cref="IOException"></exception>
+        public async Task StartAsync(CancellationToken cancellationToken = default)
         {
-            _shouldKeepRunning = true;
+            var source = new TaskCompletionSource<bool>();
+            cancellationToken.Register(() => source.TrySetCanceled(cancellationToken));
 
-            ListenWorker = new Worker(() =>
+            ListenWorker = new Worker(async token =>
             {
-                while (_shouldKeepRunning)
+                while (!token.IsCancellationRequested)
                 {
-                    WaitForConnection(PipeName);
+                    try
+                    {
+                        var connectionPipeName = $"{PipeName}_{++NextPipeId}";
+
+                        // Send the client the name of the data pipe to use
+                        try
+                        {
+                            using var handshakePipe = PipeServerFactory.Create(PipeName);
+
+                            source.TrySetResult(true);
+
+                            await handshakePipe.WaitForConnectionAsync(token).ConfigureAwait(false);
+
+                            using var handshakeWrapper = new PipeStreamWrapper<string, string>(handshakePipe);
+
+                            await handshakeWrapper.WriteObjectAsync(connectionPipeName, token).ConfigureAwait(false);
+                        }
+                        catch (Exception exception)
+                        {
+                            source.TrySetException(exception);
+                            throw;
+                        }
+
+                        // Wait for the client to connect to the data pipe
+                        var dataPipe = await PipeServerFactory.CreateAndWaitAsync(connectionPipeName, token).ConfigureAwait(false);
+
+                        // Add the client's connection to the list of connections
+                        var connection = ConnectionFactory.Create<TRead, TWrite>(dataPipe);
+                        connection.MessageReceived += (sender, args) => OnMessageReceived(args);
+                        connection.Disconnected += (sender, args) => OnClientDisconnected(args);
+                        connection.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
+                        connection.Start();
+
+                        Connections.Add(connection);
+
+                        OnClientConnected(new ConnectionEventArgs<TRead, TWrite>(connection));
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        throw;
+                    }
+                    // Catch the IOException that is raised if the pipe is broken or disconnected.
+                    catch (IOException)
+                    {
+                        await Task.Delay(TimeSpan.FromMilliseconds(1), token).ConfigureAwait(false);
+                    }
+                    catch (Exception exception)
+                    {
+                        OnExceptionOccurred(exception);
+                    }
                 }
             }, OnExceptionOccurred);
+
+            await source.Task;
         }
 
         /// <summary>
         /// Sends a message to all connected clients asynchronously.
         /// This method returns immediately, possibly before the message has been sent to all clients.
         /// </summary>
-        /// <param name="message"></param>
-        public void PushMessage(TWrite message)
+        /// <param name="value"></param>
+        /// <param name="predicate"></param>
+        /// <param name="cancellationToken"></param>
+        public async Task WriteAsync(TWrite value, Predicate<NamedPipeConnection<TRead, TWrite>>? predicate = null, CancellationToken cancellationToken = default)
         {
-            lock (Connections)
-            {
-                foreach (var connection in Connections)
-                {
-                    connection.PushMessage(message);
-                }
-            }
+            var tasks = Connections
+                .Where(connection => predicate == null || predicate(connection))
+                .Select(connection => connection.WriteAsync(value, cancellationToken))
+                .ToList();
+
+            await Task.WhenAll(tasks).ConfigureAwait(false);
         }
 
         /// <summary>
         /// push message to the given client.
         /// </summary>
-        /// <param name="message"></param>
+        /// <param name="value"></param>
         /// <param name="clientName"></param>
-        public void PushMessage(TWrite message, string clientName)
+        /// <param name="cancellationToken"></param>
+        public async Task WriteAsync(TWrite value, string clientName, CancellationToken cancellationToken = default)
         {
-            lock (Connections)
-            {
-                foreach (var connection in Connections.Where(connection => connection.Name == clientName))
-                {
-                    connection.PushMessage(message);
-                }
-            }
+            await WriteAsync(value, connection => connection.Name == clientName, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Closes all open client connections and stops listening for new ones.
         /// </summary>
-        public void Stop()
+        public async Task StopAsync(CancellationToken _ = default)
         {
-            _shouldKeepRunning = false;
-
-            Dispose();
-
-            // If background thread is still listening for a client to connect,
-            // initiate a dummy connection that will allow the thread to exit.
-            //dummy connection will use the local server name.
-            var dummyClient = new NamedPipeClient<TRead, TWrite>(PipeName);
-            dummyClient.Start();
-            dummyClient.WaitForConnection(TimeSpan.FromSeconds(2));
-            dummyClient.Dispose();
-            dummyClient.WaitForDisconnection(TimeSpan.FromSeconds(2));
-        }
-
-        #region Private methods
-
-        private void WaitForConnection(string pipeName)
-        {
-            NamedPipeServerStream? handshakePipe = null;
-            NamedPipeServerStream? dataPipe = null;
-            NamedPipeConnection<TRead, TWrite>? connection = null;
-
-            var connectionPipeName = GetNextConnectionPipeName(pipeName);
-
-            try
+            if (ListenWorker != null)
             {
-                // Send the client the name of the data pipe to use
-                handshakePipe = PipeServerFactory.CreateAndConnectPipe(pipeName);
-                var handshakeWrapper = new PipeStreamWrapper<string, string>(handshakePipe);
-                handshakeWrapper.WriteObject(connectionPipeName);
-                handshakeWrapper.WaitForPipeDrain();
-                handshakeWrapper.Dispose();
-
-                // Wait for the client to connect to the data pipe
-                dataPipe = PipeServerFactory.CreatePipe(connectionPipeName);
-                dataPipe.WaitForConnection();
-
-                // Add the client's connection to the list of connections
-                connection = ConnectionFactory.CreateConnection<TRead, TWrite>(dataPipe);
-                connection.MessageReceived += (sender, args) => OnMessageReceived(args);
-                connection.Disconnected += ClientOnDisconnected;
-                connection.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
-                connection.Open();
-
-                lock (Connections)
-                {
-                    Connections.Add(connection);
-                }
-
-                OnClientConnected(new ConnectionEventArgs<TRead, TWrite>(connection));
-            }
-            // Catch the IOException that is raised if the pipe is broken or disconnected.
-            catch (Exception e)
-            {
-                Console.Error.WriteLine("Named pipe is broken or disconnected: {0}", e);
-
-                handshakePipe?.Dispose();
-                dataPipe?.Dispose();
-
-                if (connection != null)
-                {
-                    ClientOnDisconnected(this, new ConnectionEventArgs<TRead, TWrite>(connection));
-                }
-            }
-        }
-
-        private void ClientOnDisconnected(object sender, ConnectionEventArgs<TRead, TWrite> args)
-        {
-            if (args.Connection == null)
-            {
-                return;
+                await ListenWorker.DisposeAsync().ConfigureAwait(false);
             }
 
-            lock (Connections)
-            {
-                Connections.Remove(args.Connection);
-            }
+            var tasks = Connections
+                .Select(connection => connection.DisposeAsync().AsTask())
+                .ToList();
 
-            OnClientDisconnected(args);
-        }
+            Connections.Clear();
 
-        private string GetNextConnectionPipeName(string pipeName)
-        {
-            return $"{pipeName}_{++NextPipeId}";
+            await Task.WhenAll(tasks).ConfigureAwait(false);
         }
 
         #endregion
@@ -247,18 +233,27 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Dispose internal resources
         /// </summary>
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
-            ListenWorker?.Dispose();
-
-            lock (Connections)
+            if (_isDisposed)
             {
-                foreach (var connection in Connections)
-                {
-                    connection.Dispose();
-                }
-                Connections.Clear();
+                return;
             }
+
+            _isDisposed = true;
+
+            if (ListenWorker != null)
+            {
+                await ListenWorker.DisposeAsync().ConfigureAwait(false);
+            }
+
+            var tasks = Connections
+                .Select(connection => connection.DisposeAsync().AsTask())
+                .ToList();
+
+            Connections.Clear();
+
+            await Task.WhenAll(tasks).ConfigureAwait(false);
         }
 
         #endregion

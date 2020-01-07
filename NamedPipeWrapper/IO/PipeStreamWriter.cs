@@ -4,6 +4,8 @@ using System.IO.Pipes;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NamedPipeWrapper.IO
 {
@@ -49,30 +51,32 @@ namespace NamedPipeWrapper.IO
             return stream.ToArray();
         }
 
-        private void WriteLength(int length)
+        private async Task WriteLengthAsync(int length, CancellationToken cancellationToken = default)
         {
             var buffer = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(length));
 
-            BaseStream.Write(buffer, 0, buffer.Length);
+            await WriteObjectAsync(buffer, cancellationToken).ConfigureAwait(false);
         }
 
-        private void WriteObject(byte[] data)
+        private async Task WriteObjectAsync(byte[] data, CancellationToken cancellationToken = default)
         {
-            BaseStream.Write(data, 0, data.Length);
+            await BaseStream.WriteAsync(data, 0, data.Length, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Writes an object to the pipe.  This method blocks until all data is sent.
         /// </summary>
         /// <param name="obj">Object to write to the pipe</param>
+        /// <param name="cancellationToken"></param>
         /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
-        public void WriteObject(T obj)
+        public async Task WriteObjectAsync(T obj, CancellationToken cancellationToken = default)
         {
             var data = Serialize(obj);
 
-            WriteLength(data.Length);
-            WriteObject(data);
-            Flush();
+            await WriteLengthAsync(data.Length, cancellationToken).ConfigureAwait(false);
+            await WriteObjectAsync(data, cancellationToken).ConfigureAwait(false);
+
+            await BaseStream.FlushAsync(cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -84,11 +88,6 @@ namespace NamedPipeWrapper.IO
         public void WaitForPipeDrain()
         {
             BaseStream.WaitForPipeDrain();
-        }
-
-        private void Flush()
-        {
-            BaseStream.Flush();
         }
 
         #endregion

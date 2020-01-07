@@ -4,12 +4,14 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using NUnit.Framework;
+using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NamedPipeWrapper.Args;
 
 namespace NamedPipeWrapper.Tests
 {
-    [TestFixture]
-    internal class SerializableTests
+    [TestClass]
+    public class SerializableTests
     {
         private const string PipeName = "data_test_pipe";
 
@@ -29,8 +31,8 @@ namespace NamedPipeWrapper.Tests
 
         #region Setup and teardown
 
-        [SetUp]
-        public void SetUp()
+        [TestInitialize]
+        public async Task SetUp()
         {
             Trace.WriteLine("Setting up test...");
 
@@ -45,16 +47,13 @@ namespace NamedPipeWrapper.Tests
             _actualData = null;
             _actualHash = 0;
 
-            _server.ClientMessage += ServerOnClientMessage;
+            _server.MessageReceived += ServerOnMessageReceived;
 
-            _server.Error += OnError;
-            _client.Error += OnError;
+            _server.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
+            _client.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
 
-            _server.Start();
-            _client.Start();
-
-            // Give the client and server a few seconds to connect before sending data
-            Thread.Sleep(TimeSpan.FromSeconds(1));
+            await _server.StartAsync();
+            await _client.ConnectAsync();
 
             Trace.WriteLine("Client and server started");
             Trace.WriteLine("---");
@@ -62,22 +61,20 @@ namespace NamedPipeWrapper.Tests
             _startTime = DateTime.Now;
         }
 
-        private void OnError(Exception exception)
+        private void OnExceptionOccurred(Exception exception)
         {
             _exceptions.Add(exception);
             _barrier.Set();
         }
 
-        [TearDown]
-        public void TearDown()
+        [TestCleanup]
+        public async Task TearDown()
         {
             Trace.WriteLine("---");
             Trace.WriteLine("Stopping client and server...");
 
-            _server.ClientMessage -= ServerOnClientMessage;
-
-            _server.Stop();
-            _client.Stop();
+            await _server.DisposeAsync();
+            await _client.DisposeAsync();
 
             Trace.WriteLine("Client and server stopped");
             Trace.WriteLine($"Test took {DateTime.Now - _startTime}");
@@ -88,11 +85,11 @@ namespace NamedPipeWrapper.Tests
 
         #region Events
 
-        private void ServerOnClientMessage(NamedPipeConnection<TestCollection, TestCollection> connection, TestCollection message)
+        private void ServerOnMessageReceived(object sender, ConnectionMessageEventArgs<TestCollection, TestCollection> args)
         {
-            Trace.WriteLine($"Received collection with {message.Count} items from the client");
-            _actualData = message;
-            _actualHash = message.GetHashCode();
+            Trace.WriteLine($"Received collection with {args.Message.Count} items from the client");
+            _actualData = args.Message;
+            _actualHash = args.Message.GetHashCode();
             _barrier.Set();
         }
 
@@ -100,8 +97,8 @@ namespace NamedPipeWrapper.Tests
 
         #region Tests
 
-        [Test]
-        public void TestCircularReferences()
+        [TestMethod]
+        public async Task TestCircularReferences()
         {
             _expectedData = new TestCollection();
             for (var i = 0; i < 10; i++)
@@ -111,13 +108,13 @@ namespace NamedPipeWrapper.Tests
             }
             _expectedHash = _expectedData.GetHashCode();
 
-            _client.PushMessage(_expectedData);
+            await _client.WriteAsync(_expectedData);
             _barrier.WaitOne(TimeSpan.FromSeconds(5));
 
             if (_exceptions.Any())
                 throw new AggregateException(_exceptions);
 
-            Assert.NotNull(_actualHash, $"Server should have received client's {_expectedData.Count} item message");
+            Assert.IsNotNull(_actualHash, $"Server should have received client's {_expectedData.Count} item message");
             Assert.AreEqual(_expectedHash, _actualHash,
                 $"Hash codes for {_expectedData.Count} item message should match");
             Assert.AreEqual(_expectedData.Count, _actualData.Count, "Collection lengths should be equal");
