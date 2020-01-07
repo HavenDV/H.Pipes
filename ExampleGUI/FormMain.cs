@@ -5,6 +5,8 @@ namespace ExampleGUI
 {
     public partial class FormMain : Form
     {
+        private const string DefaultPipeName = "named_pipe_test_server";
+
         public FormMain()
         {
             InitializeComponent();
@@ -14,7 +16,7 @@ namespace ExampleGUI
         {
             Hide();
 
-            await using var client = new FormClient();
+            await using var client = new FormClient(DefaultPipeName);
             client.ShowDialog(this);
 
             Close();
@@ -24,7 +26,7 @@ namespace ExampleGUI
         {
             Hide();
 
-            await using var server = new FormServer();
+            await using var server = new FormServer(DefaultPipeName);
             server.ShowDialog(this);
 
             Close();

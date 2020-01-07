@@ -7,10 +7,13 @@ namespace ExampleGUI
 {
     public partial class FormClient : Form, IAsyncDisposable
     {
+        private string PipeName { get; }
         private NamedPipeClient<string> Client { get; set; }
 
-        public FormClient()
+        public FormClient(string pipeName)
         {
+            PipeName = pipeName;
+
             InitializeComponent();
 
             Load += OnLoad;
@@ -18,7 +21,7 @@ namespace ExampleGUI
 
         private async void OnLoad(object sender, EventArgs eventArgs)
         {
-            Client = new NamedPipeClient<string>(Constants.PIPE_NAME);
+            Client = new NamedPipeClient<string>(PipeName);
             Client.MessageReceived += (o, args) => AddLine("MessageReceived: " + args.Message);
             Client.Disconnected += (o, args) => AddLine("Disconnected from server");
             Client.ExceptionOccurred += (o, args) => OnExceptionOccurred(args.Exception);

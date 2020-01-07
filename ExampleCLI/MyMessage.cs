@@ -3,14 +3,14 @@
 namespace ExampleCLI
 {
     [Serializable]
-    class MyMessage
+    internal class MyMessage
     {
-        public int Id;
-        public string Text;
+        public int Id { get; set; }
+        public string Text { get; set; }
 
         public override string ToString()
         {
-            return string.Format("\"{0}\" (message ID = {1})", Text, Id);
+            return $"\"{Text}\" (message ID = {Id})";
         }
     }
 }

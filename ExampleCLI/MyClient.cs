@@ -1,45 +1,73 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using NamedPipeWrapper;
+// ReSharper disable AccessToDisposedClosure
 
 namespace ExampleCLI
 {
-    class MyClient
+    internal static class MyClient
     {
-        private bool KeepRunning
+        private static void OnExceptionOccurred(Exception exception)
         {
-            get
+            Console.Error.WriteLine($"Exception: {exception}");
+        }
+
+        public static async Task RunAsync(string pipeName)
+        {
+            try
             {
-                var key = Console.ReadKey();
-                if (key.Key == ConsoleKey.Q)
-                    return false;
-                return true;
-            }
-        }
+                using var source = new CancellationTokenSource();
 
-        public MyClient(string pipeName)
-        {
-            var client = new NamedPipeClient<MyMessage>(pipeName);
-            client.ServerMessage += OnServerMessage;
-            client.Error += OnError;
-            client.Start();
-            while (KeepRunning)
+                Console.WriteLine("Running in CLIENT mode");
+                Console.WriteLine("Enter 'q' to exit");
+
+                await using var client = new NamedPipeClient<string>(pipeName);
+                client.MessageReceived += (o, args) => Console.WriteLine("MessageReceived: " + args.Message);
+                client.Disconnected += (o, args) => Console.WriteLine("Disconnected from server");
+                client.ExceptionOccurred += (o, args) => OnExceptionOccurred(args.Exception);
+
+                // Dispose is not required
+                var _ = Task.Run(async () =>
+                {
+                    while (true)
+                    {
+                        try
+                        {
+                            var message = await Console.In.ReadLineAsync().ConfigureAwait(false);
+                            if (message == "q")
+                            {
+                                source.Cancel();
+                                break;
+                            }
+
+                            await client.WriteAsync(message, source.Token);
+                        }
+                        catch (Exception exception)
+                        {
+                            OnExceptionOccurred(exception);
+                        }
+                    }
+                }, source.Token);
+
+                Console.WriteLine("Client connecting...");
+
+                await client.ConnectAsync(source.Token).ConfigureAwait(false);
+
+                Console.WriteLine("Client is connected!");
+
+                await Task.Delay(Timeout.InfiniteTimeSpan, source.Token).ConfigureAwait(false);
+            }
+            catch (TaskCanceledException)
             {
-                // Do nothing - wait for user to press 'q' key
             }
-            client.Stop();
-        }
-
-        private void OnServerMessage(NamedPipeConnection<MyMessage, MyMessage> connection, MyMessage message)
-        {
-            Console.WriteLine("Server says: {0}", message);
-        }
-
-        private void OnError(Exception exception)
-        {
-            Console.Error.WriteLine("ERROR: {0}", exception);
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                OnExceptionOccurred(exception);
+            }
         }
     }
 }

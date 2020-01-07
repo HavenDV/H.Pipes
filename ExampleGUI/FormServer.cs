@@ -8,11 +8,14 @@ namespace ExampleGUI
 {
     public sealed partial class FormServer : Form, IAsyncDisposable
     {
-        private NamedPipeServer<string> Server { get; } = new NamedPipeServer<string>(Constants.PIPE_NAME);
+        private string PipeName { get; }
+        private NamedPipeServer<string> Server { get; set; }
         private ISet<string> Clients { get; } = new HashSet<string>();
 
-        public FormServer()
+        public FormServer(string pipeName)
         {
+            PipeName = pipeName;
+
             InitializeComponent();
 
             Load += OnLoad;
@@ -20,6 +23,7 @@ namespace ExampleGUI
 
         private async void OnLoad(object sender, EventArgs eventArgs)
         {
+            Server = new NamedPipeServer<string>(PipeName);
             Server.ClientConnected += async (o, args) =>
             {
                 Clients.Add(args.Connection.Name);
