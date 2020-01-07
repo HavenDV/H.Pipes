@@ -1,13 +1,15 @@
-﻿using NamedPipeWrapper.IO;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using NamedPipeWrapper.Args;
 using NamedPipeWrapper.Factories;
+using NamedPipeWrapper.Formatters;
+using NamedPipeWrapper.IO;
 using NamedPipeWrapper.Utilities;
 
 namespace NamedPipeWrapper
@@ -15,33 +17,16 @@ namespace NamedPipeWrapper
     /// <summary>
     /// Wraps a <see cref="NamedPipeServerStream"/> and provides multiple simultaneous client connection handling.
     /// </summary>
-    /// <typeparam name="TReadWrite">Reference type to read from and write to the named pipe</typeparam>
-    public class NamedPipeServer<TReadWrite> : NamedPipeServer<TReadWrite, TReadWrite> where TReadWrite : class
-    {
-        /// <summary>
-        /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName"/>.
-        /// </summary>
-        /// <param name="pipeName">Name of the pipe to listen on</param>
-        public NamedPipeServer(string pipeName)
-            : base(pipeName)
-        {
-        }
-    }
-
-    /// <summary>
-    /// Wraps a <see cref="NamedPipeServerStream"/> and provides multiple simultaneous client connection handling.
-    /// </summary>
-    /// <typeparam name="TRead">Reference type to read from the named pipe</typeparam>
-    /// <typeparam name="TWrite">Reference type to write to the named pipe</typeparam>
-    public class NamedPipeServer<TRead, TWrite> : IAsyncDisposable
-        where TRead : class
-        where TWrite : class
+    /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
+    public class NamedPipeServer<T> : IAsyncDisposable
+        where T : class
     {
         #region Properties
 
         public string PipeName { get; }
-        public List<NamedPipeConnection<TRead, TWrite>> Connections { get; } = new List<NamedPipeConnection<TRead, TWrite>>();
-        public List<NamedPipeConnection<TRead, TWrite>> ConnectedClients => Connections.Where(connection => connection.IsConnected).ToList();
+        private IFormatter Formatter { get; }
+        public List<NamedPipeConnection<T>> Connections { get; } = new List<NamedPipeConnection<T>>();
+        public List<NamedPipeConnection<T>> ConnectedClients => Connections.Where(connection => connection.IsConnected).ToList();
 
         private int NextPipeId { get; set; }
 
@@ -56,34 +41,34 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Invoked whenever a client connects to the server.
         /// </summary>
-        public event EventHandler<ConnectionEventArgs<TRead, TWrite>>? ClientConnected;
+        public event EventHandler<ConnectionEventArgs<T>>? ClientConnected;
 
         /// <summary>
         /// Invoked whenever a client disconnects from the server.
         /// </summary>
-        public event EventHandler<ConnectionEventArgs<TRead, TWrite>>? ClientDisconnected;
+        public event EventHandler<ConnectionEventArgs<T>>? ClientDisconnected;
 
         /// <summary>
         /// Invoked whenever a client sends a message to the server.
         /// </summary>
-        public event EventHandler<ConnectionMessageEventArgs<TRead, TWrite>>? MessageReceived;
+        public event EventHandler<ConnectionMessageEventArgs<T>>? MessageReceived;
 
         /// <summary>
         /// Invoked whenever an exception is thrown during a read or write operation.
         /// </summary>
         public event EventHandler<ExceptionEventArgs>? ExceptionOccurred;
 
-        private void OnClientConnected(ConnectionEventArgs<TRead, TWrite> args)
+        private void OnClientConnected(ConnectionEventArgs<T> args)
         {
             ClientConnected?.Invoke(this, args);
         }
 
-        private void OnClientDisconnected(ConnectionEventArgs<TRead, TWrite> args)
+        private void OnClientDisconnected(ConnectionEventArgs<T> args)
         {
             ClientDisconnected?.Invoke(this, args);
         }
 
-        private void OnMessageReceived(ConnectionMessageEventArgs<TRead, TWrite> args)
+        private void OnMessageReceived(ConnectionMessageEventArgs<T> args)
         {
             MessageReceived?.Invoke(this, args);
         }
@@ -101,9 +86,11 @@ namespace NamedPipeWrapper
         /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName"/>.
         /// </summary>
         /// <param name="pipeName">Name of the pipe to listen on</param>
-        public NamedPipeServer(string pipeName)
+        /// <param name="formatter">Default formatter - <see cref="BinaryFormatter"/></param>
+        public NamedPipeServer(string pipeName, IFormatter? formatter = default)
         {
             PipeName = pipeName;
+            Formatter = formatter ?? new BinaryFormatter();
         }
 
         #endregion
@@ -137,9 +124,9 @@ namespace NamedPipeWrapper
 
                             await handshakePipe.WaitForConnectionAsync(token).ConfigureAwait(false);
 
-                            using var handshakeWrapper = new PipeStreamWrapper<string, string>(handshakePipe);
+                            using var handshakeWrapper = new PipeStreamWrapper(handshakePipe);
 
-                            await handshakeWrapper.WriteObjectAsync(connectionPipeName, token).ConfigureAwait(false);
+                            await handshakeWrapper.WriteAsync(Encoding.UTF8.GetBytes(connectionPipeName), token).ConfigureAwait(false);
                         }
                         catch (Exception exception)
                         {
@@ -151,7 +138,7 @@ namespace NamedPipeWrapper
                         var dataPipe = await PipeServerFactory.CreateAndWaitAsync(connectionPipeName, token).ConfigureAwait(false);
 
                         // Add the client's connection to the list of connections
-                        var connection = ConnectionFactory.Create<TRead, TWrite>(dataPipe);
+                        var connection = ConnectionFactory.Create<T>(dataPipe, Formatter);
                         connection.MessageReceived += (sender, args) => OnMessageReceived(args);
                         connection.Disconnected += (sender, args) => OnClientDisconnected(args);
                         connection.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
@@ -159,7 +146,7 @@ namespace NamedPipeWrapper
 
                         Connections.Add(connection);
 
-                        OnClientConnected(new ConnectionEventArgs<TRead, TWrite>(connection));
+                        OnClientConnected(new ConnectionEventArgs<T>(connection));
                     }
                     catch (TaskCanceledException)
                     {
@@ -187,7 +174,7 @@ namespace NamedPipeWrapper
         /// <param name="value"></param>
         /// <param name="predicate"></param>
         /// <param name="cancellationToken"></param>
-        public async Task WriteAsync(TWrite value, Predicate<NamedPipeConnection<TRead, TWrite>>? predicate = null, CancellationToken cancellationToken = default)
+        public async Task WriteAsync(T value, Predicate<NamedPipeConnection<T>>? predicate = null, CancellationToken cancellationToken = default)
         {
             var tasks = Connections
                 .Where(connection => connection.IsConnected && (predicate == null || predicate(connection)))
@@ -203,7 +190,7 @@ namespace NamedPipeWrapper
         /// <param name="value"></param>
         /// <param name="clientName"></param>
         /// <param name="cancellationToken"></param>
-        public async Task WriteAsync(TWrite value, string clientName, CancellationToken cancellationToken = default)
+        public async Task WriteAsync(T value, string clientName, CancellationToken cancellationToken = default)
         {
             await WriteAsync(value, connection => connection.Name == clientName, cancellationToken).ConfigureAwait(false);
         }

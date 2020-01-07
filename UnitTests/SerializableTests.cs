@@ -85,7 +85,7 @@ namespace NamedPipeWrapper.Tests
 
         #region Events
 
-        private void ServerOnMessageReceived(object sender, ConnectionMessageEventArgs<TestCollection, TestCollection> args)
+        private void ServerOnMessageReceived(object sender, ConnectionMessageEventArgs<TestCollection> args)
         {
             Trace.WriteLine($"Received collection with {args.Message.Count} items from the client");
             _actualData = args.Message;

@@ -1,4 +1,5 @@
 ﻿using System.IO.Pipes;
+using NamedPipeWrapper.Formatters;
 
 namespace NamedPipeWrapper.Factories
 {
@@ -6,11 +7,10 @@ namespace NamedPipeWrapper.Factories
     {
         private static int LastId { get; set; }
 
-        public static NamedPipeConnection<TRead, TWrite> Create<TRead, TWrite>(PipeStream pipeStream)
-            where TRead : class
-            where TWrite : class
+        public static NamedPipeConnection<T> Create<T>(PipeStream pipeStream, IFormatter formatter)
+            where T : class
         {
-            return new NamedPipeConnection<TRead, TWrite>(++LastId, "Client " + LastId, pipeStream);
+            return new NamedPipeConnection<T>(++LastId, "Client " + LastId, pipeStream, formatter);
         }
     }
 }

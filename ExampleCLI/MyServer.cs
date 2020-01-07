@@ -22,7 +22,7 @@ namespace ExampleCLI
                 Console.WriteLine("Running in SERVER mode");
                 Console.WriteLine("Enter 'q' to exit");
 
-                await using var server = new NamedPipeServer<string>(pipeName);
+                await using var server = new NamedPipeServer<MyMessage>(pipeName);
                 server.ClientConnected += async (o, args) =>
                 {
                     Console.WriteLine($"Client {args.Connection.Id} is now connected!");
@@ -33,7 +33,7 @@ namespace ExampleCLI
                         {
                             Id = new Random().Next(),
                             Text = "Welcome!"
-                        }.ToString(), source.Token).ConfigureAwait(false);
+                        }, source.Token).ConfigureAwait(false);
                     }
                     catch (Exception exception)
                     {
@@ -66,7 +66,11 @@ namespace ExampleCLI
 
                             Console.WriteLine($"Sent to {server.ConnectedClients.Count} clients");
 
-                            await server.WriteAsync(message, cancellationToken: source.Token);
+                            await server.WriteAsync(new MyMessage
+                            {
+                                Id = new Random().Next(),
+                                Text = message,
+                            }, cancellationToken: source.Token);
                         }
                         catch (Exception exception)
                         {

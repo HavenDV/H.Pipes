@@ -4,6 +4,7 @@ using NamedPipeWrapper.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using NamedPipeWrapper.Args;
+using NamedPipeWrapper.Formatters;
 using NamedPipeWrapper.Utilities;
 
 namespace NamedPipeWrapper
@@ -11,11 +12,9 @@ namespace NamedPipeWrapper
     /// <summary>
     /// Represents a connection between a named pipe client and server.
     /// </summary>
-    /// <typeparam name="TRead">Reference type to read from the named pipe</typeparam>
-    /// <typeparam name="TWrite">Reference type to write to the named pipe</typeparam>
-    public sealed class NamedPipeConnection<TRead, TWrite> : IAsyncDisposable
-        where TRead : class
-        where TWrite : class
+    /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
+    public sealed class NamedPipeConnection<T> : IAsyncDisposable
+        where T : class
     {
         #region Properties
 
@@ -36,7 +35,8 @@ namespace NamedPipeWrapper
 
         public bool IsStarted => ReadWorker != null;
 
-        private PipeStreamWrapper<TRead, TWrite> PipeStreamWrapper { get; }
+        private IFormatter Formatter { get; }
+        private PipeStreamWrapper PipeStreamWrapper { get; }
         private Worker? ReadWorker { get; set; }
 
         #endregion
@@ -46,42 +46,43 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Invoked when the named pipe connection terminates.
         /// </summary>
-        public event EventHandler<ConnectionEventArgs<TRead, TWrite>>? Disconnected;
+        public event EventHandler<ConnectionEventArgs<T>>? Disconnected;
 
         /// <summary>
         /// Invoked whenever a message is received from the other end of the pipe.
         /// </summary>
-        public event EventHandler<ConnectionMessageEventArgs<TRead, TWrite>>? MessageReceived;
+        public event EventHandler<ConnectionMessageEventArgs<T>>? MessageReceived;
 
         /// <summary>
         /// Invoked when an exception is thrown during any read/write operation over the named pipe.
         /// </summary>
-        public event EventHandler<ConnectionExceptionEventArgs<TRead, TWrite>>? ExceptionOccurred;
+        public event EventHandler<ConnectionExceptionEventArgs<T>>? ExceptionOccurred;
 
         private void OnDisconnected()
         {
-            Disconnected?.Invoke(this, new ConnectionEventArgs<TRead, TWrite>(this));
+            Disconnected?.Invoke(this, new ConnectionEventArgs<T>(this));
         }
 
-        private void OnMessageReceived(TRead message)
+        private void OnMessageReceived(T message)
         {
-            MessageReceived?.Invoke(this, new ConnectionMessageEventArgs<TRead, TWrite>(this, message));
+            MessageReceived?.Invoke(this, new ConnectionMessageEventArgs<T>(this, message));
         }
 
         private void OnExceptionOccurred(Exception exception)
         {
-            ExceptionOccurred?.Invoke(this, new ConnectionExceptionEventArgs<TRead, TWrite>(this, exception));
+            ExceptionOccurred?.Invoke(this, new ConnectionExceptionEventArgs<T>(this, exception));
         }
 
         #endregion
 
         #region Constructors
 
-        internal NamedPipeConnection(int id, string name, PipeStream stream)
+        internal NamedPipeConnection(int id, string name, PipeStream stream, IFormatter formatter)
         {
             Id = id;
             Name = name;
-            PipeStreamWrapper = new PipeStreamWrapper<TRead, TWrite>(stream);
+            PipeStreamWrapper = new PipeStreamWrapper(stream);
+            Formatter = formatter;
         }
 
         #endregion
@@ -105,11 +106,13 @@ namespace NamedPipeWrapper
                 {
                     try
                     {
-                        var obj = await PipeStreamWrapper.ReadObjectAsync(cancellationToken).ConfigureAwait(false);
-                        if (obj == null)
+                        var bytes = await PipeStreamWrapper.ReadAsync(cancellationToken).ConfigureAwait(false);
+                        if (bytes == null)
                         {
                             break;
                         }
+
+                        var obj = Formatter.Deserialize<T>(bytes);
 
                         OnMessageReceived(obj);
                     }
@@ -132,14 +135,16 @@ namespace NamedPipeWrapper
         /// </summary>
         /// <param name="value"></param>
         /// <param name="cancellationToken"></param>
-        public async Task WriteAsync(TWrite value, CancellationToken cancellationToken = default)
+        public async Task WriteAsync(T value, CancellationToken cancellationToken = default)
         {
             if (!IsConnected || !PipeStreamWrapper.CanWrite)
             {
                 throw new InvalidOperationException("Client is not connected");
             }
 
-            await PipeStreamWrapper.WriteObjectAsync(value, cancellationToken).ConfigureAwait(false);
+            var bytes = Formatter.Serialize(value);
+
+            await PipeStreamWrapper.WriteAsync(bytes, cancellationToken).ConfigureAwait(false);
         }
 
         #endregion

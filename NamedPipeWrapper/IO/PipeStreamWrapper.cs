@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO.Pipes;
-using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,11 +8,7 @@ namespace NamedPipeWrapper.IO
     /// <summary>
     /// Wraps a <see cref="PipeStream"/> object to read and write .NET CLR objects.
     /// </summary>
-    /// <typeparam name="TRead">Reference type to <b>read</b> from the pipe</typeparam>
-    /// <typeparam name="TWrite">Reference type to <b>write</b> to the pipe</typeparam>
-    public sealed class PipeStreamWrapper<TRead, TWrite> : IDisposable
-        where TRead : class
-        where TWrite : class
+    public sealed class PipeStreamWrapper : IDisposable
     {
         #region Properties
 
@@ -42,8 +37,8 @@ namespace NamedPipeWrapper.IO
         public bool CanWrite => BaseStream.CanWrite;
 
         private PipeStream BaseStream { get; }
-        private PipeStreamReader<TRead> Reader { get; }
-        private PipeStreamWriter<TWrite> Writer { get; }
+        private PipeStreamReader Reader { get; }
+        private PipeStreamWriter Writer { get; }
 
         #endregion
 
@@ -53,12 +48,13 @@ namespace NamedPipeWrapper.IO
         /// Constructs a new <c>PipeStreamWrapper</c> object that reads from and writes to the given <paramref name="stream"/>.
         /// </summary>
         /// <param name="stream">Stream to read from and write to</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public PipeStreamWrapper(PipeStream stream)
         {
             BaseStream = stream ?? throw new ArgumentNullException(nameof(stream));
 
-            Reader = new PipeStreamReader<TRead>(BaseStream);
-            Writer = new PipeStreamWriter<TWrite>(BaseStream);
+            Reader = new PipeStreamReader(BaseStream);
+            Writer = new PipeStreamWriter(BaseStream);
         }
 
         #endregion
@@ -66,25 +62,22 @@ namespace NamedPipeWrapper.IO
         #region Public methods
 
         /// <summary>
-        /// Reads the next object from the pipe.  This method blocks until an object is sent
-        /// or the pipe is disconnected.
+        /// Reads the next object from the pipe. 
         /// </summary>
         /// <returns>The next object read from the pipe, or <c>null</c> if the pipe disconnected.</returns>
-        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="TRead"/> is not marked as serializable.</exception>
-        public async Task<TRead?> ReadObjectAsync(CancellationToken cancellationToken = default)
+        public async Task<byte[]?> ReadAsync(CancellationToken cancellationToken = default)
         {
-            return await Reader.ReadObjectAsync(cancellationToken).ConfigureAwait(false);
+            return await Reader.ReadAsync(cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Writes an object to the pipe.  This method blocks until all data is sent.
         /// </summary>
-        /// <param name="obj">Object to write to the pipe</param>
+        /// <param name="buffer">Object to write to the pipe</param>
         /// <param name="cancellationToken"></param>
-        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="TRead"/> is not marked as serializable.</exception>
-        public async Task WriteObjectAsync(TWrite obj, CancellationToken cancellationToken = default)
+        public async Task WriteAsync(byte[] buffer, CancellationToken cancellationToken = default)
         {
-            await Writer.WriteObjectAsync(obj, cancellationToken).ConfigureAwait(false);
+            await Writer.WriteAsync(buffer, cancellationToken).ConfigureAwait(false);
 
             Writer.WaitForPipeDrain();
         }

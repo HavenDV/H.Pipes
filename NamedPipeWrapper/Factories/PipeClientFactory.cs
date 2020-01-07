@@ -7,13 +7,11 @@ namespace NamedPipeWrapper.Factories
 {
     public static class PipeClientFactory
     {
-        public static async Task<PipeStreamWrapper<TRead, TWrite>> ConnectAsync<TRead, TWrite>(string pipeName, string serverName, CancellationToken cancellationToken = default)
-            where TRead : class
-            where TWrite : class
+        public static async Task<PipeStreamWrapper> ConnectAsync(string pipeName, string serverName, CancellationToken cancellationToken = default)
         {
             var pipe = await CreateAndConnectAsync(pipeName, serverName, cancellationToken).ConfigureAwait(false);
 
-            return new PipeStreamWrapper<TRead, TWrite>(pipe);
+            return new PipeStreamWrapper(pipe);
         }
 
         public static async Task<NamedPipeClientStream> CreateAndConnectAsync(string pipeName, string serverName, CancellationToken cancellationToken = default)

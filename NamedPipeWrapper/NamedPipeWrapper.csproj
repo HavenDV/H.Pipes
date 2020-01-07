@@ -41,7 +41,6 @@ Requires .NET Standard 2.0</Description>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="1.1.0" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
   
 </Project>

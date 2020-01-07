@@ -2,19 +2,15 @@ using System;
 using System.IO;
 using System.IO.Pipes;
 using System.Net;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace NamedPipeWrapper.IO
 {
     /// <summary>
-    /// Wraps a <see cref="PipeStream"/> object and writes to it.  Serializes .NET CLR objects specified by <typeparamref name="T"/>
-    /// into binary form and sends them over the named pipe for a <see cref="PipeStreamWriter{T}"/> to read and deserialize.
+    /// Wraps a <see cref="PipeStream"/> object and writes to it.
     /// </summary>
-    /// <typeparam name="T">Reference type to serialize</typeparam>
-    public sealed class PipeStreamWriter<T> : IDisposable where T : class
+    public sealed class PipeStreamWriter : IDisposable
     {
         #region Properties
 
@@ -22,8 +18,6 @@ namespace NamedPipeWrapper.IO
         /// Gets the underlying <c>PipeStream</c> object.
         /// </summary>
         private PipeStream BaseStream { get; }
-
-        private BinaryFormatter BinaryFormatter { get; } = new BinaryFormatter();
 
         #endregion
 
@@ -42,39 +36,23 @@ namespace NamedPipeWrapper.IO
 
         #region Private stream writers
 
-        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
-        private byte[] Serialize(T obj)
-        {
-            using var stream = new MemoryStream();
-            BinaryFormatter.Serialize(stream, obj);
-
-            return stream.ToArray();
-        }
-
         private async Task WriteLengthAsync(int length, CancellationToken cancellationToken = default)
         {
             var buffer = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(length));
 
-            await WriteObjectAsync(buffer, cancellationToken).ConfigureAwait(false);
-        }
-
-        private async Task WriteObjectAsync(byte[] data, CancellationToken cancellationToken = default)
-        {
-            await BaseStream.WriteAsync(data, 0, data.Length, cancellationToken).ConfigureAwait(false);
+            await BaseStream.WriteAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Writes an object to the pipe.  This method blocks until all data is sent.
+        /// Writes an object to the pipe.
         /// </summary>
-        /// <param name="obj">Object to write to the pipe</param>
+        /// <param name="buffer">Object to write to the pipe</param>
         /// <param name="cancellationToken"></param>
-        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
-        public async Task WriteObjectAsync(T obj, CancellationToken cancellationToken = default)
+        public async Task WriteAsync(byte[] buffer, CancellationToken cancellationToken = default)
         {
-            var data = Serialize(obj);
+            await WriteLengthAsync(buffer.Length, cancellationToken).ConfigureAwait(false);
 
-            await WriteLengthAsync(data.Length, cancellationToken).ConfigureAwait(false);
-            await WriteObjectAsync(data, cancellationToken).ConfigureAwait(false);
+            await BaseStream.WriteAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
 
             await BaseStream.FlushAsync(cancellationToken).ConfigureAwait(false);
         }

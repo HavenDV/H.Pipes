@@ -5,23 +5,21 @@ namespace NamedPipeWrapper.Args
     /// <summary>
     /// Handles messages received from a named pipe.
     /// </summary>
-    /// <typeparam name="TRead">Reference type</typeparam>
-    /// <typeparam name="TWrite">Reference type</typeparam>
-    public class ConnectionMessageEventArgs<TRead, TWrite> : ConnectionEventArgs<TRead, TWrite>
-        where TRead : class
-        where TWrite : class
+    /// <typeparam name="T">Reference type</typeparam>
+    public class ConnectionMessageEventArgs<T> : ConnectionEventArgs<T> 
+        where T : class
     {
         /// <summary>
         /// Message sent by the other end of the pipe
         /// </summary>
-        public TRead Message { get; }
+        public T Message { get; }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="message"></param>
-        public ConnectionMessageEventArgs(NamedPipeConnection<TRead, TWrite> connection, TRead message) : base(connection)
+        public ConnectionMessageEventArgs(NamedPipeConnection<T> connection, T message) : base(connection)
         {
             Message = message ?? throw new ArgumentNullException(nameof(message));
         }

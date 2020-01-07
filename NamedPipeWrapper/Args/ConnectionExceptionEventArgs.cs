@@ -5,11 +5,9 @@ namespace NamedPipeWrapper.Args
     /// <summary>
     /// Handles exceptions thrown during read/write operations.
     /// </summary>
-    /// <typeparam name="TRead">Reference type</typeparam>
-    /// <typeparam name="TWrite">Reference type</typeparam>
-    public class ConnectionExceptionEventArgs<TRead, TWrite> : ConnectionEventArgs<TRead, TWrite>
-        where TRead : class
-        where TWrite : class
+    /// <typeparam name="T">Reference type</typeparam>
+    public class ConnectionExceptionEventArgs<T> : ConnectionEventArgs<T> 
+        where T : class
     {
         /// <summary>
         /// The exception that was thrown
@@ -21,7 +19,7 @@ namespace NamedPipeWrapper.Args
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="exception"></param>
-        public ConnectionExceptionEventArgs(NamedPipeConnection<TRead, TWrite> connection, Exception exception) : base(connection)
+        public ConnectionExceptionEventArgs(NamedPipeConnection<T> connection, Exception exception) : base(connection)
         {
             Exception = exception ?? throw new ArgumentNullException(nameof(exception));
         }
