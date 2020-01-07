@@ -41,7 +41,17 @@ jobs:
     - name: Run tests
       run: dotnet test --configuration Release --nologo
       
-    - name: Try Publish(if the version has changed)
+    - name: Try Publish(if the version has changed) H.Pipes
       if: runner.os == 'Windows' &&
           matrix.dotnet == '3.1.100'
-      run: dotnet nuget push NamedPipeWrapper\bin\Release\NamedPipeWrapper.NetStandard.*.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json; exit 0
+      run: dotnet nuget push H.Pipes\bin\Release\H.Pipes.*.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json; exit 0
+      
+    - name: Try Publish(if the version has changed) H.Pipes.Json
+      if: runner.os == 'Windows' &&
+          matrix.dotnet == '3.1.100'
+      run: dotnet nuget push H.Pipes.Json\bin\Release\H.Pipes.Json.*.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json; exit 0
+      
+    - name: Try Publish(if the version has changed) H.Pipes.Wire
+      if: runner.os == 'Windows' &&
+          matrix.dotnet == '3.1.100'
+      run: dotnet nuget push H.Pipes.Wire\bin\Release\H.Pipes.Wire.*.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json; exit 0
