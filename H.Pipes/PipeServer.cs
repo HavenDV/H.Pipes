@@ -154,7 +154,7 @@ namespace H.Pipes
 
                             await handshakePipe.WaitForConnectionAsync(token).ConfigureAwait(false);
 
-                            using var handshakeWrapper = new PipeStreamWrapper(handshakePipe);
+                            await using var handshakeWrapper = new PipeStreamWrapper(handshakePipe);
 
                             await handshakeWrapper.WriteAsync(Encoding.UTF8.GetBytes(connectionPipeName), token)
                                 .ConfigureAwait(false);

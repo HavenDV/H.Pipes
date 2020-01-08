@@ -10,7 +10,7 @@ namespace H.Pipes.IO
     /// <summary>
     /// Wraps a <see cref="PipeStream"/> object and reads from it.
     /// </summary>
-    public sealed class PipeStreamReader : IDisposable
+    public sealed class PipeStreamReader : IAsyncDisposable
     {
         #region Properties
 
@@ -92,9 +92,15 @@ namespace H.Pipes.IO
         /// <summary>
         /// Dispose internal <see cref="PipeStream"/>
         /// </summary>
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
+#if NETSTANDARD2_0
             BaseStream.Dispose();
+
+            await Task.Delay(0).ConfigureAwait(false);
+#else
+            await BaseStream.DisposeAsync().ConfigureAwait(false);
+#endif
         }
 
         #endregion

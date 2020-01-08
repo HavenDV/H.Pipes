@@ -8,7 +8,7 @@ namespace H.Pipes.IO
     /// <summary>
     /// Wraps a <see cref="PipeStream"/> object to read and write .NET CLR objects.
     /// </summary>
-    public sealed class PipeStreamWrapper : IDisposable
+    public sealed class PipeStreamWrapper : IAsyncDisposable
     {
         #region Properties
 
@@ -89,13 +89,17 @@ namespace H.Pipes.IO
         /// <summary>
         /// Dispose internal <see cref="PipeStream"/>
         /// </summary>
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
+#if NETSTANDARD2_0
             BaseStream.Dispose();
+#else
+            await BaseStream.DisposeAsync().ConfigureAwait(false);
+#endif
 
             // This is redundant, just to avoid mistakes and follow the general logic of Dispose
-            Reader.Dispose();
-            Writer.Dispose();
+            await Reader.DisposeAsync().ConfigureAwait(false);
+            await Writer.DisposeAsync().ConfigureAwait(false);
         }
 
         #endregion

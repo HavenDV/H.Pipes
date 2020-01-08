@@ -27,7 +27,11 @@ namespace H.Pipes.Factories
             }
             catch
             {
+#if NETSTANDARD2_0
                 pipe.Dispose();
+#else
+                await pipe.DisposeAsync().ConfigureAwait(false);
+#endif
 
                 throw;
             }

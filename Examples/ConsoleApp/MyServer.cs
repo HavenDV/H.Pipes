@@ -82,7 +82,7 @@ namespace ConsoleApp
 
                 Console.WriteLine("Server starting...");
 
-                await server.StartAsync(source.Token).ConfigureAwait(false);
+                await server.StartAsync(cancellationToken: source.Token).ConfigureAwait(false);
 
                 Console.WriteLine("Server is started!");
 

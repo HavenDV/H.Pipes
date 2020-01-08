@@ -244,7 +244,7 @@ namespace H.Pipes
         /// <returns></returns>
         private async Task<string> GetConnectionPipeName(CancellationToken cancellationToken = default)
         {
-            using var handshake = await PipeClientFactory.ConnectAsync(PipeName, ServerName, cancellationToken).ConfigureAwait(false);
+            await using var handshake = await PipeClientFactory.ConnectAsync(PipeName, ServerName, cancellationToken).ConfigureAwait(false);
             var bytes = await handshake.ReadAsync(cancellationToken).ConfigureAwait(false);
             if (bytes == null)
             {

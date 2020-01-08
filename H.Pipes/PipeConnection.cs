@@ -167,7 +167,7 @@ namespace H.Pipes
                 ReadWorker = null;
             }
 
-            PipeStreamWrapper.Dispose();
+            await PipeStreamWrapper.DisposeAsync();
         }
 
         #endregion

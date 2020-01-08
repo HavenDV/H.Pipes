@@ -107,7 +107,7 @@ namespace H.Pipes.Tests
                 try
                 {
                     using var source = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
-                    using var pipe = await PipeServerFactory.CreateAndWaitAsync("test", source.Token).ConfigureAwait(false);
+                    await using var pipe = await PipeServerFactory.CreateAndWaitAsync("test", source.Token).ConfigureAwait(false);
                 }
                 catch (TaskCanceledException)
                 {
@@ -115,7 +115,7 @@ namespace H.Pipes.Tests
             }
 
             {
-                using var pipe = PipeServerFactory.Create("test");
+                await using var pipe = PipeServerFactory.Create("test");
             }
         }
 
