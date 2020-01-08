@@ -11,6 +11,7 @@ namespace H.Pipes
 {
     /// <summary>
     /// Watches the directory "\\.\pipe\" and reports on new events
+    /// <![CDATA[!!! WARNING: Use it carefully, it is very slow !!!]]>
     /// </summary>
     public sealed class PipeWatcher : IDisposable
     {
