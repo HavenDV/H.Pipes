@@ -107,7 +107,11 @@ namespace H.Pipes.Tests
                 try
                 {
                     using var source = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+#if NETCOREAPP2_0
+                    using var pipe = await PipeServerFactory.CreateAndWaitAsync("test", source.Token).ConfigureAwait(false);
+#else
                     await using var pipe = await PipeServerFactory.CreateAndWaitAsync("test", source.Token).ConfigureAwait(false);
+#endif
                 }
                 catch (TaskCanceledException)
                 {
@@ -115,7 +119,11 @@ namespace H.Pipes.Tests
             }
 
             {
+#if NETCOREAPP2_0
+                using var pipe = PipeServerFactory.Create("test");
+#else
                 await using var pipe = PipeServerFactory.Create("test");
+#endif
             }
         }
 
@@ -235,9 +243,9 @@ namespace H.Pipes.Tests
             await BaseTestAsync(1024 * 1024 * 300 + 1, 3);
         }
 
-        #endregion
+#endregion
 
-        #region Helper methods
+#region Helper methods
 
         /// <summary>
         /// Computes the SHA-1 hash (lowercase) of the specified byte array.
@@ -257,6 +265,6 @@ namespace H.Pipes.Tests
             return sb.ToString();
         }
 
-        #endregion
+#endregion
     }
 }
