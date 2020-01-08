@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.1;netstandard2.0;</TargetFrameworks>
     <LangVersion>8</LangVersion>
     <Nullable>enable</Nullable>
     <AssemblyTitle>Named Pipe Wrapper library</AssemblyTitle>
     <AssemblyDescription>A simple, easy to use, strongly-typed wrapper around .NET named pipes.</AssemblyDescription>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
     <PackageId>H.Pipes</PackageId>
@@ -24,6 +24,7 @@ Requires .NET Standard 2.0</Description>
     <PackageLicenseFile></PackageLicenseFile>
     <PackageProjectUrl>https://github.com/HavenDV/H.Pipes</PackageProjectUrl>
     <RepositoryUrl>https://github.com/HavenDV/H.Pipes</RepositoryUrl>
+    <PackageTags>pipes, named pipes, async, async named pipes, namedpipes async, namedpipes, pipes async</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
