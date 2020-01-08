@@ -22,9 +22,20 @@ namespace H.Pipes
     {
         #region Properties
 
+        /// <summary>
+        /// Name of pipe
+        /// </summary>
         public string PipeName { get; }
         private IFormatter Formatter { get; }
+
+        /// <summary>
+        /// All connections(include disconnected clients)
+        /// </summary>
         public List<PipeConnection<T>> Connections { get; } = new List<PipeConnection<T>>();
+
+        /// <summary>
+        /// Connected clients
+        /// </summary>
         public List<PipeConnection<T>> ConnectedClients => Connections.Where(connection => connection.IsConnected).ToList();
 
         private int NextPipeId { get; set; }

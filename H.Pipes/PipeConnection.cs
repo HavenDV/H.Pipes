@@ -32,6 +32,9 @@ namespace H.Pipes
         /// </summary>
         public bool IsConnected => PipeStreamWrapper.IsConnected;
 
+        /// <summary>
+        /// <see langword="true"/> if started and not disposed
+        /// </summary>
         public bool IsStarted => ReadWorker != null;
 
         private IFormatter Formatter { get; }

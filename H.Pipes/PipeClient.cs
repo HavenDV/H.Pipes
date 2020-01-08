@@ -23,10 +23,20 @@ namespace H.Pipes
         /// Default value is <see langword="true"/>.
         /// </summary>
         public bool AutoReconnect { get; set; }
+
+        /// <summary>
+        /// Interval of reconnection
+        /// </summary>
         public TimeSpan ReconnectionInterval { get; }
 
+        /// <summary>
+        /// Checks that connection is exists
+        /// </summary>
         public bool IsConnected => Connection != null;
 
+        /// <summary>
+        /// <see langword="true"/> if <see cref="ConnectAsync"/> in process
+        /// </summary>
         public bool IsConnecting
         {
             get => _isConnecting;
@@ -163,6 +173,11 @@ namespace H.Pipes
             }
         }
 
+        /// <summary>
+        /// Disconnects from server
+        /// </summary>
+        /// <param name="_"></param>
+        /// <returns></returns>
         public async Task DisconnectAsync(CancellationToken _ = default)
         {
             ReconnectionTimer.Stop();
