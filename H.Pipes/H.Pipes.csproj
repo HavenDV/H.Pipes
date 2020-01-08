@@ -18,6 +18,7 @@ Supports variable formatters, default - System.Runtime.Serialization.BinaryForma
 
 Supports large messages - up to 300 MiB.
 
+
 Requires .NET Standard 2.0</Description>
     <Authors>havendv</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
