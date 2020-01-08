@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <AssemblyTitle>Named Pipe Wrapper library</AssemblyTitle>
     <AssemblyDescription>A simple, easy to use, strongly-typed wrapper around .NET named pipes.</AssemblyDescription>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
     <PackageId>H.Pipes</PackageId>

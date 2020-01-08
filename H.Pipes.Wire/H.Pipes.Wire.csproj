@@ -3,7 +3,7 @@
     <TargetFrameworks>netstandard2.0;netstandard2.1;</TargetFrameworks>
     <LangVersion>8</LangVersion>
     <Nullable>enable</Nullable>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <PackageId>H.Pipes.Wire</PackageId>
     <Description>This package adds WireFormatter(based on Wire nuger package) to H.Pipes
 Also adds overloads of client/server classes
