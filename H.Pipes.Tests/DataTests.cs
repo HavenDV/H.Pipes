@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using H.Pipes.Factories;
+using H.Pipes.Formatters;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace H.Pipes.Tests
@@ -12,7 +13,7 @@ namespace H.Pipes.Tests
     [TestClass]
     public class DataTests
     {
-        private static async Task BaseTestAsync(int numBytes, int count = 1, CancellationToken cancellationToken = default)
+        private static async Task BaseTestAsync(int numBytes, int count = 1, IFormatter formatter = default, CancellationToken cancellationToken = default)
         {
             Trace.WriteLine("Setting up test...");
 
@@ -21,8 +22,8 @@ namespace H.Pipes.Tests
             cancellationToken.Register(() => completionSource.TrySetCanceled(cancellationToken));
 
             const string pipeName = "data_test_pipe";
-            var server = new PipeServer<byte[]>(pipeName);
-            var client = new PipeClient<byte[]>(pipeName);
+            var server = new PipeServer<byte[]>(pipeName, formatter ?? new BinaryFormatter());
+            var client = new PipeClient<byte[]>(pipeName, formatter: formatter ?? new BinaryFormatter());
 
             var actualHash = (string)null;
             var clientDisconnected = false;
@@ -193,6 +194,18 @@ namespace H.Pipes.Tests
         public async Task TestMessageSize33B()
         {
             await BaseTestAsync(33);
+        }
+
+        [TestMethod]
+        public async Task TestMessageSize1Kx3_JSON()
+        {
+            await BaseTestAsync(1025, 3, formatter: new JsonFormatter());
+        }
+
+        [TestMethod]
+        public async Task TestMessageSize1Kx3_Wire()
+        {
+            await BaseTestAsync(1025, 3, formatter: new WireFormatter());
         }
 
         [TestMethod]

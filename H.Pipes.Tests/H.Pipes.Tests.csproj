@@ -10,6 +10,8 @@
     <PackageReference Include="coverlet.collector" Version="1.0.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\H.Pipes.Json\H.Pipes.Json.csproj" />
+    <ProjectReference Include="..\H.Pipes.Wire\H.Pipes.Wire.csproj" />
     <ProjectReference Include="..\H.Pipes\H.Pipes.csproj" />
   </ItemGroup>
 </Project>
