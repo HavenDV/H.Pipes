@@ -6,8 +6,7 @@ namespace H.Pipes.Args
     /// Handles messages received from a named pipe.
     /// </summary>
     /// <typeparam name="T">Reference type</typeparam>
-    public class ConnectionMessageEventArgs<T> : ConnectionEventArgs<T> 
-        where T : class
+    public class ConnectionMessageEventArgs<T> : ConnectionEventArgs<T>
     {
         /// <summary>
         /// Message sent by the other end of the pipe

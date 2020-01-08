@@ -14,7 +14,6 @@ namespace H.Pipes
     /// </summary>
     /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
     public sealed class PipeConnection<T> : IAsyncDisposable
-        where T : class
     {
         #region Properties
 
@@ -137,6 +136,8 @@ namespace H.Pipes
         /// <param name="cancellationToken"></param>
         public async Task WriteAsync(T value, CancellationToken cancellationToken = default)
         {
+            value = value ?? throw new ArgumentNullException(nameof(value));
+
             if (!IsConnected || !PipeStreamWrapper.CanWrite)
             {
                 throw new InvalidOperationException("Client is not connected");

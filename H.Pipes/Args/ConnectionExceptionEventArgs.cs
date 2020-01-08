@@ -6,8 +6,7 @@ namespace H.Pipes.Args
     /// Handles exceptions thrown during read/write operations.
     /// </summary>
     /// <typeparam name="T">Reference type</typeparam>
-    public class ConnectionExceptionEventArgs<T> : ConnectionEventArgs<T> 
-        where T : class
+    public class ConnectionExceptionEventArgs<T> : ConnectionEventArgs<T>
     {
         /// <summary>
         /// The exception that was thrown

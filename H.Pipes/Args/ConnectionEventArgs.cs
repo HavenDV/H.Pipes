@@ -6,8 +6,7 @@ namespace H.Pipes.Args
     /// Handles new connections.
     /// </summary>
     /// <typeparam name="T">Reference type</typeparam>
-    public class ConnectionEventArgs<T> : EventArgs 
-        where T : class
+    public class ConnectionEventArgs<T> : EventArgs
     {
         /// <summary>
         /// Connection

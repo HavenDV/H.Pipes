@@ -14,7 +14,6 @@ namespace H.Pipes
     /// </summary>
     /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
     public class PipeClient<T> : IAsyncDisposable
-        where T : class
     {
         private volatile bool _isConnecting;
 
