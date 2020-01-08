@@ -1,13 +1,14 @@
 # Async Named Pipe Wrapper for .NET Standard 2.0
 
+[![NuGet](https://img.shields.io/nuget/v/H.Pipes.svg?style=flat-square)](https://www.nuget.org/packages/H.Pipes/)
+[![NuGet](https://img.shields.io/nuget/v/H.Pipes.Json.svg?style=flat-square)](https://www.nuget.org/packages/H.Pipes.Json/)
+[![NuGet](https://img.shields.io/nuget/v/H.Pipes.Wire.svg?style=flat-square)](https://www.nuget.org/packages/H.Pipes.Wire/)
+[![Language](https://img.shields.io/badge/language-C%23-blue.svg?style=flat-square)](https://github.com/HavenDV/H.Pipes/search?l=C%23&o=desc&s=&type=Code) 
+[![License](https://img.shields.io/github/license/HavenDV/H.Pipes.svg?label=License&maxAge=86400)](LICENSE.md) 
+[![Requirements](https://img.shields.io/badge/Requirements-.NET%20Standard%202.0-blue.svg)](https://github.com/dotnet/standard/blob/master/docs/versions/netstandard2.0.md)
+[![Build Status](https://github.com/HavenDV/H.Pipes/workflows/.NET%20Core/badge.svg?branch=master)](https://github.com/HavenDV/H.Pipes/actions?query=workflow%3A%22.NET+Core%22)
+
 A simple, easy to use, strongly-typed, async wrapper around .NET named pipes.
-
-# NuGet Package
-
-Available as a [NuGet package](https://www.nuget.org/packages/H.Pipes/).
-```
-Install-Package H.Pipes -Version 1.0.0
-```
 
 # Features
 
@@ -69,9 +70,4 @@ await client.WriteAsync(new MyMessage
 });
 
 await Task.Delay(Timeout.InfiniteTimeSpan);
-// ...
 ```
-
-# MIT License
-
-H.Pipes is licensed under the [MIT license](LICENSE.txt).
