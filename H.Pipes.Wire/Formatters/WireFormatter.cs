@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Wire;
 
 namespace H.Pipes.Formatters
@@ -14,13 +16,15 @@ namespace H.Pipes.Formatters
         /// Serializes using <see langword="Wire"/>
         /// </summary>
         /// <param name="obj"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public byte[] Serialize(object obj)
+        public Task<byte[]> SerializeAsync(object obj, CancellationToken cancellationToken = default)
         {
             using var stream = new MemoryStream();
             Serializer.Serialize(obj, stream);
+            var bytes = stream.ToArray();
 
-            return stream.ToArray();
+            return Task.FromResult(bytes);
         }
 
         /// <summary>
@@ -28,12 +32,14 @@ namespace H.Pipes.Formatters
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="bytes"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public T Deserialize<T>(byte[] bytes)
+        public Task<T> DeserializeAsync<T>(byte[] bytes, CancellationToken cancellationToken = default)
         {
             using var memoryStream = new MemoryStream(bytes);
+            var obj = (T)Serializer.Deserialize(memoryStream);
 
-            return (T)Serializer.Deserialize(memoryStream);
+            return Task.FromResult(obj);
         }
     }
 }

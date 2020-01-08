@@ -114,7 +114,7 @@ namespace H.Pipes
                             break;
                         }
 
-                        var obj = Formatter.Deserialize<T>(bytes);
+                        var obj = await Formatter.DeserializeAsync<T>(bytes, cancellationToken).ConfigureAwait(false);
 
                         OnMessageReceived(obj);
                     }
@@ -146,7 +146,7 @@ namespace H.Pipes
                 throw new InvalidOperationException("Client is not connected");
             }
 
-            var bytes = Formatter.Serialize(value);
+            var bytes = await Formatter.SerializeAsync(value, cancellationToken).ConfigureAwait(false);
 
             await PipeStreamWrapper.WriteAsync(bytes, cancellationToken).ConfigureAwait(false);
         }

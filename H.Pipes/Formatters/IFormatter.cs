@@ -1,4 +1,7 @@
-﻿namespace H.Pipes.Formatters
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+namespace H.Pipes.Formatters
 {
     /// <summary>
     /// A formatter interface for serialization/deserialization
@@ -9,15 +12,17 @@
         /// Serializes to bytes
         /// </summary>
         /// <param name="obj"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        byte[] Serialize(object obj);
+        Task<byte[]> SerializeAsync(object obj, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Deserializes from bytes
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="bytes"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        T Deserialize<T>(byte[] bytes);
+        Task<T> DeserializeAsync<T>(byte[] bytes, CancellationToken cancellationToken = default);
     }
 }

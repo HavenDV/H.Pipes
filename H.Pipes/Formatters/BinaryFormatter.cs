@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace H.Pipes.Formatters
 {
@@ -13,13 +15,15 @@ namespace H.Pipes.Formatters
         /// Serializes using <see cref="System.Runtime.Serialization.Formatters.Binary.BinaryFormatter"/>
         /// </summary>
         /// <param name="obj"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public byte[] Serialize(object obj)
+        public Task<byte[]> SerializeAsync(object obj, CancellationToken cancellationToken = default)
         {
             using var stream = new MemoryStream();
             InternalFormatter.Serialize(stream, obj);
+            var bytes = stream.ToArray();
 
-            return stream.ToArray();
+            return Task.FromResult(bytes);
         }
 
         /// <summary>
@@ -27,12 +31,14 @@ namespace H.Pipes.Formatters
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="bytes"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public T Deserialize<T>(byte[] bytes)
+        public Task<T> DeserializeAsync<T>(byte[] bytes, CancellationToken cancellationToken = default)
         {
             using var memoryStream = new MemoryStream(bytes);
+            var obj = (T) InternalFormatter.Deserialize(memoryStream);
 
-            return (T)InternalFormatter.Deserialize(memoryStream);
+            return Task.FromResult(obj);
         }
     }
 }
