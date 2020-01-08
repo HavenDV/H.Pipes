@@ -118,7 +118,7 @@ namespace H.Pipes
 
                         OnMessageReceived(obj);
                     }
-                    catch (TaskCanceledException)
+                    catch (OperationCanceledException)
                     {
                         throw;
                     }

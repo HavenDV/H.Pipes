@@ -25,7 +25,7 @@ namespace H.Pipes.Utilities
                 {
                     await action(CancellationTokenSource.Token).ConfigureAwait(false);
                 }
-                catch (TaskCanceledException)
+                catch (OperationCanceledException)
                 {
                 }
                 catch (Exception exception)

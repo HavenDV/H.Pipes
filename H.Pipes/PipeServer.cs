@@ -136,7 +136,8 @@ namespace H.Pipes
 
                             using var handshakeWrapper = new PipeStreamWrapper(handshakePipe);
 
-                            await handshakeWrapper.WriteAsync(Encoding.UTF8.GetBytes(connectionPipeName), token).ConfigureAwait(false);
+                            await handshakeWrapper.WriteAsync(Encoding.UTF8.GetBytes(connectionPipeName), token)
+                                .ConfigureAwait(false);
                         }
                         catch (Exception exception)
                         {
@@ -145,7 +146,8 @@ namespace H.Pipes
                         }
 
                         // Wait for the client to connect to the data pipe
-                        var dataPipe = await PipeServerFactory.CreateAndWaitAsync(connectionPipeName, token).ConfigureAwait(false);
+                        var dataPipe = await PipeServerFactory.CreateAndWaitAsync(connectionPipeName, token)
+                            .ConfigureAwait(false);
 
                         // Add the client's connection to the list of connections
                         var connection = ConnectionFactory.Create<T>(dataPipe, Formatter);
@@ -158,7 +160,7 @@ namespace H.Pipes
 
                         OnClientConnected(new ConnectionEventArgs<T>(connection));
                     }
-                    catch (TaskCanceledException)
+                    catch (OperationCanceledException)
                     {
                         throw;
                     }
