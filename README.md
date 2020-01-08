@@ -9,9 +9,9 @@ A simple, easy to use, strongly-typed, async wrapper around .NET named pipes.
 
 ## Nuget
 
-[![NuGet](https://img.shields.io/nuget/v/H.Pipes.svg?style=flat-square&label=H.Pipes)](https://www.nuget.org/packages/H.Pipes/)
-[![NuGet](https://img.shields.io/nuget/v/H.Pipes.Json.svg?style=flat-square&label=H.Pipes.Json)](https://www.nuget.org/packages/H.Pipes.Json/)
-[![NuGet](https://img.shields.io/nuget/v/H.Pipes.Wire.svg?style=flat-square&label=H.Pipes.Wire)](https://www.nuget.org/packages/H.Pipes.Wire/)
+[![NuGet](https://img.shields.io/nuget/dt/H.Pipes.svg?style=flat-square&label=H.Pipes)](https://www.nuget.org/packages/H.Pipes/)
+[![NuGet](https://img.shields.io/nuget/dt/H.Pipes.Json.svg?style=flat-square&label=H.Pipes.Json)](https://www.nuget.org/packages/H.Pipes.Json/)
+[![NuGet](https://img.shields.io/nuget/dt/H.Pipes.Wire.svg?style=flat-square&label=H.Pipes.Wire)](https://www.nuget.org/packages/H.Pipes.Wire/)
 
 ## Features
 
