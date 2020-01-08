@@ -278,18 +278,7 @@ namespace H.Pipes
 
             _isDisposed = true;
 
-            if (ListenWorker != null)
-            {
-                await ListenWorker.DisposeAsync().ConfigureAwait(false);
-            }
-
-            var tasks = Connections
-                .Select(connection => connection.DisposeAsync().AsTask())
-                .ToList();
-
-            Connections.Clear();
-
-            await Task.WhenAll(tasks).ConfigureAwait(false);
+            await StopAsync().ConfigureAwait(false);
         }
 
         #endregion
