@@ -51,7 +51,7 @@ namespace H.Pipes.Tests
             server.ExceptionOccurred += (sender, args) => Trace.WriteLine(args.Exception.ToString());
             client.ExceptionOccurred += (sender, args) => Trace.WriteLine(args.Exception.ToString());
 
-            await server.StartAsync(cancellationToken);
+            await server.StartAsync(cancellationToken: cancellationToken);
             await client.ConnectAsync(cancellationToken);
 
             Trace.WriteLine("Client and server started");
@@ -139,7 +139,7 @@ namespace H.Pipes.Tests
             await pipe1.StartAsync();
             await using var pipe2 = new PipeServer<string>("test");
 
-            await Assert.ThrowsExceptionAsync<IOException>(async () => await pipe2.StartAsync());
+            await Assert.ThrowsExceptionAsync<IOException>(async () => await pipe2.StartAsync(false));
         }
 
         [TestMethod]

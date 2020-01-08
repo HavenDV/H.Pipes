@@ -26,7 +26,11 @@ namespace H.Pipes
         /// Name of pipe
         /// </summary>
         public string PipeName { get; }
-        private IFormatter Formatter { get; }
+
+        /// <summary>
+        /// Used formatter
+        /// </summary>
+        public IFormatter Formatter { get; }
 
         /// <summary>
         /// All connections(include disconnected clients)
@@ -37,6 +41,12 @@ namespace H.Pipes
         /// Connected clients
         /// </summary>
         public List<PipeConnection<T>> ConnectedClients => Connections.Where(connection => connection.IsConnected).ToList();
+
+        /// <summary>
+        /// IsStarted
+        /// </summary>
+        public bool IsStarted => ListenWorker != null;
+
 
         private int NextPipeId { get; set; }
 
@@ -111,9 +121,15 @@ namespace H.Pipes
         /// Begins listening for client connections in a separate background thread.
         /// This method waits when pipe will be created(or throws exception).
         /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
         /// <exception cref="IOException"></exception>
-        public async Task StartAsync(CancellationToken cancellationToken = default)
+        public async Task StartAsync(bool waitFreePipe = true, CancellationToken cancellationToken = default)
         {
+            if (IsStarted)
+            {
+                throw new InvalidOperationException("Server already started");
+            }
+
             var source = new TaskCompletionSource<bool>();
             cancellationToken.Register(() => source.TrySetCanceled(cancellationToken));
 
@@ -128,7 +144,11 @@ namespace H.Pipes
                         // Send the client the name of the data pipe to use
                         try
                         {
+#if NETSTANDARD2_0
                             using var handshakePipe = PipeServerFactory.Create(PipeName);
+#else
+                            await using var handshakePipe = PipeServerFactory.Create(PipeName);
+#endif
 
                             source.TrySetResult(true);
 
@@ -141,8 +161,13 @@ namespace H.Pipes
                         }
                         catch (Exception exception)
                         {
+                            if (waitFreePipe)
+                            {
+                                throw;
+                            }
+
                             source.TrySetException(exception);
-                            throw;
+                            break;
                         }
 
                         // Wait for the client to connect to the data pipe
@@ -176,7 +201,16 @@ namespace H.Pipes
                 }
             }, OnExceptionOccurred);
 
-            await source.Task.ConfigureAwait(false);
+            try
+            {
+                await source.Task.ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                await StopAsync(cancellationToken);
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -215,6 +249,8 @@ namespace H.Pipes
             if (ListenWorker != null)
             {
                 await ListenWorker.DisposeAsync().ConfigureAwait(false);
+
+                ListenWorker = null;
             }
 
             var tasks = Connections
