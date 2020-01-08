@@ -1,8 +1,5 @@
 # Async Named Pipe Wrapper for .NET Standard 2.0
 
-[![NuGet](https://img.shields.io/nuget/v/H.Pipes.svg?style=flat-square&label=H.Pipes)](https://www.nuget.org/packages/H.Pipes/)
-[![NuGet](https://img.shields.io/nuget/v/H.Pipes.Json.svg?style=flat-square&label=H.Pipes.Json)](https://www.nuget.org/packages/H.Pipes.Json/)
-[![NuGet](https://img.shields.io/nuget/v/H.Pipes.Wire.svg?style=flat-square&label=H.Pipes.Wire)](https://www.nuget.org/packages/H.Pipes.Wire/)
 [![Language](https://img.shields.io/badge/language-C%23-blue.svg?style=flat-square)](https://github.com/HavenDV/H.Pipes/search?l=C%23&o=desc&s=&type=Code) 
 [![License](https://img.shields.io/github/license/HavenDV/H.Pipes.svg?label=License&maxAge=86400)](LICENSE.md) 
 [![Requirements](https://img.shields.io/badge/Requirements-.NET%20Standard%202.0-blue.svg)](https://github.com/dotnet/standard/blob/master/docs/versions/netstandard2.0.md)
@@ -10,18 +7,20 @@
 
 A simple, easy to use, strongly-typed, async wrapper around .NET named pipes.
 
-# Features
+## Nuget
+
+[![NuGet](https://img.shields.io/nuget/v/H.Pipes.svg?style=flat-square&label=H.Pipes)](https://www.nuget.org/packages/H.Pipes/)
+[![NuGet](https://img.shields.io/nuget/v/H.Pipes.Json.svg?style=flat-square&label=H.Pipes.Json)](https://www.nuget.org/packages/H.Pipes.Json/)
+[![NuGet](https://img.shields.io/nuget/v/H.Pipes.Wire.svg?style=flat-square&label=H.Pipes.Wire)](https://www.nuget.org/packages/H.Pipes.Wire/)
+
+## Features
 
 *  Create named pipe servers that can handle multiple client connections simultaneously.
 *  Send strongly-typed messages between clients and servers: any serializable .NET object can be sent over a pipe and will be automatically serialized/deserialized, including cyclical references and complex object graphs.
 *  Async
 *  Supports large messages - up to 300 MiB.
 
-# Requirements
-
-Requires .NET Standard 2.0.
-
-# Usage
+## Usage
 
 Server:
 
