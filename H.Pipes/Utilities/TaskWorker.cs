@@ -4,7 +4,12 @@ using System.Threading.Tasks;
 
 namespace H.Pipes.Utilities
 {
-    internal class Worker : IAsyncDisposable
+    /// <summary>
+    /// A class designed to run code using <see cref="Task"/> with <see cref="TaskCreationOptions.LongRunning"/> <br/>
+    /// and supporting automatic cancellation after <see cref="DisposeAsync"/>
+    /// <![CDATA[Version: 1.0.0.0]]>
+    /// </summary>
+    internal class TaskWorker : IAsyncDisposable
     {
         #region Properties
 
@@ -17,7 +22,7 @@ namespace H.Pipes.Utilities
 
         #region Constructors
 
-        public Worker(Func<CancellationToken, Task> action, Action<Exception>? exceptionAction = null)
+        public TaskWorker(Func<CancellationToken, Task> action, Action<Exception>? exceptionAction = null)
         {
             Task = Task.Factory.StartNew(async () =>
             {
@@ -32,7 +37,7 @@ namespace H.Pipes.Utilities
                 {
                     exceptionAction?.Invoke(exception);
                 }
-            }, CancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+            }, CancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
 
         #endregion
@@ -40,7 +45,7 @@ namespace H.Pipes.Utilities
         #region IDisposable
 
         /// <summary>
-        /// Dispose internal resources
+        /// Cancel task(if it's not completed) and dispose internal resources
         /// </summary>
         public async ValueTask DisposeAsync()
         {

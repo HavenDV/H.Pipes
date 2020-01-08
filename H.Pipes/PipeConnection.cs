@@ -39,7 +39,7 @@ namespace H.Pipes
 
         private IFormatter Formatter { get; }
         private PipeStreamWrapper PipeStreamWrapper { get; }
-        private Worker? ReadWorker { get; set; }
+        private TaskWorker? ReadWorker { get; set; }
 
         #endregion
 
@@ -102,7 +102,7 @@ namespace H.Pipes
                 throw new InvalidOperationException("Connection already started");
             }
 
-            ReadWorker = new Worker(async cancellationToken =>
+            ReadWorker = new TaskWorker(async cancellationToken =>
             {
                 while (!cancellationToken.IsCancellationRequested && IsConnected && PipeStreamWrapper.CanRead)
                 {

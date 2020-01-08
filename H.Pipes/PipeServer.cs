@@ -40,7 +40,7 @@ namespace H.Pipes
 
         private int NextPipeId { get; set; }
 
-        private Worker? ListenWorker { get; set; }
+        private TaskWorker? ListenWorker { get; set; }
 
         private volatile bool _isDisposed;
 
@@ -117,7 +117,7 @@ namespace H.Pipes
             var source = new TaskCompletionSource<bool>();
             cancellationToken.Register(() => source.TrySetCanceled(cancellationToken));
 
-            ListenWorker = new Worker(async token =>
+            ListenWorker = new TaskWorker(async token =>
             {
                 while (!token.IsCancellationRequested)
                 {
