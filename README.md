@@ -19,6 +19,10 @@ A simple, easy to use, strongly-typed, async wrapper around .NET named pipes.
 *  Send strongly-typed messages between clients and servers: any serializable .NET object can be sent over a pipe and will be automatically serialized/deserialized, including cyclical references and complex object graphs.
 *  Async
 *  Supports large messages - up to 300 MiB.
+*  Server restart automatically
+*  Automatically wait for the release of the pipe for the server, if it is already in use
+*  Automatically waiting for a pipe creating when client connecting
+*  Automatic reconnect with a given interval and at each `client.WriteAsync`, if necessary
 
 ## Usage
 
