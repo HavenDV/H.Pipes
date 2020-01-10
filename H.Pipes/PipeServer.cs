@@ -28,9 +28,14 @@ namespace H.Pipes
         public string PipeName { get; }
 
         /// <summary>
+        /// Used PipeSecurity
+        /// </summary>
+        public Action<NamedPipeServerStream>? PipeStreamInitializeAction { get; set; }
+
+        /// <summary>
         /// Used formatter
         /// </summary>
-        public IFormatter Formatter { get; }
+        public IFormatter Formatter { get; set; }
 
         /// <summary>
         /// All connections(include disconnected clients)
@@ -145,16 +150,17 @@ namespace H.Pipes
                         try
                         {
 #if NETSTANDARD2_0
-                            using var handshakePipe = PipeServerFactory.Create(PipeName);
+                            using var serverStream = PipeServerFactory.Create(PipeName);
 #else
-                            await using var handshakePipe = PipeServerFactory.Create(PipeName);
+                            await using var serverStream = PipeServerFactory.Create(PipeName);
 #endif
+                            PipeStreamInitializeAction?.Invoke(serverStream);
 
                             source.TrySetResult(true);
 
-                            await handshakePipe.WaitForConnectionAsync(token).ConfigureAwait(false);
+                            await serverStream.WaitForConnectionAsync(token).ConfigureAwait(false);
 
-                            await using var handshakeWrapper = new PipeStreamWrapper(handshakePipe);
+                            await using var handshakeWrapper = new PipeStreamWrapper(serverStream);
 
                             await handshakeWrapper.WriteAsync(Encoding.UTF8.GetBytes(connectionPipeName), token)
                                 .ConfigureAwait(false);
@@ -171,11 +177,13 @@ namespace H.Pipes
                         }
 
                         // Wait for the client to connect to the data pipe
-                        var dataPipe = await PipeServerFactory.CreateAndWaitAsync(connectionPipeName, token)
+                        var connectionStream = await PipeServerFactory.CreateAndWaitAsync(connectionPipeName, token)
                             .ConfigureAwait(false);
 
+                        PipeStreamInitializeAction?.Invoke(connectionStream);
+
                         // Add the client's connection to the list of connections
-                        var connection = ConnectionFactory.Create<T>(dataPipe, Formatter);
+                        var connection = ConnectionFactory.Create<T>(connectionStream, Formatter);
                         connection.MessageReceived += (sender, args) => OnMessageReceived(args);
                         connection.Disconnected += (sender, args) => OnClientDisconnected(args);
                         connection.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
