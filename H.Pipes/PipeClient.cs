@@ -210,6 +210,10 @@ namespace H.Pipes
             {
                 await ConnectAsync(cancellationToken);
             }
+            while (IsConnecting)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(1), cancellationToken);
+            }
             if (Connection == null) // nullable detection system is not very smart
             {
                 throw new InvalidOperationException("Client is not connected");
