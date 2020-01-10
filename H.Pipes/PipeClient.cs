@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using H.Pipes.Args;
 using H.Pipes.Factories;
-using H.Pipes.Formatters;
+using H.Formatters;
 
 namespace H.Pipes
 {

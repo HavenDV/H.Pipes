@@ -1,5 +1,5 @@
 ﻿using System.IO.Pipes;
-using H.Pipes.Formatters;
+using H.Formatters;
 
 namespace H.Pipes.Factories
 {

@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace H.Pipes.Formatters
+namespace H.Formatters
 {
     /// <summary>
     /// A formatter that uses <see cref="JsonConvert"/> inside for serialization/deserialization

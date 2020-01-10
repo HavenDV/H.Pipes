@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace H.Pipes.Formatters
+namespace H.Formatters
 {
     /// <summary>
     /// A formatter interface for serialization/deserialization

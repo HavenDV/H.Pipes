@@ -6,10 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using H.Formatters;
+using H.Pipes.IO;
 using H.Pipes.Args;
 using H.Pipes.Factories;
-using H.Pipes.Formatters;
-using H.Pipes.IO;
 using H.Pipes.Utilities;
 
 namespace H.Pipes

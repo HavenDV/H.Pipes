@@ -10,8 +10,10 @@ A simple, easy to use, strongly-typed, async wrapper around .NET named pipes.
 ## Nuget
 
 [![NuGet](https://img.shields.io/nuget/dt/H.Pipes.svg?style=flat-square&label=H.Pipes)](https://www.nuget.org/packages/H.Pipes/)
-[![NuGet](https://img.shields.io/nuget/dt/H.Pipes.Json.svg?style=flat-square&label=H.Pipes.Json)](https://www.nuget.org/packages/H.Pipes.Json/)
-[![NuGet](https://img.shields.io/nuget/dt/H.Pipes.Wire.svg?style=flat-square&label=H.Pipes.Wire)](https://www.nuget.org/packages/H.Pipes.Wire/)
+[![NuGet](https://img.shields.io/nuget/dt/H.Formatters.svg?style=flat-square&label=H.Formatters)](https://www.nuget.org/packages/H.Formatters/)
+[![NuGet](https://img.shields.io/nuget/dt/H.Formatters.BinaryFormatter.svg?style=flat-square&label=H.Formatters.BinaryFormatter)](https://www.nuget.org/packages/H.Formatters.BinaryFormatter/)
+[![NuGet](https://img.shields.io/nuget/dt/H.Formatters.Json.svg?style=flat-square&label=H.Formatters.Json)](https://www.nuget.org/packages/H.Formatters.Json/)
+[![NuGet](https://img.shields.io/nuget/dt/H.Formatters.Wire.svg?style=flat-square&label=H.Formatters.Wire)](https://www.nuget.org/packages/H.Formatters.Wire/)
 
 ## Features
 
@@ -25,7 +27,7 @@ A simple, easy to use, strongly-typed, async wrapper around .NET named pipes.
 *  Automatically waiting for a server pipe creating when client connecting
 *  Automatic reconnect with a given interval and at each `client.WriteAsync`, if necessary
 *  Supports variable formatters, default - BinaryFormatter which uses System.Runtime.Serialization.BinaryFormatter inside
-*  Also available ready formatters in separate nuget packages: H.Pipes.Json and H.Pipes.Wire
+*  Also available ready formatters in separate nuget packages: H.Formatters.Json and H.Formatters.Wire
 
 ## Usage
 
@@ -76,4 +78,16 @@ await client.WriteAsync(new MyMessage
 });
 
 await Task.Delay(Timeout.InfiniteTimeSpan);
+```
+
+## Custom Formatters
+```
+Install-Package H.Formatters.Json
+```
+
+```csharp
+using H.Formatters;
+
+await using var server = new PipeServer<MyMessage>(pipeName, formatter: new JsonFormatter());
+await using var client = new PipeClient<MyMessage>(pipeName, formatter: new JsonFormatter());
 ```

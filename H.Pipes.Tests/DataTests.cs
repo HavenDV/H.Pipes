@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using H.Pipes.Factories;
-using H.Pipes.Formatters;
+using H.Formatters;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace H.Pipes.Tests

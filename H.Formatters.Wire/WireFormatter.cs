@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Wire;
 
-namespace H.Pipes.Formatters
+namespace H.Formatters
 {
     /// <summary>
     /// A formatter that uses <see langword="Wire"/> inside for serialization/deserialization
