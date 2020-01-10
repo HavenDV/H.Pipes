@@ -10,7 +10,7 @@ namespace H.Pipes.IO
     /// <summary>
     /// Wraps a <see cref="PipeStream"/> object and writes to it.
     /// </summary>
-    public sealed class PipeStreamWriter : IAsyncDisposable
+    public sealed class PipeStreamWriter : IDisposable, IAsyncDisposable
     {
         #region Properties
 
@@ -71,6 +71,14 @@ namespace H.Pipes.IO
         #endregion
 
         #region IDisposable
+
+        /// <summary>
+        /// Dispose internal <see cref="PipeStream"/>
+        /// </summary>
+        public void Dispose()
+        {
+            BaseStream.Dispose();
+        }
 
         /// <summary>
         /// Dispose internal <see cref="PipeStream"/>

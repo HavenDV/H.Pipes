@@ -13,7 +13,7 @@ namespace H.Pipes
     /// Wraps a <see cref="NamedPipeClientStream"/>.
     /// </summary>
     /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
-    public class PipeClient<T> : IAsyncDisposable
+    public class PipeClient<T> : IDisposable, IAsyncDisposable
     {
         private volatile bool _isConnecting;
 
@@ -219,6 +219,15 @@ namespace H.Pipes
         }
 
         #region IDisposable
+
+        /// <summary>
+        /// Dispose internal resources
+        /// </summary>
+        public void Dispose()
+        {
+            Connection?.Dispose();
+            Connection = null;
+        }
 
         /// <summary>
         /// Dispose internal resources

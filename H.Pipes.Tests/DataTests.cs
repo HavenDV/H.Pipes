@@ -152,6 +152,16 @@ namespace H.Pipes.Tests
         }
 
         [TestMethod]
+        public async Task DoubleStartWithSameName_CommonDispose()
+        {
+            using var pipe1 = new PipeServer<string>("test");
+            await pipe1.StartAsync();
+            using var pipe2 = new PipeServer<string>("test");
+
+            await Assert.ThrowsExceptionAsync<IOException>(async () => await pipe2.StartAsync(false));
+        }
+
+        [TestMethod]
         public async Task StartStopStart()
         {
             await using var pipe = new PipeServer<string>("test");

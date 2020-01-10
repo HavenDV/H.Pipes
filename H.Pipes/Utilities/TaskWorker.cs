@@ -9,9 +9,9 @@ namespace H.Pipes.Utilities
     /// <summary>
     /// A class designed to run code using <see cref="Task"/> with <see cref="TaskCreationOptions.LongRunning"/> <br/>
     /// and supporting automatic cancellation after <see cref="DisposeAsync"/>
-    /// <![CDATA[Version: 1.0.0.1]]>
+    /// <![CDATA[Version: 1.0.0.2]]>
     /// </summary>
-    internal class TaskWorker : IAsyncDisposable
+    internal class TaskWorker : IDisposable, IAsyncDisposable
     {
         #region Properties
 
@@ -45,6 +45,14 @@ namespace H.Pipes.Utilities
         #endregion
 
         #region IDisposable
+
+        /// <summary>
+        /// Cancel task(if it's not completed) and dispose internal resources
+        /// </summary>
+        public void Dispose()
+        {
+            DisposeAsync().AsTask().Wait();
+        }
 
         /// <summary>
         /// Cancel task(if it's not completed) and dispose internal resources
