@@ -20,7 +20,7 @@ namespace ConsoleApp
             {
                 using var source = new CancellationTokenSource();
 
-                Console.WriteLine("Running in SERVER mode");
+                Console.WriteLine($"Running in SERVER mode. PipeName: {pipeName}");
                 Console.WriteLine("Enter 'q' to exit");
 
                 await using var server = new PipeServer<MyMessage>(pipeName);

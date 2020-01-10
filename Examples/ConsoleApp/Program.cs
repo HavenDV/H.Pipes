@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
+
+#nullable enable
 
 namespace ConsoleApp
 {
@@ -7,19 +10,29 @@ namespace ConsoleApp
     {
         private const string DefaultPipeName = "named_pipe_test_server";
 
-        private static async Task Main()
+        private static async Task Main(string[] arguments)
         {
-            Console.WriteLine("Enter mode('server' or 'client'):");
-            var mode = await Console.In.ReadLineAsync().ConfigureAwait(false);
+            string? mode;
+            string pipeName = DefaultPipeName;
+            if (arguments.Any())
+            {
+                mode = arguments.ElementAt(0);
+                pipeName = arguments.ElementAtOrDefault(1);
+            }
+            else
+            {
+                Console.WriteLine("Enter mode('server' or 'client'):");
+                mode = await Console.In.ReadLineAsync().ConfigureAwait(false);
+            }
 
             switch (mode?.ToUpperInvariant())
             {
                 case "SERVER":
-                    await MyServer.RunAsync(DefaultPipeName);
+                    await MyServer.RunAsync(pipeName);
                     break;
 
                 default:
-                    await MyClient.RunAsync(DefaultPipeName);
+                    await MyClient.RunAsync(pipeName);
                     break;
             }
         }

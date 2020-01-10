@@ -20,7 +20,7 @@ namespace ConsoleApp
             {
                 using var source = new CancellationTokenSource();
 
-                Console.WriteLine("Running in CLIENT mode");
+                Console.WriteLine($"Running in CLIENT mode. PipeName: {pipeName}");
                 Console.WriteLine("Enter 'q' to exit");
 
                 await using var client = new PipeClient<MyMessage>(pipeName);
