@@ -10,8 +10,7 @@ A simple, easy to use, strongly-typed, async wrapper around .NET named pipes.
 ## Nuget
 
 [![NuGet](https://img.shields.io/nuget/dt/H.Pipes.svg?style=flat-square&label=H.Pipes)](https://www.nuget.org/packages/H.Pipes/)
-[![NuGet](https://img.shields.io/nuget/dt/H.Formatters.svg?style=flat-square&label=H.Formatters)](https://www.nuget.org/packages/H.Formatters/)
-[![NuGet](https://img.shields.io/nuget/dt/H.Formatters.BinaryFormatter.svg?style=flat-square&label=H.Formatters.BinaryFormatter)](https://www.nuget.org/packages/H.Formatters.BinaryFormatter/)
+[![NuGet](https://img.shields.io/nuget/dt/H.Pipes.AccessControl.svg?style=flat-square&label=H.Pipes.AccessControl)](https://www.nuget.org/packages/H.Pipes.AccessControl/)
 [![NuGet](https://img.shields.io/nuget/dt/H.Formatters.Json.svg?style=flat-square&label=H.Formatters.Json)](https://www.nuget.org/packages/H.Formatters.Json/)
 [![NuGet](https://img.shields.io/nuget/dt/H.Formatters.Wire.svg?style=flat-square&label=H.Formatters.Wire)](https://www.nuget.org/packages/H.Formatters.Wire/)
 
@@ -90,4 +89,16 @@ using H.Formatters;
 
 await using var server = new PipeServer<MyMessage>(pipeName, formatter: new JsonFormatter());
 await using var client = new PipeClient<MyMessage>(pipeName, formatter: new JsonFormatter());
+```
+
+## Access Control
+```
+Install-Package H.Pipes.AccessControl
+```
+
+```csharp
+using System.IO.Pipes;
+
+await using var server = new PipeServer<string>(pipeName);
+server.AddAccessRules(new PipeAccessRule("Users", PipeAccessRights.ReadWrite, AccessControlType.Allow));
 ```
