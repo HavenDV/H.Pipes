@@ -28,7 +28,12 @@ namespace H.Pipes
         public string PipeName { get; }
 
         /// <summary>
-        /// Used PipeSecurity
+        /// CreatePipeStreamFunc
+        /// </summary>
+        public Func<string, NamedPipeServerStream>? CreatePipeStreamFunc { get; set; }
+
+        /// <summary>
+        /// PipeStreamInitializeAction
         /// </summary>
         public Action<NamedPipeServerStream>? PipeStreamInitializeAction { get; set; }
 
@@ -150,9 +155,9 @@ namespace H.Pipes
                         try
                         {
 #if NETSTANDARD2_0
-                            using var serverStream = PipeServerFactory.Create(PipeName);
+                            using var serverStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName);
 #else
-                            await using var serverStream = PipeServerFactory.Create(PipeName);
+                            await using var serverStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName);
 #endif
                             PipeStreamInitializeAction?.Invoke(serverStream);
 
@@ -177,8 +182,22 @@ namespace H.Pipes
                         }
 
                         // Wait for the client to connect to the data pipe
-                        var connectionStream = await PipeServerFactory.CreateAndWaitAsync(connectionPipeName, token)
-                            .ConfigureAwait(false);
+                        var connectionStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(connectionPipeName);
+
+                        try
+                        {
+                            await connectionStream.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
+                        }
+                        catch
+                        {
+#if NETSTANDARD2_0
+                            connectionStream.Dispose();
+#else
+                            await connectionStream.DisposeAsync().ConfigureAwait(false);
+#endif
+
+                            throw;
+                        }
 
                         PipeStreamInitializeAction?.Invoke(connectionStream);
 

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO.Pipes;
+using System.Security.AccessControl;
+using H.Pipes.Internal;
 
 namespace H.Pipes
 {
@@ -29,6 +31,26 @@ namespace H.Pipes
                 }
 
                 stream.SetAccessControl(control);
+            };
+        }
+
+        /// <summary>
+        /// Sets <see cref="PipeSecurity"/>'s for each <see cref="NamedPipeServerStream"/> that will be created by <see cref="PipeServer{T}"/>
+        /// </summary>
+        /// <param name="server"></param>
+        /// <param name="pipeSecurity"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <returns></returns>
+        public static void SetPipeSecurity<T>(this PipeServer<T> server, PipeSecurity pipeSecurity)
+        {
+            server = server ?? throw new ArgumentNullException(nameof(server));
+            pipeSecurity = pipeSecurity ?? throw new ArgumentNullException(nameof(pipeSecurity));
+
+            server.CreatePipeStreamFunc = name =>
+            {
+                var handle = NativeNamedPipeServer.CreateNamedPipeServer(name, pipeSecurity.GetSecurityDescriptorSddlForm(AccessControlSections.Access));
+
+                return new NamedPipeServerStream(PipeDirection.InOut, true, false, handle);
             };
         }
     }

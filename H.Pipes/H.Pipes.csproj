@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <AssemblyTitle>Named Pipe Wrapper library</AssemblyTitle>
     <AssemblyDescription>A simple, easy to use, strongly-typed wrapper around .NET named pipes.</AssemblyDescription>
-    <Version>1.0.6</Version>
+    <Version>1.0.6.1</Version>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
     <PackageId>H.Pipes</PackageId>
@@ -29,7 +29,8 @@
     <PackageProjectUrl>https://github.com/HavenDV/H.Pipes</PackageProjectUrl>
     <RepositoryUrl>https://github.com/HavenDV/H.Pipes</RepositoryUrl>
     <PackageTags>pipes, named pipes, async, async named pipes, namedpipes async, namedpipes, pipes async</PackageTags>
-    <PackageReleaseNotes>Added PipeServer.PipeStreamInitializeAction(for AccessControl support)</PackageReleaseNotes>
+    <PackageReleaseNotes>Added PipeServer.PipeStreamInitializeAction(for AccessControl support)
+Added alternative way to set PipeSecurity</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
