@@ -32,6 +32,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Formatters.BinaryFormatte
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Pipes.AccessControl", "H.Pipes.AccessControl\H.Pipes.AccessControl.csproj", "{207B142C-1972-4DC4-B66D-1B5B219E7992}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NamedPipeServerStream.NetFrameworkVersion", "NamedPipeServerStream.NetFrameworkVersion\NamedPipeServerStream.NetFrameworkVersion.csproj", "{2A8CC0AB-815B-4224-8F4D-96581C659537}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -74,6 +76,10 @@ Global
 		{207B142C-1972-4DC4-B66D-1B5B219E7992}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{207B142C-1972-4DC4-B66D-1B5B219E7992}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{207B142C-1972-4DC4-B66D-1B5B219E7992}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A8CC0AB-815B-4224-8F4D-96581C659537}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A8CC0AB-815B-4224-8F4D-96581C659537}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A8CC0AB-815B-4224-8F4D-96581C659537}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A8CC0AB-815B-4224-8F4D-96581C659537}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
