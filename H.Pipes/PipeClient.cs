@@ -123,6 +123,8 @@ namespace H.Pipes
                 }
                 catch (Exception exception)
                 {
+                    ReconnectionTimer.Stop();
+
                     OnExceptionOccurred(exception);
                 }
             };
@@ -151,7 +153,8 @@ namespace H.Pipes
                 var connectionPipeName = await GetConnectionPipeName(cancellationToken).ConfigureAwait(false);
 
                 // Connect to the actual data pipe
-                var dataPipe = await PipeClientFactory.CreateAndConnectAsync(connectionPipeName, ServerName, cancellationToken).ConfigureAwait(false);
+                var dataPipe = await PipeClientFactory
+                    .CreateAndConnectAsync(connectionPipeName, ServerName, cancellationToken).ConfigureAwait(false);
 
                 // Create a Connection object for the data pipe
                 Connection = ConnectionFactory.Create<T>(dataPipe, Formatter);
@@ -166,6 +169,12 @@ namespace H.Pipes
                 Connection.Start();
 
                 OnConnected(new ConnectionEventArgs<T>(Connection));
+            }
+            catch (Exception)
+            {
+                ReconnectionTimer.Stop();
+
+                throw;
             }
             finally
             {
