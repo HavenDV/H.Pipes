@@ -154,15 +154,16 @@ namespace H.Pipes.Tests
         [TestMethod]
         public async Task ClientConnectTest()
         {
-            await using var client = new PipeClient<string>("H.MainApplication");
+            using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+            await using var client = new PipeClient<string>("this_pipe_100%_is_not_exists");
 
-            await client.ConnectAsync();
+            await Assert.ThrowsExceptionAsync<OperationCanceledException>(async () => await client.ConnectAsync(cancellationTokenSource.Token));
         }
 
         [TestMethod]
         public void PipeExistsTest()
         {
-            Assert.IsTrue(PipeWatcher.IsExists("H.MainApplication"));
+            Assert.IsFalse(PipeWatcher.IsExists("this_pipe_100%_is_not_exists"));
         }
 
         [TestMethod]
