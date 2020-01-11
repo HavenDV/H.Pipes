@@ -152,6 +152,20 @@ namespace H.Pipes.Tests
         }
 
         [TestMethod]
+        public async Task ClientConnectTest()
+        {
+            await using var client = new PipeClient<string>("H.MainApplication");
+
+            await client.ConnectAsync();
+        }
+
+        [TestMethod]
+        public void PipeExistsTest()
+        {
+            Assert.IsTrue(PipeWatcher.IsExists("H.MainApplication"));
+        }
+
+        [TestMethod]
         public async Task DoubleStartWithSameName_CommonDispose()
         {
             using var pipe1 = new PipeServer<string>("test");
