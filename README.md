@@ -99,7 +99,11 @@ Install-Package H.Pipes.AccessControl
 
 ```csharp
 using System.IO.Pipes;
+using H.Pipes.AccessControl;
 
 await using var server = new PipeServer<string>(pipeName);
-server.AddAccessRules(new PipeAccessRule("Users", PipeAccessRights.ReadWrite, AccessControlType.Allow));
+var pipeSecurity = new PipeSecurity();
+pipeSecurity.AddAccessRule(new PipeAccessRule(WindowsIdentity.GetCurrent().Owner, PipeAccessRights.FullControl, AccessControlType.Allow));
+
+server.SetPipeSecurity(pipeSecurity);
 ```
