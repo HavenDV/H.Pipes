@@ -7,47 +7,26 @@ using System.Text;
 
 namespace System.IO.Pipes
 {
+    /// <summary>
+    /// Original .Net Framework <see cref="NamedPipeServerStream"/> constructors from decompiled code
+    /// </summary>
     [SecurityCritical]
     public static class NamedPipeServerStreamConstructors
     {
-        [SecurityCritical]
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true, BestFitMapping = false)]
-        internal static extern SafePipeHandle CreateNamedPipe(
-            string pipeName,
-            int openMode,
-            int pipeMode,
-            int maxInstances,
-            int outBufferSize,
-            int inBufferSize,
-            int defaultTimeout,
-            SECURITY_ATTRIBUTES securityAttributes);
-
-
-        [SecurityCritical]
-        internal static unsafe SECURITY_ATTRIBUTES GetSecAttrs(
-            HandleInheritability inheritability,
-            PipeSecurity pipeSecurity,
-            out object pinningHandle)
-        {
-            pinningHandle = (object)null;
-            SECURITY_ATTRIBUTES securityAttributes = (SECURITY_ATTRIBUTES)null;
-            if ((inheritability & HandleInheritability.Inheritable) != HandleInheritability.None || pipeSecurity != null)
-            {
-                securityAttributes = new SECURITY_ATTRIBUTES();
-                securityAttributes.nLength = Marshal.SizeOf((object)securityAttributes);
-                if ((inheritability & HandleInheritability.Inheritable) != HandleInheritability.None)
-                    securityAttributes.bInheritHandle = 1;
-                if (pipeSecurity != null)
-                {
-                    byte[] descriptorBinaryForm = pipeSecurity.GetSecurityDescriptorBinaryForm();
-                    pinningHandle = (object)GCHandle.Alloc((object)descriptorBinaryForm, GCHandleType.Pinned);
-                    fixed (byte* numPtr = descriptorBinaryForm)
-                        securityAttributes.pSecurityDescriptor = numPtr;
-                }
-            }
-            return securityAttributes;
-        }
-
+        /// <summary>
+        /// Create a new <see cref="NamedPipeServerStream"/>. All default parameters are copied from the original constructors.
+        /// </summary>
+        /// <param name="pipeName"></param>
+        /// <param name="direction"></param>
+        /// <param name="maxNumberOfServerInstances"></param>
+        /// <param name="transmissionMode"></param>
+        /// <param name="options"></param>
+        /// <param name="inBufferSize"></param>
+        /// <param name="outBufferSize"></param>
+        /// <param name="pipeSecurity"></param>
+        /// <param name="inheritability"></param>
+        /// <param name="additionalAccessRights"></param>
+        /// <returns></returns>
         [SecurityCritical]
         public static NamedPipeServerStream New(
             string pipeName,
@@ -103,6 +82,44 @@ namespace System.IO.Pipes
                             ((GCHandle)pinningHandle).Free();
                     }
             }
+        }
+
+        [SecurityCritical]
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true, BestFitMapping = false)]
+        internal static extern SafePipeHandle CreateNamedPipe(
+            string pipeName,
+            int openMode,
+            int pipeMode,
+            int maxInstances,
+            int outBufferSize,
+            int inBufferSize,
+            int defaultTimeout,
+            SECURITY_ATTRIBUTES securityAttributes);
+
+
+        [SecurityCritical]
+        internal static unsafe SECURITY_ATTRIBUTES GetSecAttrs(
+            HandleInheritability inheritability,
+            PipeSecurity pipeSecurity,
+            out object pinningHandle)
+        {
+            pinningHandle = (object)null;
+            SECURITY_ATTRIBUTES securityAttributes = (SECURITY_ATTRIBUTES)null;
+            if ((inheritability & HandleInheritability.Inheritable) != HandleInheritability.None || pipeSecurity != null)
+            {
+                securityAttributes = new SECURITY_ATTRIBUTES();
+                securityAttributes.nLength = Marshal.SizeOf((object)securityAttributes);
+                if ((inheritability & HandleInheritability.Inheritable) != HandleInheritability.None)
+                    securityAttributes.bInheritHandle = 1;
+                if (pipeSecurity != null)
+                {
+                    byte[] descriptorBinaryForm = pipeSecurity.GetSecurityDescriptorBinaryForm();
+                    pinningHandle = (object)GCHandle.Alloc((object)descriptorBinaryForm, GCHandleType.Pinned);
+                    fixed (byte* numPtr = descriptorBinaryForm)
+                        securityAttributes.pSecurityDescriptor = numPtr;
+                }
+            }
+            return securityAttributes;
         }
 
         [SecurityCritical]

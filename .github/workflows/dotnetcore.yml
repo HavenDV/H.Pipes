@@ -70,3 +70,8 @@ jobs:
       if: runner.os == 'Windows' &&
           matrix.dotnet == '3.1.100'
       run: dotnet nuget push H.Pipes.AccessControl\bin\Release\H.Pipes.AccessControl.*.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json; exit 0
+      
+    - name: Try Publish(if the version has changed) NamedPipeServerStream.NetFrameworkVersion
+      if: runner.os == 'Windows' &&
+          matrix.dotnet == '3.1.100'
+      run: dotnet nuget push NamedPipeServerStream.NetFrameworkVersion\bin\Release\NamedPipeServerStream.NetFrameworkVersion.*.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json; exit 0
