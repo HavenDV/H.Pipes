@@ -55,7 +55,7 @@ namespace H.Pipes
         /// <summary>
         /// IsStarted
         /// </summary>
-        public bool IsStarted => ListenWorker != null;
+        public bool IsStarted => ListenWorker != null && !ListenWorker.Task.IsCompleted && !ListenWorker.Task.IsCanceled && !ListenWorker.Task.IsFaulted;
 
 
         private int NextPipeId { get; set; }
@@ -140,6 +140,8 @@ namespace H.Pipes
                 throw new InvalidOperationException("Server already started");
             }
 
+            await StopAsync(cancellationToken);
+
             var source = new TaskCompletionSource<bool>();
             cancellationToken.Register(() => source.TrySetCanceled(cancellationToken));
 
@@ -182,7 +184,7 @@ namespace H.Pipes
                         }
 
                         // Wait for the client to connect to the data pipe
-                        var connectionStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(connectionPipeName);
+                        var connectionStream = CreatePipeStreamFunc?.Invoke(connectionPipeName) ?? PipeServerFactory.Create(connectionPipeName);
 
                         try
                         {
@@ -224,6 +226,7 @@ namespace H.Pipes
                     catch (Exception exception)
                     {
                         OnExceptionOccurred(exception);
+                        break;
                     }
                 }
             }, OnExceptionOccurred);
