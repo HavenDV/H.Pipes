@@ -102,8 +102,13 @@ using System.IO.Pipes;
 using H.Pipes.AccessControl;
 
 await using var server = new PipeServer<string>(pipeName);
+
+// You can set PipeSecurity
 var pipeSecurity = new PipeSecurity();
 pipeSecurity.AddAccessRule(new PipeAccessRule(new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null), PipeAccessRights.ReadWrite, AccessControlType.Allow));
 
 server.SetPipeSecurity(pipeSecurity);
+
+// or just add AccessRule's (Please be careful, the server will only consider AccessRules from the last call AddAccessRules())
+server.AddAccessRules(new PipeAccessRule(new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null), PipeAccessRights.ReadWrite, AccessControlType.Allow));
 ```
