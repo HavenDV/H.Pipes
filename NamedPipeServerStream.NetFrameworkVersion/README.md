@@ -1,5 +1,3 @@
-# NamedPipeServerStream.NetFrameworkVersion for .NET Standard 2.0
-
 [![Language](https://img.shields.io/badge/language-C%23-blue.svg?style=flat-square)](https://github.com/HavenDV/H.Pipes/search?l=C%23&o=desc&s=&type=Code) 
 [![License](https://img.shields.io/github/license/HavenDV/H.Pipes.svg?label=License&maxAge=86400)](LICENSE.md) 
 [![Requirements](https://img.shields.io/badge/Requirements-.NET%20Standard%202.0-blue.svg)](https://github.com/dotnet/standard/blob/master/docs/versions/netstandard2.0.md)
@@ -8,6 +6,14 @@
 ## Nuget
 
 [![NuGet](https://img.shields.io/nuget/dt/NamedPipeServerStream.NetFrameworkVersion.svg?style=flat-square&label=NamedPipeServerStream.NetFrameworkVersion)](https://www.nuget.org/packages/NamedPipeServerStream.NetFrameworkVersion/)
+
+## Features
+
+- Completely repeats constructor behavior from .Net Framework (including exceptions)
+- Has a strong name
+- Restored from decompiled code. No changes from the original
+- Official dependencies only
+- Tested
 
 ## Usage
 
