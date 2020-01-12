@@ -103,7 +103,7 @@ using H.Pipes.AccessControl;
 
 await using var server = new PipeServer<string>(pipeName);
 var pipeSecurity = new PipeSecurity();
-pipeSecurity.AddAccessRule(new PipeAccessRule(WindowsIdentity.GetCurrent().Owner, PipeAccessRights.FullControl, AccessControlType.Allow));
+pipeSecurity.AddAccessRule(new PipeAccessRule(new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null), PipeAccessRights.ReadWrite, AccessControlType.Allow));
 
 server.SetPipeSecurity(pipeSecurity);
 ```
