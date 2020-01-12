@@ -9,8 +9,10 @@
 See System.IO.Pipes.NamedPipeServerStreamConstructors.New method</Description>
     <Authors>havendv</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/HavenDV/H.Pipes/NamedPipeServerStream.NetFrameworkVersion</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/HavenDV/H.Pipes/NamedPipeServerStream.NetFrameworkVersion</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/HavenDV/H.Pipes/tree/master/NamedPipeServerStream.NetFrameworkVersion</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/HavenDV/H.Pipes/tree/master/NamedPipeServerStream.NetFrameworkVersion</RepositoryUrl>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
