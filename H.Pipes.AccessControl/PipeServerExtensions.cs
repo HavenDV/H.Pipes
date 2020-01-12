@@ -23,5 +23,26 @@ namespace H.Pipes.AccessControl
 
             server.CreatePipeStreamFunc = pipeName => NamedPipeServerStreamConstructors.New(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough, 0, 0, pipeSecurity);
         }
+
+        /// <summary>
+        /// Adds <see cref="PipeAccessRule"/>'s for each <see cref="NamedPipeServerStream"/> that will be created by <see cref="PipeServer{T}"/>
+        /// </summary>
+        /// <param name="server"></param>
+        /// <param name="rules"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <returns></returns>
+        public static void AddAccessRules<T>(this PipeServer<T> server, params PipeAccessRule[] rules)
+        {
+            server = server ?? throw new ArgumentNullException(nameof(rules));
+            rules = rules ?? throw new ArgumentNullException(nameof(rules));
+
+            var pipeSecurity = new PipeSecurity();
+            foreach (var rule in rules)
+            {
+                pipeSecurity.AddAccessRule(rule);
+            }
+
+            server.SetPipeSecurity(pipeSecurity);
+        }
     }
 }
