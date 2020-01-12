@@ -4,7 +4,9 @@
     <Version>1.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>System.IO.Pipes</RootNamespace>
-    <Description>This package adds original NamedPipeServerStream constructors from Net.Framework to NetStandard</Description>
+    <Description>This package adds original NamedPipeServerStream constructors from Net.Framework to NetStandard
+
+See System.IO.Pipes.NamedPipeServerStreamConstructors.New method</Description>
     <Authors>havendv</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/HavenDV/H.Pipes/NamedPipeServerStream.NetFrameworkVersion</PackageProjectUrl>
