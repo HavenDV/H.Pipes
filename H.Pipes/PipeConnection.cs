@@ -120,6 +120,7 @@ namespace H.Pipes
                     }
                     catch (OperationCanceledException)
                     {
+                        OnDisconnected();
                         throw;
                     }
                     catch (Exception exception)
