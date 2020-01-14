@@ -18,7 +18,7 @@ namespace H.Pipes
     /// Wraps a <see cref="NamedPipeServerStream"/> and provides multiple simultaneous client connection handling.
     /// </summary>
     /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
-    public class PipeServer<T> : IPipeServer<T>, IDisposable, IAsyncDisposable
+    public class PipeServer<T> : IPipeServer<T>
     {
         #region Properties
 
@@ -241,6 +241,17 @@ namespace H.Pipes
 
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Sends a message to all connected clients asynchronously.
+        /// This method returns immediately, possibly before the message has been sent to all clients.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="cancellationToken"></param>
+        public async Task WriteAsync(T value, CancellationToken cancellationToken = default)
+        {
+            await WriteAsync(value, predicate: null, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
