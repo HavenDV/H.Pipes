@@ -108,20 +108,20 @@ namespace H.Pipes.Tests
             Trace.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~");
         }
 
-        public static async Task DataTestAsync(int numBytes, int count, IFormatter formatter, TimeSpan timeout)
+        public static async Task DataTestAsync(int numBytes, int count = 1, IFormatter formatter = default, TimeSpan? timeout = default)
         {
-            using var cancellationTokenSource = new CancellationTokenSource(timeout);
+            using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(5));
 
             const string pipeName = "data_test_pipe";
-            var server = new PipeServer<byte[]>(pipeName, formatter ?? new BinaryFormatter());
-            var client = new PipeClient<byte[]>(pipeName, formatter: formatter ?? new BinaryFormatter());
+            await using var server = new PipeServer<byte[]>(pipeName, formatter ?? new BinaryFormatter());
+            await using var client = new PipeClient<byte[]>(pipeName, formatter: formatter ?? new BinaryFormatter());
 
             await DataTestAsync(server, client, numBytes, count, cancellationTokenSource.Token);
         }
 
-        public static async Task DataSingleTestAsync(int numBytes, int count, IFormatter formatter, TimeSpan timeout)
+        public static async Task DataSingleTestAsync(int numBytes, int count = 1, IFormatter formatter = default, TimeSpan? timeout = default)
         {
-            using var cancellationTokenSource = new CancellationTokenSource(timeout);
+            using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(5));
 
             const string pipeName = "data_test_pipe";
             await using var server = new SingleConnectionPipeServer<byte[]>(pipeName, formatter ?? new BinaryFormatter());
