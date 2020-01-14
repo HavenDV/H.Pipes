@@ -12,9 +12,15 @@ namespace H.Pipes
     /// Wraps a <see cref="NamedPipeClientStream"/>.
     /// </summary>
     /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
-    public class SingleConnectionPipeClient<T> : IDisposable, IAsyncDisposable
+    public class SingleConnectionPipeClient<T> : IPipeClient<T>
     {
+        #region Fields
+
         private volatile bool _isConnecting;
+
+        #endregion
+
+        #region Properties
 
         /// <summary>
         /// Gets or sets whether the client should attempt to reconnect when the pipe breaks
@@ -48,6 +54,8 @@ namespace H.Pipes
 
         private PipeConnection<T>? Connection { get; set; }
         private System.Timers.Timer ReconnectionTimer { get; }
+
+        #endregion
 
         #region Events
 
@@ -117,7 +125,15 @@ namespace H.Pipes
                 {
                     if (!IsConnected && !IsConnecting)
                     {
-                        await ConnectAsync();
+                        using var cancellationTokenSource = new CancellationTokenSource(ReconnectionInterval);
+
+                        try
+                        {
+                            await ConnectAsync(cancellationTokenSource.Token);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                        }
                     }
                 }
                 catch (Exception exception)
@@ -133,6 +149,8 @@ namespace H.Pipes
 
         #endregion
 
+        #region Public methods
+
         /// <summary>
         /// Connects to the named pipe server asynchronously.
         /// </summary>
@@ -143,7 +161,10 @@ namespace H.Pipes
             {
                 IsConnecting = true;
 
-                ReconnectionTimer.Start();
+                if (AutoReconnect)
+                {
+                    ReconnectionTimer.Start();
+                }
                 if (IsConnected)
                 {
                     throw new InvalidOperationException("Already connected");
@@ -226,6 +247,8 @@ namespace H.Pipes
             await Connection.WriteAsync(value, cancellationToken).ConfigureAwait(false);
         }
 
+        #endregion
+
         #region IDisposable
 
         /// <summary>
@@ -233,6 +256,8 @@ namespace H.Pipes
         /// </summary>
         public void Dispose()
         {
+            ReconnectionTimer.Dispose();
+
             Connection?.Dispose();
             Connection = null;
         }
@@ -242,12 +267,9 @@ namespace H.Pipes
         /// </summary>
         public async ValueTask DisposeAsync()
         {
-            if (Connection != null)
-            {
-                await Connection.DisposeAsync().ConfigureAwait(false);
+            ReconnectionTimer.Dispose();
 
-                Connection = null;
-            }
+            await DisconnectInternalAsync().ConfigureAwait(false);
         }
 
         #endregion
