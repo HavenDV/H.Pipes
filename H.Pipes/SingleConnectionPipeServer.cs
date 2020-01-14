@@ -122,7 +122,7 @@ namespace H.Pipes
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
         /// <exception cref="IOException"></exception>
-        public async Task StartAsync(bool waitFreePipe = true, CancellationToken cancellationToken = default)
+        public async Task StartAsync(bool waitFreePipe = false, CancellationToken cancellationToken = default)
         {
             if (IsStarted)
             {
