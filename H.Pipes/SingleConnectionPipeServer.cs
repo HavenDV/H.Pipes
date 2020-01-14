@@ -14,7 +14,7 @@ namespace H.Pipes
     /// Wraps a <see cref="NamedPipeServerStream"/> and optimized for one connection.
     /// </summary>
     /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
-    public class SingleConnectionPipeServer<T> : IPipeServer<T>, IDisposable, IAsyncDisposable
+    public class SingleConnectionPipeServer<T> : IPipeServer<T>
     {
         #region Properties
 
@@ -140,6 +140,12 @@ namespace H.Pipes
                 {
                     try
                     {
+                        if (Connection != null && Connection.IsConnected)
+                        {
+                            await Task.Delay(TimeSpan.FromMilliseconds(1), cancellationToken).ConfigureAwait(false);
+                            continue;
+                        }
+
                         // Wait for the client to connect to the data pipe
                         var connectionStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName);
 
@@ -191,6 +197,12 @@ namespace H.Pipes
                     }
                     catch (OperationCanceledException)
                     {
+                        if (Connection != null)
+                        {
+                            await Connection.DisposeAsync().ConfigureAwait(false);
+
+                            Connection = null;
+                        }
                         throw;
                     }
                     // Catch the IOException that is raised if the pipe is broken or disconnected.
