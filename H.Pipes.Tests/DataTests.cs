@@ -137,7 +137,7 @@ namespace H.Pipes.Tests
             }
             {
                 await using var pipe = new PipeServer<string>("test");
-                await pipe.StartAsync();
+                await pipe.StartAsync(false);
             }
         }
 
@@ -182,7 +182,7 @@ namespace H.Pipes.Tests
             await using var pipe = new PipeServer<string>("test");
             await pipe.StartAsync();
             await pipe.StopAsync();
-            await pipe.StartAsync();
+            await pipe.StartAsync(false);
         }
 
         [TestMethod]

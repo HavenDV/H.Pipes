@@ -16,7 +16,7 @@ namespace H.Pipes.AccessControl
         /// <param name="pipeSecurity"></param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <returns></returns>
-        public static void SetPipeSecurity<T>(this PipeServer<T> server, PipeSecurity pipeSecurity)
+        public static void SetPipeSecurity<T>(this IPipeServer<T> server, PipeSecurity pipeSecurity)
         {
             server = server ?? throw new ArgumentNullException(nameof(server));
             pipeSecurity = pipeSecurity ?? throw new ArgumentNullException(nameof(pipeSecurity));
@@ -31,7 +31,7 @@ namespace H.Pipes.AccessControl
         /// <param name="rules"></param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <returns></returns>
-        public static void AddAccessRules<T>(this PipeServer<T> server, params PipeAccessRule[] rules)
+        public static void AddAccessRules<T>(this IPipeServer<T> server, params PipeAccessRule[] rules)
         {
             server = server ?? throw new ArgumentNullException(nameof(rules));
             rules = rules ?? throw new ArgumentNullException(nameof(rules));
