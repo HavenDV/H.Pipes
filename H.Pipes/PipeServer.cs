@@ -18,7 +18,7 @@ namespace H.Pipes
     /// Wraps a <see cref="NamedPipeServerStream"/> and provides multiple simultaneous client connection handling.
     /// </summary>
     /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
-    public class PipeServer<T> : IDisposable, IAsyncDisposable
+    public class PipeServer<T> : IPipeServer<T>, IDisposable, IAsyncDisposable
     {
         #region Properties
 
@@ -186,9 +186,11 @@ namespace H.Pipes
                         // Wait for the client to connect to the data pipe
                         var connectionStream = CreatePipeStreamFunc?.Invoke(connectionPipeName) ?? PipeServerFactory.Create(connectionPipeName);
 
+                        PipeStreamInitializeAction?.Invoke(connectionStream);
+
                         try
                         {
-                            await connectionStream.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
+                            await connectionStream.WaitForConnectionAsync(token).ConfigureAwait(false);
                         }
                         catch
                         {
@@ -200,8 +202,6 @@ namespace H.Pipes
 
                             throw;
                         }
-
-                        PipeStreamInitializeAction?.Invoke(connectionStream);
 
                         // Add the client's connection to the list of connections
                         var connection = ConnectionFactory.Create<T>(connectionStream, Formatter);
