@@ -1,5 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.IO.Pipes;
+using System.Threading;
+using System.Threading.Tasks;
 using H.Formatters;
 using H.Pipes.Args;
 
@@ -9,7 +12,7 @@ namespace H.Pipes
     /// 
     /// </summary>
     /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
-    public interface IPipeServer<T>
+    public interface IPipeServer<T> : IDisposable, IAsyncDisposable
     {
         #region Properties
 
@@ -61,6 +64,31 @@ namespace H.Pipes
         /// Invoked whenever an exception is thrown during a read or write operation.
         /// </summary>
         event EventHandler<ExceptionEventArgs>? ExceptionOccurred;
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Begins listening for client connections in a separate background thread.
+        /// This method waits when pipe will be created(or throws exception).
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="IOException"></exception>
+        Task StartAsync(bool waitFreePipe = false, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Sends a message to all connected clients asynchronously.
+        /// This method returns immediately, possibly before the message has been sent to all clients.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="cancellationToken"></param>
+        Task WriteAsync(T value, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Closes all open client connections and stops listening for new ones.
+        /// </summary>
+        Task StopAsync(CancellationToken _ = default);
 
         #endregion
     }
