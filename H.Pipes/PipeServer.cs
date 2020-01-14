@@ -261,7 +261,7 @@ namespace H.Pipes
         /// <param name="value"></param>
         /// <param name="predicate"></param>
         /// <param name="cancellationToken"></param>
-        public async Task WriteAsync(T value, Predicate<PipeConnection<T>>? predicate = null, CancellationToken cancellationToken = default)
+        public async Task WriteAsync(T value, Predicate<PipeConnection<T>>? predicate, CancellationToken cancellationToken = default)
         {
             var tasks = Connections
                 .Where(connection => connection.IsConnected && (predicate == null || predicate(connection)))

@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <AssemblyTitle>Named Pipe Wrapper library</AssemblyTitle>
     <AssemblyDescription>A simple, easy to use, strongly-typed wrapper around .NET named pipes.</AssemblyDescription>
-    <Version>1.0.8</Version>
+    <Version>1.0.9</Version>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
     <PackageId>H.Pipes</PackageId>
@@ -29,8 +29,9 @@
     <PackageProjectUrl>https://github.com/HavenDV/H.Pipes</PackageProjectUrl>
     <RepositoryUrl>https://github.com/HavenDV/H.Pipes</RepositoryUrl>
     <PackageTags>pipes, named pipes, async, async named pipes, namedpipes async, namedpipes, pipes async</PackageTags>
-    <PackageReleaseNotes>Fixed some server bugs.
-Added optimized SingleConnection client/server classes</PackageReleaseNotes>
+    <PackageReleaseNotes>Fixed bugs.
+Added optimized SingleConnection client/server classes.
+Added IPipeClient/IPipeServer interfaces.</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
