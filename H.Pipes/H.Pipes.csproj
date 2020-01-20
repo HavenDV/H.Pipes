@@ -1,13 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;</TargetFrameworks>
     <LangVersion>8</LangVersion>
     <Nullable>enable</Nullable>
     <AssemblyTitle>Named Pipe Wrapper library</AssemblyTitle>
     <AssemblyDescription>A simple, easy to use, strongly-typed wrapper around .NET named pipes.</AssemblyDescription>
-    <Version>1.0.9</Version>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
+    <Version>1.0.9</Version>
     <PackageId>H.Pipes</PackageId>
     <Description>Features:
 - Create named pipe servers that can handle multiple client connections simultaneously.
