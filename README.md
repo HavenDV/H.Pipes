@@ -36,10 +36,10 @@ Install-Package H.Pipes
 Install-Package H.Pipes.AccessControl
 
 // If you want to transfer any data that can be serialized/deserialized in json.
-H.Formatters.Json
+Install-Package H.Formatters.Json
 
 // If you want to transfer any data that can be serialized/deserialized by Wire(Binary serializer).
-H.Formatters.Wire
+Install-Package H.Formatters.Wire
 ```
 
 ### Usage
