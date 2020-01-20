@@ -15,12 +15,12 @@ namespace H.Pipes.Tests
     {
         private const string PipeName = "data_test_pipe";
 
-        private PipeServer<TestCollection> _server;
-        private PipeClient<TestCollection> _client;
+        private PipeServer<TestCollection>? _server;
+        private PipeClient<TestCollection>? _client;
 
-        private TestCollection _expectedData;
+        private TestCollection? _expectedData;
         private int _expectedHash;
-        private TestCollection _actualData;
+        private TestCollection? _actualData;
         private int _actualHash;
 
         private DateTime _startTime;
@@ -73,8 +73,14 @@ namespace H.Pipes.Tests
             Trace.WriteLine("---");
             Trace.WriteLine("Stopping client and server...");
 
-            await _server.DisposeAsync();
-            await _client.DisposeAsync();
+            if (_server != null)
+            {
+                await _server.DisposeAsync();
+            }
+            if (_client != null)
+            {
+                await _client.DisposeAsync();
+            }
 
             Trace.WriteLine("Client and server stopped");
             Trace.WriteLine($"Test took {DateTime.Now - _startTime}");
@@ -85,7 +91,7 @@ namespace H.Pipes.Tests
 
         #region Events
 
-        private void ServerOnMessageReceived(object sender, ConnectionMessageEventArgs<TestCollection> args)
+        private void ServerOnMessageReceived(object? sender, ConnectionMessageEventArgs<TestCollection> args)
         {
             Trace.WriteLine($"Received collection with {args.Message.Count} items from the client");
             _actualData = args.Message;
@@ -108,7 +114,10 @@ namespace H.Pipes.Tests
             }
             _expectedHash = _expectedData.GetHashCode();
 
-            await _client.WriteAsync(_expectedData);
+            if (_client != null)
+            {
+                await _client.WriteAsync(_expectedData);
+            }
             _barrier.WaitOne(TimeSpan.FromSeconds(5));
 
             if (_exceptions.Any())
@@ -117,6 +126,10 @@ namespace H.Pipes.Tests
             Assert.IsNotNull(_actualHash, $"Server should have received client's {_expectedData.Count} item message");
             Assert.AreEqual(_expectedHash, _actualHash,
                 $"Hash codes for {_expectedData.Count} item message should match");
+            if (_actualData == null)
+            {
+                throw new InvalidOperationException($"{nameof(_actualData)} is null");
+            }
             Assert.AreEqual(_expectedData.Count, _actualData.Count, "Collection lengths should be equal");
             
             for (var i = 0; i < _actualData.Count; i++)
@@ -194,7 +207,7 @@ namespace H.Pipes.Tests
             return Id == other.Id && Enum == other.Enum;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;

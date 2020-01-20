@@ -18,7 +18,7 @@ namespace H.Pipes.Tests
             // ReSharper disable once AccessToModifiedClosure
             cancellationToken.Register(() => completionSource.TrySetCanceled(cancellationToken));
 
-            var actualHash = (string)null;
+            var actualHash = (string?)null;
             var clientDisconnected = false;
 
             server.ClientConnected += (sender, args) =>
@@ -60,8 +60,11 @@ namespace H.Pipes.Tests
             };
             AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
             {
-                // ReSharper disable once AccessToModifiedClosure
-                completionSource.TrySetException(args.ExceptionObject as Exception);
+                if (args.ExceptionObject is Exception exception)
+                {
+                    // ReSharper disable once AccessToModifiedClosure
+                    completionSource.TrySetException(exception);
+                }
             };
 
             server.ExceptionOccurred += (sender, args) => Trace.WriteLine(args.Exception.ToString());
@@ -108,7 +111,7 @@ namespace H.Pipes.Tests
             Trace.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~");
         }
 
-        public static async Task DataTestAsync(int numBytes, int count = 1, IFormatter formatter = default, TimeSpan? timeout = default)
+        public static async Task DataTestAsync(int numBytes, int count = 1, IFormatter? formatter = default, TimeSpan? timeout = default)
         {
             using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(5));
 
@@ -119,7 +122,7 @@ namespace H.Pipes.Tests
             await DataTestAsync(server, client, numBytes, count, cancellationTokenSource.Token);
         }
 
-        public static async Task DataSingleTestAsync(int numBytes, int count = 1, IFormatter formatter = default, TimeSpan? timeout = default)
+        public static async Task DataSingleTestAsync(int numBytes, int count = 1, IFormatter? formatter = default, TimeSpan? timeout = default)
         {
             using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(5));
 
