@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using H.Formatters;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -102,6 +103,37 @@ namespace H.Pipes.Tests
         public async Task Single_TestMessageSize1Kx3_Wire()
         {
             await BaseTests.DataSingleTestAsync(1025, 3, new WireFormatter());
+        }
+
+        [TestMethod]
+        public async Task TypeTest()
+        {
+            using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            var completionSource = new TaskCompletionSource<bool>(false);
+            cancellationTokenSource.Token.Register(() => completionSource.TrySetCanceled());
+
+            const string pipeName = "data_test_pipe";
+            var formatter = new BinaryFormatter();
+            //var type = typeof(Exception);
+            await using var server = new PipeServer<object>(pipeName, formatter);
+            await using var client = new PipeClient<object>(pipeName, formatter: formatter);
+
+            server.ExceptionOccurred += (sender, args) => Assert.Fail(args.Exception.ToString());
+            client.ExceptionOccurred += (sender, args) => Assert.Fail(args.Exception.ToString());
+            client.MessageReceived += (sender, args) =>
+            {
+                Console.WriteLine($"MessageReceived: {args.Message as Exception}");
+
+                completionSource.TrySetResult(args.Message is Exception);
+            };
+
+            await server.StartAsync(cancellationToken: cancellationTokenSource.Token);
+
+            await client.ConnectAsync(cancellationTokenSource.Token);
+
+            await server.WriteAsync(new Exception("Hello. It's server message"), cancellationTokenSource.Token);
+
+            Assert.IsTrue(await completionSource.Task);
         }
     }
 }
