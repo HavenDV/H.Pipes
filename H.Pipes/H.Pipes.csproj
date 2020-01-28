@@ -8,7 +8,7 @@
     <AssemblyDescription>A simple, easy to use, strongly-typed wrapper around .NET named pipes.</AssemblyDescription>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
-    <Version>1.0.10</Version>
+    <Version>1.0.11</Version>
     <PackageId>H.Pipes</PackageId>
     <Description>Features:
 - Create named pipe servers that can handle multiple client connections simultaneously.
@@ -30,7 +30,7 @@
     <PackageProjectUrl>https://github.com/HavenDV/H.Pipes</PackageProjectUrl>
     <RepositoryUrl>https://github.com/HavenDV/H.Pipes</RepositoryUrl>
     <PackageTags>pipes, named pipes, async, async named pipes, namedpipes async, namedpipes, pipes async</PackageTags>
-    <PackageReleaseNotes>Added the ability to send null messages</PackageReleaseNotes>
+    <PackageReleaseNotes>Fixed null messages after disconnect</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">

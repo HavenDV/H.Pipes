@@ -104,11 +104,16 @@ namespace H.Pipes
 
             ReadWorker = new TaskWorker(async cancellationToken =>
             {
-                while (!cancellationToken.IsCancellationRequested && IsConnected && PipeStreamWrapper.CanRead)
+                while (!cancellationToken.IsCancellationRequested && IsConnected)
                 {
                     try
                     {
                         var bytes = await PipeStreamWrapper.ReadAsync(cancellationToken).ConfigureAwait(false);
+                        if (bytes == null && !IsConnected)
+                        {
+                            break;
+                        }
+
                         var obj = await Formatter.DeserializeAsync<T>(bytes, cancellationToken).ConfigureAwait(false);
 
                         OnMessageReceived(obj);

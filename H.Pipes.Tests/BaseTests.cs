@@ -36,6 +36,7 @@ namespace H.Pipes.Tests
             };
             server.MessageReceived += (sender, args) =>
             {
+                Trace.WriteLine($"Server_OnMessageReceived: {args.Message}");
                 actualHash = hashFunc?.Invoke(args.Message);
 
                 // ReSharper disable once AccessToModifiedClosure
@@ -50,7 +51,7 @@ namespace H.Pipes.Tests
             };
             client.Connected += (sender, args) => Trace.WriteLine("Client_OnConnected");
             client.Disconnected += (sender, args) => Trace.WriteLine("Client_OnDisconnected");
-            client.MessageReceived += (sender, args) => Trace.WriteLine("Client_OnMessageReceived");
+            client.MessageReceived += (sender, args) => Trace.WriteLine($"Client_OnMessageReceived: {args.Message}");
             client.ExceptionOccurred += (sender, args) =>
             {
                 Trace.WriteLine($"Client exception occurred: {args.Exception}");

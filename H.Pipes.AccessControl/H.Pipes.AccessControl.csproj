@@ -3,7 +3,7 @@
     <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
     <LangVersion>8</LangVersion>
     <Nullable>enable</Nullable>
-    <Version>1.0.10</Version>
+    <Version>1.0.11</Version>
     <Description>This package adds AccessControl extensions for PipeServerSetPipeSecurity() and other)</Description>
     <Authors>havendv</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

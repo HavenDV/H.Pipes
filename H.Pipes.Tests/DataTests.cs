@@ -13,9 +13,9 @@ namespace H.Pipes.Tests
         [TestMethod]
         public async Task NullTest()
         {
-            await BaseTests.DataSingleTestAsync(new List<string?>{ null });
-            await BaseTests.DataSingleTestAsync(new List<string?> { null }, formatter: new JsonFormatter());
-            await BaseTests.DataSingleTestAsync(new List<string?> { null }, formatter: new WireFormatter());
+            await BaseTests.DataSingleTestAsync(new List<string?>{ null }, value => value ?? "null");
+            await BaseTests.DataSingleTestAsync(new List<string?> { null }, value => value ?? "null", new JsonFormatter());
+            await BaseTests.DataSingleTestAsync(new List<string?> { null }, value => value ?? "null", new WireFormatter());
         }
 
         [TestMethod]
