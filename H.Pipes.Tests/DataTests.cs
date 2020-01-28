@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using H.Formatters;
@@ -9,6 +10,14 @@ namespace H.Pipes.Tests
     [TestClass]
     public class DataTests
     {
+        [TestMethod]
+        public async Task NullTest()
+        {
+            await BaseTests.DataSingleTestAsync(new List<string?>{ null });
+            await BaseTests.DataSingleTestAsync(new List<string?> { null }, formatter: new JsonFormatter());
+            await BaseTests.DataSingleTestAsync(new List<string?> { null }, formatter: new WireFormatter());
+        }
+
         [TestMethod]
         public async Task TestEmptyMessageDoesNotDisconnectClient()
         {

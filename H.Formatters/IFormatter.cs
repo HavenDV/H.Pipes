@@ -14,7 +14,7 @@ namespace H.Formatters
         /// <param name="obj"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<byte[]> SerializeAsync(object obj, CancellationToken cancellationToken = default);
+        Task<byte[]> SerializeAsync(object? obj, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Deserializes from bytes
@@ -23,6 +23,6 @@ namespace H.Formatters
         /// <param name="bytes"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<T> DeserializeAsync<T>(byte[] bytes, CancellationToken cancellationToken = default);
+        Task<T> DeserializeAsync<T>(byte[]? bytes, CancellationToken cancellationToken = default);
     }
 }

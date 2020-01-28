@@ -109,11 +109,6 @@ namespace H.Pipes
                     try
                     {
                         var bytes = await PipeStreamWrapper.ReadAsync(cancellationToken).ConfigureAwait(false);
-                        if (bytes == null)
-                        {
-                            break;
-                        }
-
                         var obj = await Formatter.DeserializeAsync<T>(bytes, cancellationToken).ConfigureAwait(false);
 
                         OnMessageReceived(obj);
@@ -140,8 +135,6 @@ namespace H.Pipes
         /// <param name="cancellationToken"></param>
         public async Task WriteAsync(T value, CancellationToken cancellationToken = default)
         {
-            value = value ?? throw new ArgumentNullException(nameof(value));
-
             if (!IsConnected || !PipeStreamWrapper.CanWrite)
             {
                 throw new InvalidOperationException("Client is not connected");

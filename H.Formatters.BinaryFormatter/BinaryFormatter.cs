@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,8 +19,13 @@ namespace H.Formatters
         /// <param name="obj"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task<byte[]> SerializeAsync(object obj, CancellationToken cancellationToken = default)
+        public Task<byte[]> SerializeAsync(object? obj, CancellationToken cancellationToken = default)
         {
+            if (obj == null)
+            {
+                return Task.FromResult(Array.Empty<byte>());
+            }
+
             using var stream = new MemoryStream();
             InternalFormatter.Serialize(stream, obj);
             var bytes = stream.ToArray();
@@ -33,8 +40,15 @@ namespace H.Formatters
         /// <param name="bytes"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task<T> DeserializeAsync<T>(byte[] bytes, CancellationToken cancellationToken = default)
+        public Task<T> DeserializeAsync<T>(byte[]? bytes, CancellationToken cancellationToken = default)
         {
+            if (bytes == null || !bytes.Any())
+            {
+#pragma warning disable CS8653 // A default expression introduces a null value for a type parameter.
+                return Task.FromResult<T>(default);
+#pragma warning restore CS8653 // A default expression introduces a null value for a type parameter.
+            }
+
             using var memoryStream = new MemoryStream(bytes);
             var obj = (T) InternalFormatter.Deserialize(memoryStream);
 

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace H.Pipes.Args
+﻿namespace H.Pipes.Args
 {
     /// <summary>
     /// Handles messages received from a named pipe.
@@ -20,7 +18,7 @@ namespace H.Pipes.Args
         /// <param name="message"></param>
         public ConnectionMessageEventArgs(PipeConnection<T> connection, T message) : base(connection)
         {
-            Message = message ?? throw new ArgumentNullException(nameof(message));
+            Message = message;
         }
     }
 }

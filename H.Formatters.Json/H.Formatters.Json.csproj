@@ -3,7 +3,7 @@
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <LangVersion>8</LangVersion>
     <Nullable>enable</Nullable>
-    <Version>12.0.3</Version>
+    <Version>12.0.3.1</Version>
     <RootNamespace>H.Formatters</RootNamespace>
     <Description>This package adds JsonFormatter(based on Newtonsoft.Json)</Description>
     <Authors>havendv</Authors>
