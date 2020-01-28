@@ -12,97 +12,97 @@ namespace H.Pipes.Tests
         [TestMethod]
         public async Task TestEmptyMessageDoesNotDisconnectClient()
         {
-            await BaseTests.DataTestAsync(0);
+            await BaseTests.BinaryDataTestAsync(0);
         }
 
         [TestMethod]
         public async Task TestMessageSize1B()
         {
-            await BaseTests.DataTestAsync(1);
+            await BaseTests.BinaryDataTestAsync(1);
         }
 
         [TestMethod]
         public async Task TestMessageSize2B()
         {
-            await BaseTests.DataTestAsync(2);
+            await BaseTests.BinaryDataTestAsync(2);
         }
 
         [TestMethod]
         public async Task TestMessageSize3B()
         {
-            await BaseTests.DataTestAsync(3);
+            await BaseTests.BinaryDataTestAsync(3);
         }
 
         [TestMethod]
         public async Task TestMessageSize9B()
         {
-            await BaseTests.DataTestAsync(9);
+            await BaseTests.BinaryDataTestAsync(9);
         }
 
         [TestMethod]
         public async Task TestMessageSize33B()
         {
-            await BaseTests.DataTestAsync(33);
+            await BaseTests.BinaryDataTestAsync(33);
         }
 
         [TestMethod]
         public async Task TestMessageSize1Kx3_JSON()
         {
-            await BaseTests.DataTestAsync(1025, 3, new JsonFormatter());
+            await BaseTests.BinaryDataTestAsync(1025, 3, new JsonFormatter());
         }
 
         [TestMethod]
         public async Task TestMessageSize1Kx3_Wire()
         {
-            await BaseTests.DataTestAsync(1025, 3, new WireFormatter());
+            await BaseTests.BinaryDataTestAsync(1025, 3, new WireFormatter());
         }
 
         [TestMethod]
         public async Task TestMessageSize129B()
         {
-            await BaseTests.DataTestAsync(129);
+            await BaseTests.BinaryDataTestAsync(129);
         }
 
         [TestMethod]
         public async Task TestMessageSize1K()
         {
-            await BaseTests.DataTestAsync(1025);
+            await BaseTests.BinaryDataTestAsync(1025);
         }
 
         [TestMethod]
         public async Task TestMessageSize1M()
         {
-            await BaseTests.DataTestAsync(1024 * 1024 + 1);
+            await BaseTests.BinaryDataTestAsync(1024 * 1024 + 1);
         }
 
         [TestMethod]
         public async Task TestMessageSize300Mx3()
         {
-            await BaseTests.DataTestAsync(1024 * 1024 * 300 + 1, 3, timeout: TimeSpan.FromMinutes(1));
+            await BaseTests.BinaryDataTestAsync(1024 * 1024 * 300 + 1, 3, timeout: TimeSpan.FromMinutes(1));
         }
 
         [TestMethod]
         public async Task Single_TestEmptyMessageDoesNotDisconnectClient()
         {
-            await BaseTests.DataSingleTestAsync(0);
+            await BaseTests.BinaryDataSingleTestAsync(0);
         }
 
         [TestMethod]
         public async Task Single_TestMessageSize1B()
         {
-            await BaseTests.DataSingleTestAsync(1);
+            await BaseTests.BinaryDataSingleTestAsync(1);
         }
 
         [TestMethod]
         public async Task Single_TestMessageSize1Kx3_JSON()
         {
-            await BaseTests.DataSingleTestAsync(1025, 3, new JsonFormatter());
+            await BaseTests.BinaryDataSingleTestAsync(1025, 3, new JsonFormatter());
         }
 
         [TestMethod]
         public async Task Single_TestMessageSize1Kx3_Wire()
         {
-            await BaseTests.DataSingleTestAsync(1025, 3, new WireFormatter());
+            await BaseTests.BinaryDataSingleTestAsync(1025, 3, new WireFormatter());
         }
 
         [TestMethod]

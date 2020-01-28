@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
@@ -10,7 +11,7 @@ namespace H.Pipes.Tests
 {
     public static class BaseTests
     {
-        public static async Task DataTestAsync(IPipeServer<byte[]> server, IPipeClient<byte[]> client, int numBytes, int count = 1, CancellationToken cancellationToken = default)
+        public static async Task DataTestAsync<T>(IPipeServer<T> server, IPipeClient<T> client, List<T> values, Func<T, string> hashFunc, CancellationToken cancellationToken = default)
         {
             Trace.WriteLine("Setting up test...");
 
@@ -35,8 +36,7 @@ namespace H.Pipes.Tests
             };
             server.MessageReceived += (sender, args) =>
             {
-                Trace.WriteLine($"Received {args.Message.Length} bytes from the client");
-                actualHash = Hash(args.Message);
+                actualHash = hashFunc(args.Message);
 
                 // ReSharper disable once AccessToModifiedClosure
                 completionSource.TrySetResult(true);
@@ -78,23 +78,11 @@ namespace H.Pipes.Tests
 
             var watcher = Stopwatch.StartNew();
 
-            for (var i = 0; i < count; i++)
+            foreach (var value in values)
             {
-                Trace.WriteLine($"Generating {numBytes} bytes of random data...");
+                var expectedHash = hashFunc(value);
 
-                // Generate some random data and compute its SHA-1 hash
-                var data = new byte[numBytes];
-                new Random().NextBytes(data);
-
-                Trace.WriteLine($"Computing SHA-1 hash for {numBytes} bytes of data...");
-
-                var expectedHash = Hash(data);
-
-                Trace.WriteLine($"Sending {numBytes} bytes of data to the client...");
-
-                await client.WriteAsync(data, cancellationToken).ConfigureAwait(false);
-
-                Trace.WriteLine($"Finished sending {numBytes} bytes of data to the client");
+                await client.WriteAsync(value, cancellationToken).ConfigureAwait(false);
 
                 await completionSource.Task.ConfigureAwait(false);
                 
@@ -111,29 +99,54 @@ namespace H.Pipes.Tests
             Trace.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~");
         }
 
-        public static async Task DataTestAsync(int numBytes, int count = 1, IFormatter? formatter = default, TimeSpan? timeout = default)
+        public static async Task DataTestAsync<T>(List<T> values, Func<T, string> hashFunc, IFormatter? formatter = default, TimeSpan? timeout = default)
         {
             using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(5));
 
             const string pipeName = "data_test_pipe";
-            await using var server = new PipeServer<byte[]>(pipeName, formatter ?? new BinaryFormatter());
-            await using var client = new PipeClient<byte[]>(pipeName, formatter: formatter ?? new BinaryFormatter());
+            await using var server = new PipeServer<T>(pipeName, formatter ?? new BinaryFormatter());
+            await using var client = new PipeClient<T>(pipeName, formatter: formatter ?? new BinaryFormatter());
 
-            await DataTestAsync(server, client, numBytes, count, cancellationTokenSource.Token);
+            await DataTestAsync(server, client, values, hashFunc, cancellationTokenSource.Token);
         }
 
-        public static async Task DataSingleTestAsync(int numBytes, int count = 1, IFormatter? formatter = default, TimeSpan? timeout = default)
+        public static async Task DataSingleTestAsync<T>(List<T> values, Func<T, string> hashFunc, IFormatter? formatter = default, TimeSpan? timeout = default)
         {
             using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(5));
 
             const string pipeName = "data_test_pipe";
-            await using var server = new SingleConnectionPipeServer<byte[]>(pipeName, formatter ?? new BinaryFormatter());
-            await using var client = new SingleConnectionPipeClient<byte[]>(pipeName, formatter: formatter ?? new BinaryFormatter());
+            await using var server = new SingleConnectionPipeServer<T>(pipeName, formatter ?? new BinaryFormatter());
+            await using var client = new SingleConnectionPipeClient<T>(pipeName, formatter: formatter ?? new BinaryFormatter());
 
-            await DataTestAsync(server, client, numBytes, count, cancellationTokenSource.Token);
+            await DataTestAsync(server, client, values, hashFunc, cancellationTokenSource.Token);
+        }
+
+        public static async Task BinaryDataTestAsync(int numBytes, int count = 1, IFormatter? formatter = default, TimeSpan? timeout = default)
+        {
+            await DataTestAsync(GenerateData(numBytes, count), Hash, formatter, timeout);
+        }
+
+        public static async Task BinaryDataSingleTestAsync(int numBytes, int count = 1, IFormatter? formatter = default, TimeSpan? timeout = default)
+        {
+            await DataSingleTestAsync(GenerateData(numBytes, count), Hash, formatter, timeout);
         }
 
         #region Helper methods
+
+        public static List<byte[]> GenerateData(int numBytes, int count = 1)
+        {
+            var values = new List<byte[]>();
+
+            for (var i = 0; i < count; i++)
+            {
+                var value = new byte[numBytes];
+                new Random().NextBytes(value);
+
+                values.Add(value);
+            }
+
+            return values;
+        }
 
         /// <summary>
         /// Computes the SHA-1 hash (lowercase) of the specified byte array.
