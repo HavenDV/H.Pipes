@@ -11,7 +11,7 @@ namespace H.Pipes.Tests
 {
     public static class BaseTests
     {
-        public static async Task DataTestAsync<T>(IPipeServer<T> server, IPipeClient<T> client, List<T> values, Func<T, string> hashFunc, CancellationToken cancellationToken = default)
+        public static async Task DataTestAsync<T>(IPipeServer<T> server, IPipeClient<T> client, List<T> values, Func<T, string>? hashFunc = null, CancellationToken cancellationToken = default)
         {
             Trace.WriteLine("Setting up test...");
 
@@ -36,7 +36,7 @@ namespace H.Pipes.Tests
             };
             server.MessageReceived += (sender, args) =>
             {
-                actualHash = hashFunc(args.Message);
+                actualHash = hashFunc?.Invoke(args.Message);
 
                 // ReSharper disable once AccessToModifiedClosure
                 completionSource.TrySetResult(true);
@@ -80,13 +80,17 @@ namespace H.Pipes.Tests
 
             foreach (var value in values)
             {
-                var expectedHash = hashFunc(value);
+                var expectedHash = hashFunc?.Invoke(value);
 
                 await client.WriteAsync(value, cancellationToken).ConfigureAwait(false);
 
                 await completionSource.Task.ConfigureAwait(false);
-                
-                Assert.IsNotNull(actualHash, "Server should have received a zero-byte message from the client");
+
+                if (hashFunc != null)
+                {
+                    Assert.IsNotNull(actualHash, "Server should have received a zero-byte message from the client");
+                }
+
                 Assert.AreEqual(expectedHash, actualHash, "SHA-1 hashes for zero-byte message should match");
                 Assert.IsFalse(clientDisconnected, "Server should not disconnect the client for explicitly sending zero-length data");
 
@@ -99,7 +103,7 @@ namespace H.Pipes.Tests
             Trace.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~");
         }
 
-        public static async Task DataTestAsync<T>(List<T> values, Func<T, string> hashFunc, IFormatter? formatter = default, TimeSpan? timeout = default)
+        public static async Task DataTestAsync<T>(List<T> values, Func<T, string>? hashFunc = null, IFormatter? formatter = default, TimeSpan? timeout = default)
         {
             using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(5));
 
@@ -110,7 +114,7 @@ namespace H.Pipes.Tests
             await DataTestAsync(server, client, values, hashFunc, cancellationTokenSource.Token);
         }
 
-        public static async Task DataSingleTestAsync<T>(List<T> values, Func<T, string> hashFunc, IFormatter? formatter = default, TimeSpan? timeout = default)
+        public static async Task DataSingleTestAsync<T>(List<T> values, Func<T, string>? hashFunc = null, IFormatter? formatter = default, TimeSpan? timeout = default)
         {
             using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(5));
 
