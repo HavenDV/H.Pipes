@@ -238,7 +238,6 @@ namespace H.Pipes
 
         /// <summary>
         /// Sends a message to all connected clients asynchronously.
-        /// This method returns immediately, possibly before the message has been sent to all clients.
         /// </summary>
         /// <param name="value"></param>
         /// <param name="cancellationToken"></param>

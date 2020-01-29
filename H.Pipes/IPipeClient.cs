@@ -10,7 +10,7 @@ namespace H.Pipes
     /// Wraps a <see cref="NamedPipeClientStream"/>.
     /// </summary>
     /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
-    public interface IPipeClient<T> : IDisposable, IAsyncDisposable
+    public interface IPipeClient<T> : IPipeConnection<T>
     {
         #region Properties
 
@@ -41,24 +41,14 @@ namespace H.Pipes
         #region Events
 
         /// <summary>
-        /// Invoked whenever a message is received from the server.
-        /// </summary>
-        event EventHandler<ConnectionMessageEventArgs<T>>? MessageReceived;
-
-        /// <summary>
-        /// Invoked when the client disconnects from the server (e.g., the pipe is closed or broken).
-        /// </summary>
-        event EventHandler<ConnectionEventArgs<T>>? Disconnected;
-
-        /// <summary>
         /// Invoked after each the client connect to the server (include reconnects).
         /// </summary>
         event EventHandler<ConnectionEventArgs<T>>? Connected;
 
         /// <summary>
-        /// Invoked whenever an exception is thrown during a read or write operation on the named pipe.
+        /// Invoked when the client disconnects from the server (e.g., the pipe is closed or broken).
         /// </summary>
-        event EventHandler<ExceptionEventArgs>? ExceptionOccurred;
+        event EventHandler<ConnectionEventArgs<T>>? Disconnected;
 
         #endregion
 
@@ -76,15 +66,6 @@ namespace H.Pipes
         /// <param name="_"></param>
         /// <returns></returns>
         Task DisconnectAsync(CancellationToken _ = default);
-
-        /// <summary>
-        /// Sends a message to the server over a named pipe. <br/>
-        /// If client is not connected, <see cref="InvalidOperationException"/> is occurred
-        /// </summary>
-        /// <param name="value">Message to send to the server.</param>
-        /// <param name="cancellationToken"></param>
-        /// <exception cref="InvalidOperationException"></exception>
-        Task WriteAsync(T value, CancellationToken cancellationToken = default);
 
         #endregion
     }

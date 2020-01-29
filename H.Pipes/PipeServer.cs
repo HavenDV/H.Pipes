@@ -256,7 +256,6 @@ namespace H.Pipes
 
         /// <summary>
         /// Sends a message to all connected clients asynchronously.
-        /// This method returns immediately, possibly before the message has been sent to all clients.
         /// </summary>
         /// <param name="value"></param>
         /// <param name="predicate"></param>
@@ -272,7 +271,7 @@ namespace H.Pipes
         }
 
         /// <summary>
-        /// push message to the given client.
+        /// Sends a message to the given client ny name.
         /// </summary>
         /// <param name="value"></param>
         /// <param name="clientName"></param>
