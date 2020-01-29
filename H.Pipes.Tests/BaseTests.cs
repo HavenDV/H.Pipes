@@ -38,6 +38,7 @@ namespace H.Pipes.Tests
             {
                 Trace.WriteLine($"Server_OnMessageReceived: {args.Message}");
                 actualHash = hashFunc?.Invoke(args.Message);
+                Trace.WriteLine($"ActualHash: {actualHash}");
 
                 // ReSharper disable once AccessToModifiedClosure
                 completionSource.TrySetResult(true);
@@ -82,6 +83,7 @@ namespace H.Pipes.Tests
             foreach (var value in values)
             {
                 var expectedHash = hashFunc?.Invoke(value);
+                Trace.WriteLine($"ExpectedHash: {expectedHash}");
 
                 await client.WriteAsync(value, cancellationToken).ConfigureAwait(false);
 

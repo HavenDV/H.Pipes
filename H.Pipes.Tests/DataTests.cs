@@ -13,9 +13,29 @@ namespace H.Pipes.Tests
         [TestMethod]
         public async Task NullTest()
         {
-            await BaseTests.DataSingleTestAsync(new List<string?>{ null }, value => value ?? "null");
-            await BaseTests.DataSingleTestAsync(new List<string?> { null }, value => value ?? "null", new JsonFormatter());
-            await BaseTests.DataSingleTestAsync(new List<string?> { null }, value => value ?? "null", new WireFormatter());
+            var values = new List<string?> { null };
+            static string HashFunc(string? value) => value ?? "null";
+
+            await BaseTests.DataSingleTestAsync(values, HashFunc);
+            await BaseTests.DataSingleTestAsync(values, HashFunc, new JsonFormatter());
+            await BaseTests.DataSingleTestAsync(values, HashFunc, new WireFormatter());
+        }
+
+        [TestMethod]
+        public async Task EmptyArrayTest()
+        {
+            var values = new List<byte[]?> {Array.Empty<byte>()};
+            static string HashFunc(byte[]? value) => value?.Length.ToString() ?? "null";
+
+            await BaseTests.DataSingleTestAsync(values, HashFunc);
+            await BaseTests.DataSingleTestAsync(values, HashFunc, new JsonFormatter());
+            await BaseTests.DataSingleTestAsync(values, HashFunc, new WireFormatter());
+
+            values = new List<byte[]?> { null };
+
+            await BaseTests.DataSingleTestAsync(values, HashFunc);
+            await BaseTests.DataSingleTestAsync(values, HashFunc, new JsonFormatter());
+            await BaseTests.DataSingleTestAsync(values, HashFunc, new WireFormatter());
         }
 
         [TestMethod]
