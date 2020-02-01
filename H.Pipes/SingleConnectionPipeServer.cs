@@ -146,6 +146,11 @@ namespace H.Pipes
                             continue;
                         }
 
+                        if (Connection != null)
+                        {
+                            await Connection.DisposeAsync().ConfigureAwait(false);
+                        }
+
                         // Wait for the client to connect to the data pipe
                         var connectionStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName);
 
@@ -175,19 +180,11 @@ namespace H.Pipes
                             connection.Disconnected += (sender, args) => OnClientDisconnected(args);
                             connection.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
                             connection.Start();
-
-                            if (Connection != null)
-                            {
-                                await Connection.DisposeAsync().ConfigureAwait(false);
-                            }
                         }
                         catch
                         {
-#if NETSTANDARD2_0
-                            connection.Dispose();
-#else
                             await connection.DisposeAsync().ConfigureAwait(false);
-#endif
+
                             throw;
                         }
 
