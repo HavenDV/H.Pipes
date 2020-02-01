@@ -43,6 +43,11 @@ namespace H.Pipes
         public IFormatter Formatter { get; set; }
 
         /// <summary>
+        /// Indicates whether to wait for a name to be released when calling StartAsync()
+        /// </summary>
+        public bool WaitFreePipe { get; set; }
+
+        /// <summary>
         /// All connections(include disconnected clients)
         /// </summary>
         public List<PipeConnection<T>> Connections { get; } = new List<PipeConnection<T>>();
@@ -133,7 +138,7 @@ namespace H.Pipes
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
         /// <exception cref="IOException"></exception>
-        public async Task StartAsync(bool waitFreePipe = false, CancellationToken cancellationToken = default)
+        public async Task StartAsync(CancellationToken cancellationToken = default)
         {
             if (IsStarted)
             {
@@ -174,7 +179,7 @@ namespace H.Pipes
                         }
                         catch (Exception exception)
                         {
-                            if (waitFreePipe)
+                            if (WaitFreePipe)
                             {
                                 throw;
                             }

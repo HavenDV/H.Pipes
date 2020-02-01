@@ -65,7 +65,7 @@ namespace H.Pipes
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
         /// <exception cref="IOException"></exception>
-        Task StartAsync(bool waitFreePipe = false, CancellationToken cancellationToken = default);
+        Task StartAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Closes all open client connections and stops listening for new ones.

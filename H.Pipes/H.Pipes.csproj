@@ -8,7 +8,7 @@
     <AssemblyDescription>A simple, easy to use, strongly-typed wrapper around .NET named pipes.</AssemblyDescription>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
-    <Version>1.12.1</Version>
+    <Version>1.12.2</Version>
     <PackageId>H.Pipes</PackageId>
     <Description>Features:
 - Create named pipe servers that can handle multiple client connections simultaneously.
@@ -30,7 +30,7 @@
     <PackageProjectUrl>https://github.com/HavenDV/H.Pipes</PackageProjectUrl>
     <RepositoryUrl>https://github.com/HavenDV/H.Pipes</RepositoryUrl>
     <PackageTags>pipes, named pipes, async, async named pipes, namedpipes async, namedpipes, pipes async</PackageTags>
-    <PackageReleaseNotes>Fixed SingleConnectionServer reconnect bug</PackageReleaseNotes>
+    <PackageReleaseNotes>Deleted Server.StartAsync waitFreePipe argument(It's server property now)</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">

@@ -72,7 +72,7 @@ namespace H.Pipes.Tests
             server.ExceptionOccurred += (sender, args) => Trace.WriteLine(args.Exception.ToString());
             client.ExceptionOccurred += (sender, args) => Trace.WriteLine(args.Exception.ToString());
 
-            await server.StartAsync(false, cancellationToken).ConfigureAwait(false);
+            await server.StartAsync(cancellationToken).ConfigureAwait(false);
             await client.ConnectAsync(cancellationToken).ConfigureAwait(false);
 
             Trace.WriteLine("Client and server started");

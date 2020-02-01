@@ -5,6 +5,9 @@ using H.Pipes.Args;
 
 namespace H.Pipes.Extensions
 {
+    /// <summary>
+    /// Common client/server extensions
+    /// </summary>
     public static class ConnectionExtensions
     {
         /// <summary>
