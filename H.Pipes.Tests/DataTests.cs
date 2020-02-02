@@ -139,7 +139,7 @@ namespace H.Pipes.Tests
         {
             using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(5));
             var completionSource = new TaskCompletionSource<bool>(false);
-            cancellationTokenSource.Token.Register(() => completionSource.TrySetCanceled());
+            using var registration = cancellationTokenSource.Token.Register(() => completionSource.TrySetCanceled());
 
             const string pipeName = "data_test_pipe";
             var formatter = new BinaryFormatter();

@@ -148,7 +148,7 @@ namespace H.Pipes
             await StopAsync(cancellationToken);
 
             var source = new TaskCompletionSource<bool>();
-            cancellationToken.Register(() => source.TrySetCanceled(cancellationToken));
+            using var registration = cancellationToken.Register(() => source.TrySetCanceled(cancellationToken));
 
             ListenWorker = new TaskWorker(async token =>
             {

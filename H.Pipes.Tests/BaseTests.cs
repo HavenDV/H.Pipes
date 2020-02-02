@@ -17,7 +17,7 @@ namespace H.Pipes.Tests
 
             var completionSource = new TaskCompletionSource<bool>(false);
             // ReSharper disable once AccessToModifiedClosure
-            cancellationToken.Register(() => completionSource.TrySetCanceled(cancellationToken));
+            using var registration = cancellationToken.Register(() => completionSource.TrySetCanceled(cancellationToken));
 
             var actualHash = (string?)null;
             var clientDisconnected = false;
