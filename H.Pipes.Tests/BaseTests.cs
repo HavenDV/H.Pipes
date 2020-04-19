@@ -108,7 +108,7 @@ namespace H.Pipes.Tests
 
         public static async Task DataTestAsync<T>(List<T> values, Func<T, string>? hashFunc = null, IFormatter? formatter = default, TimeSpan? timeout = default)
         {
-            using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(5));
+            using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(15));
 
             const string pipeName = "data_test_pipe";
             await using var server = new PipeServer<T>(pipeName, formatter ?? new BinaryFormatter());
@@ -119,7 +119,7 @@ namespace H.Pipes.Tests
 
         public static async Task DataSingleTestAsync<T>(List<T> values, Func<T, string>? hashFunc = null, IFormatter? formatter = default, TimeSpan? timeout = default)
         {
-            using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(5));
+            using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(15));
 
             const string pipeName = "data_test_pipe";
             await using var server = new SingleConnectionPipeServer<T>(pipeName, formatter ?? new BinaryFormatter());

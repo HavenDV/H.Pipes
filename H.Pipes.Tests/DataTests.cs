@@ -137,7 +137,7 @@ namespace H.Pipes.Tests
         [TestMethod]
         public async Task TypeTest()
         {
-            using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(15));
             var completionSource = new TaskCompletionSource<bool>(false);
             using var registration = cancellationTokenSource.Token.Register(() => completionSource.TrySetCanceled());
 
@@ -156,7 +156,7 @@ namespace H.Pipes.Tests
                 completionSource.TrySetResult(args.Message is Exception);
             };
 
-            await server.StartAsync(cancellationToken: cancellationTokenSource.Token);
+            await server.StartAsync(cancellationTokenSource.Token);
 
             await client.ConnectAsync(cancellationTokenSource.Token);
 
