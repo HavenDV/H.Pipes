@@ -73,6 +73,8 @@ await server.StartAsync();
 await Task.Delay(Timeout.InfiniteTimeSpan);
 ```
 
+P.S. To use the server inside the WinForms application, use Task.Run(). This creates a new thread for it.
+
 Client:
 
 ```csharp
