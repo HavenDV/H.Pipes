@@ -122,7 +122,10 @@ namespace H.Pipes.Tests
             using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(15));
 
             const string pipeName = "data_test_pipe";
-            await using var server = new SingleConnectionPipeServer<T>(pipeName, formatter ?? new BinaryFormatter());
+            await using var server = new SingleConnectionPipeServer<T>(pipeName, formatter ?? new BinaryFormatter())
+            {
+                WaitFreePipe = true
+            };
             await using var client = new SingleConnectionPipeClient<T>(pipeName, formatter: formatter ?? new BinaryFormatter());
 
             await DataTestAsync(server, client, values, hashFunc, cancellationTokenSource.Token);
