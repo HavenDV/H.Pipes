@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO.Pipes;
 using System.Linq;
 using System.Reflection;
@@ -13,11 +14,12 @@ namespace H.Pipes.AccessControl
     /// <summary>
     /// This class will save only one running application and passing arguments if it is already running.
     /// </summary>
-    public sealed class PipeApplication
+    public sealed class PipeApplication : IDisposable, IAsyncDisposable
     {
         #region Properties
 
         private string ApplicationName { get; }
+        private PipeServer<string[]>? PipeServer { get; set; }
 
         /// <summary>
         /// Maximum timeout for sending data to the server
@@ -33,9 +35,19 @@ namespace H.Pipes.AccessControl
         /// </summary>
         public event EventHandler<Exception>? ExceptionOccurred;
 
+        /// <summary>
+        /// Occurs when new arguments received
+        /// </summary>
+        public event EventHandler<IList<string>>? ArgumentsReceived;
+
         private void OnExceptionOccurred(Exception value)
         {
             ExceptionOccurred?.Invoke(this, value);
+        }
+
+        private void OnArgumentsReceived(IList<string> value)
+        {
+            ArgumentsReceived?.Invoke(this, value);
         }
 
         #endregion
@@ -99,43 +111,51 @@ namespace H.Pipes.AccessControl
         /// <summary>
         /// Create new thread with PipeServer.
         /// </summary>
-        /// <param name="func"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task StartAsync(Func<string[], CancellationToken, Task> func, CancellationToken cancellationToken = default)
+        public Task StartAsync(CancellationToken cancellationToken = default)
         {
             return Task.Run(async () =>
             {
-                await using var server = new PipeServer<string[]>(ApplicationName);
-                server.AddAccessRules(
+                PipeServer = new PipeServer<string[]>(ApplicationName);
+                PipeServer.AddAccessRules(
                     new PipeAccessRule(
                         new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null),
                         PipeAccessRights.ReadWrite,
                         AccessControlType.Allow));
 
-                await server.StartAsync(cancellationToken).ConfigureAwait(false);
+                await PipeServer.StartAsync(cancellationToken).ConfigureAwait(false);
 
-                server.MessageReceived += async (sender, args) =>
+                PipeServer.MessageReceived += (sender, args) =>
                 {
-                    try
-                    {
-                        await func(args.Message, cancellationToken);
-                    }
-                    catch (OperationCanceledException)
-                    {
-                    }
-                    catch (Exception exception)
-                    {
-                        OnExceptionOccurred(exception);
-                    }
+                    OnArgumentsReceived(args.Message);
                 };
-                server.ExceptionOccurred += (sender, args) =>
+                PipeServer.ExceptionOccurred += (sender, args) =>
                 {
                     OnExceptionOccurred(args.Exception);
                 };
-
-                await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken).ConfigureAwait(false);
             }, cancellationToken);
+        }
+
+        /// <summary>
+        /// Disposes pipe server
+        /// </summary>
+        /// <returns></returns>
+        public void Dispose()
+        {
+            PipeServer?.Dispose();
+        }
+
+        /// <summary>
+        /// Disposes pipe server
+        /// </summary>
+        /// <returns></returns>
+        public async ValueTask DisposeAsync()
+        {
+            if (PipeServer != null)
+            {
+                await PipeServer.DisposeAsync();
+            }
         }
 
         #endregion
