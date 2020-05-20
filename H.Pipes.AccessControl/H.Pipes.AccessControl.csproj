@@ -3,13 +3,13 @@
     <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
     <LangVersion>8</LangVersion>
     <Nullable>enable</Nullable>
-    <Version>1.12.3.2</Version>
+    <Version>1.13.0</Version>
     <Description>This package adds AccessControl extensions for PipeServerSetPipeSecurity() and other)</Description>
     <Authors>havendv</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/HavenDV/H.Pipes</PackageProjectUrl>
     <RepositoryUrl>https://github.com/HavenDV/H.Pipes</RepositoryUrl>
-    <PackageReleaseNotes>Added PipeApplication</PackageReleaseNotes>
+    <PackageReleaseNotes>Fixed writing while simultaneously accessing from multiple threads.</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">

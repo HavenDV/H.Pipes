@@ -18,6 +18,7 @@ namespace H.Pipes.IO
         /// Gets the underlying <c>PipeStream</c> object.
         /// </summary>
         private PipeStream BaseStream { get; }
+        private SemaphoreSlim SemaphoreSlim { get; } = new SemaphoreSlim(1, 1);
 
         #endregion
 
@@ -50,11 +51,20 @@ namespace H.Pipes.IO
         /// <param name="cancellationToken"></param>
         public async Task WriteAsync(byte[] buffer, CancellationToken cancellationToken = default)
         {
-            await WriteLengthAsync(buffer.Length, cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await SemaphoreSlim.WaitAsync(cancellationToken);
 
-            await BaseStream.WriteAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
+                await WriteLengthAsync(buffer.Length, cancellationToken).ConfigureAwait(false);
 
-            await BaseStream.FlushAsync(cancellationToken).ConfigureAwait(false);
+                await BaseStream.WriteAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
+
+                await BaseStream.FlushAsync(cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                SemaphoreSlim.Release();
+            }
         }
 
         /// <summary>
@@ -78,6 +88,7 @@ namespace H.Pipes.IO
         public void Dispose()
         {
             BaseStream.Dispose();
+            SemaphoreSlim.Dispose();
         }
 
         /// <summary>
@@ -92,6 +103,7 @@ namespace H.Pipes.IO
 #else
             await BaseStream.DisposeAsync().ConfigureAwait(false);
 #endif
+            SemaphoreSlim.Dispose();
         }
 
         #endregion

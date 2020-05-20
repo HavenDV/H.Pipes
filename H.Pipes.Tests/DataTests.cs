@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using H.Formatters;
@@ -36,6 +37,30 @@ namespace H.Pipes.Tests
             await BaseTests.DataSingleTestAsync(values, HashFunc);
             await BaseTests.DataSingleTestAsync(values, HashFunc, new JsonFormatter());
             await BaseTests.DataSingleTestAsync(values, HashFunc, new WireFormatter());
+        }
+
+        [TestMethod]
+        public async Task EmptyArrayParallelTest()
+        {
+            using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            var cancellationToken = cancellationTokenSource.Token;
+
+            const string pipeName = "data_test_pipe";
+            await using var server = new SingleConnectionPipeServer<string?>(pipeName)
+            {
+                WaitFreePipe = true
+            };
+            await using var client = new SingleConnectionPipeClient<string?>(pipeName);
+
+            await server.StartAsync(cancellationToken).ConfigureAwait(false);
+            await client.ConnectAsync(cancellationToken).ConfigureAwait(false);
+
+            var tasks = Enumerable
+                .Range(0, 10000)
+                .Select(async _ => await client.WriteAsync(null, cancellationTokenSource.Token))
+                .ToArray();
+
+            await Task.WhenAll(tasks);
         }
 
         [TestMethod]
