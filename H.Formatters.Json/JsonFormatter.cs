@@ -42,9 +42,7 @@ namespace H.Formatters
         {
             if (bytes == null || !bytes.Any())
             {
-#pragma warning disable CS8653 // A default expression introduces a null value for a type parameter.
-                return Task.FromResult<T>(default);
-#pragma warning restore CS8653 // A default expression introduces a null value for a type parameter.
+                return Task.FromResult<T>(default!);
             }
 
             var json = Encoding.UTF8.GetString(bytes);

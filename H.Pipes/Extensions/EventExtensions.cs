@@ -128,9 +128,7 @@ namespace H.Pipes.Extensions
                     }
                     catch (OperationCanceledException)
                     {
-#pragma warning disable CS8653 // A default expression introduces a null value for a type parameter.
-                        return default;
-#pragma warning restore CS8653 // A default expression introduces a null value for a type parameter.
+                        return default!;
                     }
                 })
                 .ToList();
@@ -152,7 +150,7 @@ namespace H.Pipes.Extensions
                     pair =>
                         pair.task.IsCompleted && !pair.task.IsCanceled
                             ? pair.task.Result
-                            : default);
+                            : default!);
         }
 
         /// <summary>
@@ -185,9 +183,7 @@ namespace H.Pipes.Extensions
                     }
                     catch (OperationCanceledException)
                     {
-#pragma warning disable CS8653 // A default expression introduces a null value for a type parameter.
-                        return default;
-#pragma warning restore CS8653 // A default expression introduces a null value for a type parameter.
+                        return default!;
                     }
                 })
                 .ToList();
@@ -209,7 +205,7 @@ namespace H.Pipes.Extensions
                     pair =>
                         pair.task.IsCompleted && !pair.task.IsCanceled
                             ? pair.task.Result
-                            : default);
+                            : default!);
         }
     }
 }
