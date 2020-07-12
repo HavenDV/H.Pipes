@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO.Pipes;
 using System.Linq;
 using System.Reflection;
@@ -96,6 +97,8 @@ namespace H.Pipes.AccessControl
                 };
 
                 await client.WriteAsync(arguments, source.Token).ConfigureAwait(false);
+
+                return true;
             }
             catch (OperationCanceledException)
             {
@@ -105,7 +108,26 @@ namespace H.Pipes.AccessControl
                 OnExceptionOccurred(exception);
             }
 
-            return true;
+            try
+            {
+                var processes = Process.GetProcessesByName(ApplicationName);
+                using var currentProcess = Process.GetCurrentProcess();
+                foreach (var process in processes.Where(i => i.Id != currentProcess.Id))
+                {
+                    process.Kill();
+                }
+
+                foreach (var process in processes)
+                {
+                    process.Dispose();
+                }
+            }
+            catch (Exception)
+            {
+                // ignored.
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -118,6 +140,10 @@ namespace H.Pipes.AccessControl
             return Task.Run(async () =>
             {
                 PipeServer = new PipeServer<string[]>(ApplicationName);
+                PipeServer.ExceptionOccurred += (sender, args) =>
+                {
+                    OnExceptionOccurred(args.Exception);
+                };
                 PipeServer.AddAccessRules(
                     new PipeAccessRule(
                         new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null),
@@ -129,10 +155,6 @@ namespace H.Pipes.AccessControl
                 PipeServer.MessageReceived += (sender, args) =>
                 {
                     OnArgumentsReceived(args.Message);
-                };
-                PipeServer.ExceptionOccurred += (sender, args) =>
-                {
-                    OnExceptionOccurred(args.Exception);
                 };
             }, cancellationToken);
         }
