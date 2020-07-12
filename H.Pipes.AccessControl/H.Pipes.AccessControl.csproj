@@ -3,13 +3,13 @@
     <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
     <LangVersion>8</LangVersion>
     <Nullable>enable</Nullable>
-    <Version>1.13.1</Version>
+    <Version>1.13.2</Version>
     <Description>This package adds AccessControl extensions for PipeServerSetPipeSecurity() and other)</Description>
     <Authors>havendv</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/HavenDV/H.Pipes</PackageProjectUrl>
     <RepositoryUrl>https://github.com/HavenDV/H.Pipes</RepositoryUrl>
-    <PackageReleaseNotes>Updated nuget references.</PackageReleaseNotes>
+    <PackageReleaseNotes>Fixed Process.GetProcessesByName disposing for PipeApplication</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">

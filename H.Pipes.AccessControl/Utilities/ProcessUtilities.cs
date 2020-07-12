@@ -29,7 +29,13 @@ namespace H.Pipes.AccessControl.Utilities
         {
             var cleanName = GetClearedApplicationName(name);
 
-            return Process.GetProcessesByName(cleanName).Length;
+            var processes = Process.GetProcessesByName(cleanName);
+            foreach (var process in processes)
+            {
+                process.Dispose();
+            }
+
+            return processes.Length;
         }
 
         /// <summary>
