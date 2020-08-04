@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard1.6</TargetFramework>
+    <TargetFrameworks>netstandard1.6;net45</TargetFrameworks>
     <LangVersion>8</LangVersion>
     <Nullable>enable</Nullable>
-    <Version>0.8.2.1</Version>
+    <Version>0.8.2.2</Version>
     <RootNamespace>H.Formatters</RootNamespace>
     <Description>This package adds WireFormatter(based on Wire nuget package)</Description>
     <Authors>havendv</Authors>

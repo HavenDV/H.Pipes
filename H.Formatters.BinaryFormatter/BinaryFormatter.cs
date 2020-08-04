@@ -1,8 +1,8 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using H.Formatters.Utilities;
 
 namespace H.Formatters
 {
@@ -23,14 +23,14 @@ namespace H.Formatters
         {
             if (obj == null)
             {
-                return Task.FromResult(Array.Empty<byte>());
+                return TaskUtilities.FromResult(ArrayUtilities.Empty<byte>());
             }
-
+            
             using var stream = new MemoryStream();
             InternalFormatter.Serialize(stream, obj);
             var bytes = stream.ToArray();
 
-            return Task.FromResult(bytes);
+            return TaskUtilities.FromResult(bytes);
         }
 
         /// <summary>
@@ -44,13 +44,13 @@ namespace H.Formatters
         {
             if (bytes == null || !bytes.Any())
             {
-                return Task.FromResult<T>(default!);
+                return TaskUtilities.FromResult<T>(default!);
             }
 
             using var memoryStream = new MemoryStream(bytes);
             var obj = (T) InternalFormatter.Deserialize(memoryStream);
 
-            return Task.FromResult(obj);
+            return TaskUtilities.FromResult(obj);
         }
     }
 }

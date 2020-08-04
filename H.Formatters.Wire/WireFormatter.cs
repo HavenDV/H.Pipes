@@ -1,8 +1,8 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using H.Formatters.Utilities;
 using Wire;
 
 namespace H.Formatters
@@ -24,7 +24,7 @@ namespace H.Formatters
         {
             if (obj == null)
             {
-                return Task.FromResult(Array.Empty<byte>());
+                return Task.FromResult(ArrayUtilities.Empty<byte>());
             }
 
             using var stream = new MemoryStream();

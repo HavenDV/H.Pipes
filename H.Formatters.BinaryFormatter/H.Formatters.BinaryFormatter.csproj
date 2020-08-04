@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net40;net45</TargetFrameworks>
     <LangVersion>8</LangVersion>
     <Nullable>enable</Nullable>
-    <Version>1.0.0.1</Version>
+    <Version>1.0.0.2</Version>
     <RootNamespace>H.Formatters</RootNamespace>
     <Description>This package adds BinaryFormatter(based on System.Runtime.Serialization.Formatters.Binary.BinaryFormatter)</Description>
     <Authors>havendv</Authors>

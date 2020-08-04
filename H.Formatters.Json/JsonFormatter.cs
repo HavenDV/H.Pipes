@@ -1,8 +1,8 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using H.Formatters.Utilities;
 using Newtonsoft.Json;
 
 namespace H.Formatters
@@ -22,13 +22,13 @@ namespace H.Formatters
         {
             if (obj == null)
             {
-                return Task.FromResult(Array.Empty<byte>());
+                return TaskUtilities.FromResult(ArrayUtilities.Empty<byte>());
             }
 
             var json = JsonConvert.SerializeObject(obj);
             var bytes = Encoding.UTF8.GetBytes(json);
 
-            return Task.FromResult(bytes);
+            return TaskUtilities.FromResult(bytes);
         }
 
         /// <summary>
@@ -42,13 +42,13 @@ namespace H.Formatters
         {
             if (bytes == null || !bytes.Any())
             {
-                return Task.FromResult<T>(default!);
+                return TaskUtilities.FromResult<T>(default!);
             }
 
             var json = Encoding.UTF8.GetString(bytes);
             var obj = JsonConvert.DeserializeObject<T>(json);
 
-            return Task.FromResult(obj);
+            return TaskUtilities.FromResult(obj);
         }
     }
 }
