@@ -12,7 +12,11 @@ namespace H.Pipes.Tests
         public async Task ConnectTest()
         {
             using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+#if NETCOREAPP3_1
             await using var client = new PipeClient<string>("this_pipe_100%_is_not_exists");
+#else
+            using var client = new PipeClient<string>("this_pipe_100%_is_not_exists");
+#endif
 
             await Assert.ThrowsExceptionAsync<OperationCanceledException>(async () => await client.ConnectAsync(cancellationTokenSource.Token));
         }

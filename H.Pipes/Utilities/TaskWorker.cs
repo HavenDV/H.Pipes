@@ -103,7 +103,14 @@ namespace H.Pipes.Utilities
         /// </summary>
         public void Dispose()
         {
-            StopAsync().Wait();
+            if (_isDisposed)
+            {
+                return;
+            }
+
+            _isDisposed = true;
+
+            CancellationTokenSource.Cancel();
         }
 
 #if NETSTANDARD2_1

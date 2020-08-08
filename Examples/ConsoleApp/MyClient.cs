@@ -62,9 +62,6 @@ namespace ConsoleApp
 
                 await Task.Delay(Timeout.InfiniteTimeSpan, source.Token).ConfigureAwait(false);
             }
-            catch (TaskCanceledException)
-            {
-            }
             catch (OperationCanceledException)
             {
             }

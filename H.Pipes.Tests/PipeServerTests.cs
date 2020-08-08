@@ -17,22 +17,22 @@ namespace H.Pipes.Tests
                 try
                 {
                     using var source = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
-#if NETCOREAPP2_0
-                    using var pipe = await PipeServerFactory.CreateAndWaitAsync("test", source.Token).ConfigureAwait(false);
-#else
+#if NETCOREAPP3_1
                     await using var pipe = await PipeServerFactory.CreateAndWaitAsync("test", source.Token).ConfigureAwait(false);
+#else
+                    using var pipe = await PipeServerFactory.CreateAndWaitAsync("test", source.Token).ConfigureAwait(false);
 #endif
                 }
-                catch (TaskCanceledException)
+                catch (OperationCanceledException)
                 {
                 }
             }
 
             {
-#if NETCOREAPP2_0
-                using var pipe = PipeServerFactory.Create("test");
-#else
+#if NETCOREAPP3_1
                 await using var pipe = PipeServerFactory.Create("test");
+#else
+                using var pipe = PipeServerFactory.Create("test");
 #endif
             }
         }
@@ -41,11 +41,21 @@ namespace H.Pipes.Tests
         public async Task StartDisposeStart()
         {
             {
+#if NETCOREAPP3_1
                 await using var pipe = new PipeServer<string>("test");
+#else
+                using var pipe = new PipeServer<string>("test");
+#endif
+
                 await pipe.StartAsync();
             }
             {
+#if NETCOREAPP3_1
                 await using var pipe = new PipeServer<string>("test");
+#else
+                using var pipe = new PipeServer<string>("test");
+#endif
+
                 await pipe.StartAsync();
             }
         }
@@ -53,9 +63,19 @@ namespace H.Pipes.Tests
         [TestMethod]
         public async Task DoubleStartWithSameName()
         {
+#if NETCOREAPP3_1
             await using var pipe1 = new PipeServer<string>("test");
+#else
+            using var pipe1 = new PipeServer<string>("test");
+#endif
+
             await pipe1.StartAsync();
+
+#if NETCOREAPP3_1
             await using var pipe2 = new PipeServer<string>("test");
+#else
+            using var pipe2 = new PipeServer<string>("test");
+#endif
 
             await Assert.ThrowsExceptionAsync<IOException>(async () => await pipe2.StartAsync());
         }
@@ -76,7 +96,12 @@ namespace H.Pipes.Tests
         [TestMethod]
         public async Task StartStopStart()
         {
+#if NETCOREAPP3_1
             await using var pipe = new PipeServer<string>("test");
+#else
+            using var pipe = new PipeServer<string>("test");
+#endif
+
             await pipe.StartAsync();
             await pipe.StopAsync();
             await pipe.StartAsync();

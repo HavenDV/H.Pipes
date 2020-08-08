@@ -46,11 +46,19 @@ namespace H.Pipes.Tests
             var cancellationToken = cancellationTokenSource.Token;
 
             const string pipeName = "data_test_pipe";
+#if NETCOREAPP3_1
             await using var server = new SingleConnectionPipeServer<string?>(pipeName)
             {
                 WaitFreePipe = true
             };
             await using var client = new SingleConnectionPipeClient<string?>(pipeName);
+#else
+            using var server = new SingleConnectionPipeServer<string?>(pipeName)
+            {
+                WaitFreePipe = true
+            };
+            using var client = new SingleConnectionPipeClient<string?>(pipeName);
+#endif
 
             await server.StartAsync(cancellationToken).ConfigureAwait(false);
             await client.ConnectAsync(cancellationToken).ConfigureAwait(false);
@@ -169,8 +177,13 @@ namespace H.Pipes.Tests
             const string pipeName = "data_test_pipe";
             var formatter = new BinaryFormatter();
             //var type = typeof(Exception);
+#if NETCOREAPP3_1
             await using var server = new PipeServer<object>(pipeName, formatter);
             await using var client = new PipeClient<object>(pipeName, formatter: formatter);
+#else
+            using var server = new PipeServer<object>(pipeName, formatter);
+            using var client = new PipeClient<object>(pipeName, formatter: formatter);
+#endif
 
             server.ExceptionOccurred += (sender, args) => Assert.Fail(args.Exception.ToString());
             client.ExceptionOccurred += (sender, args) => Assert.Fail(args.Exception.ToString());
