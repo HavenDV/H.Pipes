@@ -138,12 +138,6 @@ namespace H.Pipes.Tests
         }
 
         [TestMethod]
-        public async Task TestMessageSize300Mx3()
-        {
-            await BaseTests.BinaryDataTestAsync(1024 * 1024 * 300 + 1, 3, timeout: TimeSpan.FromMinutes(1));
-        }
-
-        [TestMethod]
         public async Task Single_TestEmptyMessageDoesNotDisconnectClient()
         {
             await BaseTests.BinaryDataSingleTestAsync(0);

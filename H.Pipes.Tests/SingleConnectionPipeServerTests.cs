@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -19,6 +20,9 @@ namespace H.Pipes.Tests
 
                 await pipe.StartAsync();
             }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(1));
+
             {
 #if NETCOREAPP3_1
                 await using var pipe = new SingleConnectionPipeServer<string>("test");

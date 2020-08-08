@@ -49,6 +49,9 @@ namespace H.Pipes.Tests
 
                 await pipe.StartAsync();
             }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(1));
+
             {
 #if NETCOREAPP3_1
                 await using var pipe = new PipeServer<string>("test");
