@@ -17,7 +17,7 @@ namespace H.Pipes.Extensions
             public TaskCompletionSource<T>? Source { get; set; }
 
             // ReSharper disable once UnusedParameter.Local
-            public void HandleEvent(object sender, T e)
+            public void HandleEvent(object _, T e)
             {
                 Source?.TrySetResult(e);
             }
@@ -144,12 +144,12 @@ namespace H.Pipes.Extensions
             }
 
             return eventNames
-                .Zip(tasks, (name, task) => (name, task))
+                .Zip(tasks, (name, task) => new Tuple<string, Task<T>>(name, task))
                 .ToDictionary(
-                    pair => pair.name,
+                    pair => pair.Item1,
                     pair =>
-                        pair.task.IsCompleted && !pair.task.IsCanceled
-                            ? pair.task.Result
+                        pair.Item2.IsCompleted && !pair.Item2.IsCanceled
+                            ? pair.Item2.Result
                             : default!);
         }
 
@@ -199,12 +199,12 @@ namespace H.Pipes.Extensions
             }
 
             return eventNames
-                .Zip(tasks, (name, task) => (name, task))
+                .Zip(tasks, (name, task) => new Tuple<string, Task<T>>(name, task))
                 .ToDictionary(
-                    pair => pair.name,
+                    pair => pair.Item1,
                     pair =>
-                        pair.task.IsCompleted && !pair.task.IsCanceled
-                            ? pair.task.Result
+                        pair.Item2.IsCompleted && !pair.Item2.IsCanceled
+                            ? pair.Item2.Result
                             : default!);
         }
     }
