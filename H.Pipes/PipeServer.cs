@@ -161,10 +161,10 @@ namespace H.Pipes
                         // Send the client the name of the data pipe to use
                         try
                         {
-#if NETSTANDARD2_0
-                            using var serverStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName);
-#else
+#if NETSTANDARD2_1
                             await using var serverStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName);
+#else
+                            using var serverStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName);
 #endif
                             PipeStreamInitializeAction?.Invoke(serverStream);
 
@@ -172,7 +172,11 @@ namespace H.Pipes
 
                             await serverStream.WaitForConnectionAsync(token).ConfigureAwait(false);
 
+#if NETSTANDARD2_1
                             await using var handshakeWrapper = new PipeStreamWrapper(serverStream);
+#else
+                            using var handshakeWrapper = new PipeStreamWrapper(serverStream);
+#endif
 
                             await handshakeWrapper.WriteAsync(Encoding.UTF8.GetBytes(connectionPipeName), token)
                                 .ConfigureAwait(false);
@@ -199,10 +203,10 @@ namespace H.Pipes
                         }
                         catch
                         {
-#if NETSTANDARD2_0
-                            connectionStream.Dispose();
-#else
+#if NETSTANDARD2_1
                             await connectionStream.DisposeAsync().ConfigureAwait(false);
+#else
+                            connectionStream.Dispose();
 #endif
 
                             throw;
@@ -293,13 +297,13 @@ namespace H.Pipes
         {
             if (ListenWorker != null)
             {
-                await ListenWorker.DisposeAsync().ConfigureAwait(false);
+                await ListenWorker.StopAsync().ConfigureAwait(false);
 
                 ListenWorker = null;
             }
 
             var tasks = Connections
-                .Select(connection => connection.DisposeAsync().AsTask())
+                .Select(connection => connection.StopAsync())
                 .ToList();
 
             Connections.Clear();
@@ -307,9 +311,9 @@ namespace H.Pipes
             await Task.WhenAll(tasks).ConfigureAwait(false);
         }
 
-        #endregion
+#endregion
 
-        #region IDisposable
+#region IDisposable
 
         /// <summary>
         /// Dispose internal resources
@@ -334,6 +338,7 @@ namespace H.Pipes
             Connections.Clear();
         }
 
+#if NETSTANDARD2_1
         /// <summary>
         /// Dispose internal resources
         /// </summary>
@@ -348,7 +353,8 @@ namespace H.Pipes
 
             await StopAsync().ConfigureAwait(false);
         }
+#endif
 
-        #endregion
+#endregion
     }
 }

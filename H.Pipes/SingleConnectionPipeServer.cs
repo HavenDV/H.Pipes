@@ -153,7 +153,7 @@ namespace H.Pipes
 
                         if (Connection != null)
                         {
-                            await Connection.DisposeAsync().ConfigureAwait(false);
+                            await Connection.StopAsync().ConfigureAwait(false);
                         }
 
                         // Wait for the client to connect to the data pipe
@@ -169,10 +169,10 @@ namespace H.Pipes
                         }
                         catch
                         {
-#if NETSTANDARD2_0
-                            connectionStream.Dispose();
-#else
+#if NETSTANDARD2_1
                             await connectionStream.DisposeAsync().ConfigureAwait(false);
+#else
+                            connectionStream.Dispose();
 #endif
 
                             throw;
@@ -188,7 +188,7 @@ namespace H.Pipes
                         }
                         catch
                         {
-                            await connection.DisposeAsync().ConfigureAwait(false);
+                            await connection.StopAsync().ConfigureAwait(false);
 
                             throw;
                         }
@@ -201,7 +201,7 @@ namespace H.Pipes
                     {
                         if (Connection != null)
                         {
-                            await Connection.DisposeAsync().ConfigureAwait(false);
+                            await Connection.StopAsync().ConfigureAwait(false);
 
                             Connection = null;
                         }
@@ -260,14 +260,14 @@ namespace H.Pipes
         {
             if (ListenWorker != null)
             {
-                await ListenWorker.DisposeAsync().ConfigureAwait(false);
+                await ListenWorker.StopAsync().ConfigureAwait(false);
 
                 ListenWorker = null;
             }
 
             if (Connection != null)
             {
-                await Connection.DisposeAsync().ConfigureAwait(false);
+                await Connection.StopAsync().ConfigureAwait(false);
 
                 Connection = null;
             }
@@ -296,6 +296,7 @@ namespace H.Pipes
             Connection = null;
         }
 
+#if NETSTANDARD2_1
         /// <summary>
         /// Dispose internal resources
         /// </summary>
@@ -310,6 +311,7 @@ namespace H.Pipes
 
             await StopAsync().ConfigureAwait(false);
         }
+#endif
 
         #endregion
     }

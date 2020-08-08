@@ -8,7 +8,10 @@ namespace H.Pipes.IO
     /// <summary>
     /// Wraps a <see cref="PipeStream"/> object to read and write .NET CLR objects.
     /// </summary>
-    public sealed class PipeStreamWrapper : IDisposable, IAsyncDisposable
+    public sealed class PipeStreamWrapper : IDisposable
+#if NETSTANDARD2_1
+        , IAsyncDisposable
+#endif
     {
         #region Properties
 
@@ -82,9 +85,23 @@ namespace H.Pipes.IO
             Writer.WaitForPipeDrain();
         }
 
-        #endregion
+        /// <summary>
+        /// Dispose internal <see cref="PipeStream"/>
+        /// </summary>
+        public async Task StopAsync()
+        {
+#if NETSTANDARD2_1
+            await DisposeAsync().ConfigureAwait(false);
+#else
+            Dispose();
 
-        #region IDisposable
+            await Task.CompletedTask;
+#endif
+        }
+
+#endregion
+
+#region IDisposable
 
         /// <summary>
         /// Dispose internal <see cref="PipeStream"/>
@@ -98,22 +115,20 @@ namespace H.Pipes.IO
             Writer.Dispose();
         }
 
+#if NETSTANDARD2_1
         /// <summary>
         /// Dispose internal <see cref="PipeStream"/>
         /// </summary>
         public async ValueTask DisposeAsync()
         {
-#if NETSTANDARD2_0
-            BaseStream.Dispose();
-#else
             await BaseStream.DisposeAsync().ConfigureAwait(false);
-#endif
 
             // This is redundant, just to avoid mistakes and follow the general logic of Dispose
             await Reader.DisposeAsync().ConfigureAwait(false);
             await Writer.DisposeAsync().ConfigureAwait(false);
         }
+#endif
 
-        #endregion
+#endregion
     }
 }

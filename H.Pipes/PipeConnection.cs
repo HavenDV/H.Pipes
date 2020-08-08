@@ -13,7 +13,10 @@ namespace H.Pipes
     /// Represents a connection between a named pipe client and server.
     /// </summary>
     /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
-    public sealed class PipeConnection<T> : IDisposable, IAsyncDisposable
+    public sealed class PipeConnection<T> : IDisposable
+#if NETSTANDARD2_1
+        , IAsyncDisposable
+#endif
     {
         #region Properties
 
@@ -150,6 +153,21 @@ namespace H.Pipes
             await PipeStreamWrapper.WriteAsync(bytes, cancellationToken).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Dispose internal resources
+        /// </summary>
+        public async Task StopAsync()
+        {
+            if (ReadWorker != null)
+            {
+                await ReadWorker.StopAsync().ConfigureAwait(false);
+
+                ReadWorker = null;
+            }
+
+            await PipeStreamWrapper.StopAsync();
+        }
+
         #endregion
 
         #region IDisposable
@@ -165,20 +183,15 @@ namespace H.Pipes
             PipeStreamWrapper.Dispose();
         }
 
+#if NETSTANDARD2_1
         /// <summary>
         /// Dispose internal resources
         /// </summary>
         public async ValueTask DisposeAsync()
         {
-            if (ReadWorker != null)
-            {
-                await ReadWorker.DisposeAsync().ConfigureAwait(false);
-
-                ReadWorker = null;
-            }
-
-            await PipeStreamWrapper.DisposeAsync();
+            await StopAsync().ConfigureAwait(false);
         }
+#endif
 
         #endregion
     }

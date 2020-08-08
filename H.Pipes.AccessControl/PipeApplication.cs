@@ -15,9 +15,12 @@ namespace H.Pipes.AccessControl
     /// <summary>
     /// This class will save only one running application and passing arguments if it is already running.
     /// </summary>
-    public sealed class PipeApplication : IDisposable, IAsyncDisposable
+    public sealed class PipeApplication : IDisposable
+#if NETSTANDARD2_1
+        , IAsyncDisposable
+#endif
     {
-        #region Properties
+#region Properties
 
         private string ApplicationName { get; }
         private PipeServer<string[]>? PipeServer { get; set; }
@@ -27,9 +30,9 @@ namespace H.Pipes.AccessControl
         /// </summary>
         public TimeSpan ClientTimeout { get; set; } = TimeSpan.FromSeconds(5);
 
-        #endregion
+#endregion
 
-        #region Events
+#region Events
 
         /// <summary>
         /// Occurs when new exception
@@ -51,9 +54,9 @@ namespace H.Pipes.AccessControl
             ArgumentsReceived?.Invoke(this, value);
         }
 
-        #endregion
+#endregion
 
-        #region Constructors
+#region Constructors
 
         /// <summary>
         /// Create pipe application
@@ -65,9 +68,9 @@ namespace H.Pipes.AccessControl
                 ?? throw new ArgumentException("Application name is null and is not found in entry assembly");
         }
 
-        #endregion
+#endregion
 
-        #region Methods
+#region Methods
 
         /// <summary>
         /// Try check and send to other process. <br/>
@@ -90,7 +93,11 @@ namespace H.Pipes.AccessControl
                 }
 
                 using var source = new CancellationTokenSource(ClientTimeout);
+#if NETSTANDARD2_1
                 await using var client = new PipeClient<string[]>(ApplicationName);
+#else
+                using var client = new PipeClient<string[]>(ApplicationName);
+#endif
                 client.ExceptionOccurred += (_, args) =>
                 {
                     OnExceptionOccurred(args.Exception);
@@ -168,6 +175,7 @@ namespace H.Pipes.AccessControl
             PipeServer?.Dispose();
         }
 
+#if NETSTANDARD2_1
         /// <summary>
         /// Disposes pipe server
         /// </summary>
@@ -179,6 +187,7 @@ namespace H.Pipes.AccessControl
                 await PipeServer.DisposeAsync();
             }
         }
+#endif
 
         #endregion
     }

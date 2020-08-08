@@ -222,7 +222,13 @@ namespace H.Pipes
                 return;
             }
 
+#if NETSTANDARD2_1
             await Connection.DisposeAsync().ConfigureAwait(false);
+#else
+            Connection.Dispose();
+
+            await Task.CompletedTask;
+#endif
 
             Connection = null;
         }
@@ -267,6 +273,7 @@ namespace H.Pipes
             Connection = null;
         }
 
+#if NETSTANDARD2_1
         /// <summary>
         /// Dispose internal resources
         /// </summary>
@@ -276,6 +283,7 @@ namespace H.Pipes
 
             await DisconnectInternalAsync().ConfigureAwait(false);
         }
+#endif
 
         #endregion
 
@@ -288,7 +296,12 @@ namespace H.Pipes
         /// <returns></returns>
         private async Task<string> GetConnectionPipeName(CancellationToken cancellationToken = default)
         {
+#if NETSTANDARD2_1
             await using var handshake = await PipeClientFactory.ConnectAsync(PipeName, ServerName, cancellationToken).ConfigureAwait(false);
+#else
+            using var handshake = await PipeClientFactory.ConnectAsync(PipeName, ServerName, cancellationToken).ConfigureAwait(false);
+#endif
+
             var bytes = await handshake.ReadAsync(cancellationToken).ConfigureAwait(false);
             if (bytes == null)
             {

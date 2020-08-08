@@ -35,10 +35,10 @@ namespace H.Pipes.Factories
             }
             catch
             {
-#if NETSTANDARD2_0
-                pipe.Dispose();
-#else
+#if NETSTANDARD2_1
                 await pipe.DisposeAsync().ConfigureAwait(false);
+#else
+                pipe.Dispose();
 #endif
 
                 throw;

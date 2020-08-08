@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;</TargetFrameworks>
-    <LangVersion>8</LangVersion>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net46</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <AssemblyTitle>Named Pipe Wrapper library</AssemblyTitle>
     <AssemblyDescription>A simple, easy to use, strongly-typed wrapper around .NET named pipes.</AssemblyDescription>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
-    <Version>1.13.1</Version>
+    <Version>1.13.4</Version>
     <PackageId>H.Pipes</PackageId>
     <Description>Features:
 - Create named pipe servers that can handle multiple client connections simultaneously.
@@ -30,7 +30,7 @@
     <PackageProjectUrl>https://github.com/HavenDV/H.Pipes</PackageProjectUrl>
     <RepositoryUrl>https://github.com/HavenDV/H.Pipes</RepositoryUrl>
     <PackageTags>pipes, named pipes, async, async named pipes, namedpipes async, namedpipes, pipes async</PackageTags>
-    <PackageReleaseNotes>Updated nuget references.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added net46 target.</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
@@ -39,10 +39,6 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="1.1.1" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\H.Formatters.BinaryFormatter\H.Formatters.BinaryFormatter.csproj" />
