@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;netcoreapp2.0;net45;net472</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;net45;net472</TargetFrameworks>
     <LangVersion>8</LangVersion>
     <Nullable>enable</Nullable>
     <RootNamespace>System.IO.Pipes.Tests</RootNamespace>
