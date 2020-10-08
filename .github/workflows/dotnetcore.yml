@@ -6,7 +6,7 @@ jobs:
   build:
     strategy:
       matrix:
-        dotnet: [ '3.1.100' ]
+        dotnet: [ '3.1.402' ]
         os: [windows-latest]
 
     runs-on: ${{ matrix.os }}
@@ -43,35 +43,35 @@ jobs:
       
     - name: Try Publish(if the version has changed) H.Formatters
       if: runner.os == 'Windows' &&
-          matrix.dotnet == '3.1.100'
+          matrix.dotnet == '3.1.402'
       run: dotnet nuget push H.Formatters\bin\Release\H.Formatters.*.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json; exit 0
       
     - name: Try Publish(if the version has changed) H.Formatters.BinaryFormatter
       if: runner.os == 'Windows' &&
-          matrix.dotnet == '3.1.100'
+          matrix.dotnet == '3.1.402'
       run: dotnet nuget push H.Formatters.BinaryFormatter\bin\Release\H.Formatters.BinaryFormatter.*.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json; exit 0
       
     - name: Try Publish(if the version has changed) H.Formatters.Json
       if: runner.os == 'Windows' &&
-          matrix.dotnet == '3.1.100'
+          matrix.dotnet == '3.1.402'
       run: dotnet nuget push H.Formatters.Json\bin\Release\H.Formatters.Json.*.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json; exit 0
       
     - name: Try Publish(if the version has changed) H.Formatters.Wire
       if: runner.os == 'Windows' &&
-          matrix.dotnet == '3.1.100'
+          matrix.dotnet == '3.1.402'
       run: dotnet nuget push H.Formatters.Wire\bin\Release\H.Formatters.Wire.*.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json; exit 0
       
     - name: Try Publish(if the version has changed) H.Pipes
       if: runner.os == 'Windows' &&
-          matrix.dotnet == '3.1.100'
+          matrix.dotnet == '3.1.402'
       run: dotnet nuget push H.Pipes\bin\Release\H.Pipes.*.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json; exit 0
       
     - name: Try Publish(if the version has changed) H.Pipes.AccessControl
       if: runner.os == 'Windows' &&
-          matrix.dotnet == '3.1.100'
+          matrix.dotnet == '3.1.402'
       run: dotnet nuget push H.Pipes.AccessControl\bin\Release\H.Pipes.AccessControl.*.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json; exit 0
       
     - name: Try Publish(if the version has changed) NamedPipeServerStream.NetFrameworkVersion
       if: runner.os == 'Windows' &&
-          matrix.dotnet == '3.1.100'
+          matrix.dotnet == '3.1.402'
       run: dotnet nuget push NamedPipeServerStream.NetFrameworkVersion\bin\Release\NamedPipeServerStream.NetFrameworkVersion.*.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json; exit 0
