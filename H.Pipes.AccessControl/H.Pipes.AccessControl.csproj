@@ -3,13 +3,13 @@
     <TargetFrameworks>netstandard2.0;netstandard2.1;net46</TargetFrameworks>
     <LangVersion>8</LangVersion>
     <Nullable>enable</Nullable>
-    <Version>1.13.4</Version>
+    <Version>1.14.0</Version>
     <Description>This package adds AccessControl extensions for PipeServerSetPipeSecurity() and other)</Description>
     <Authors>havendv</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/HavenDV/H.Pipes</PackageProjectUrl>
     <RepositoryUrl>https://github.com/HavenDV/H.Pipes</RepositoryUrl>
-    <PackageReleaseNotes>Added process killing for PipeApplication</PackageReleaseNotes>
+    <PackageReleaseNotes>Added net45 and net46 targets.</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
