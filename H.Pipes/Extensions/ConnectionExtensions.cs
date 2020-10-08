@@ -23,7 +23,7 @@ namespace H.Pipes.Extensions
         public static async Task<ConnectionMessageEventArgs<T>> WaitMessageAsync<T>(this IPipeConnection<T> connection, Func<CancellationToken, Task>? func = null, CancellationToken cancellationToken = default)
         {
             return await connection.WaitEventAsync<ConnectionMessageEventArgs<T>>(
-                func ?? (token => Task.CompletedTask),
+                func ?? (token => Task.Delay(TimeSpan.Zero, cancellationToken)),
                 nameof(connection.MessageReceived),
                 cancellationToken);
         }

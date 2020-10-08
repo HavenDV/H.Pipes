@@ -1,4 +1,5 @@
-﻿using System.IO.Pipes;
+﻿using System;
+using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,7 +22,13 @@ namespace H.Pipes.Factories
 
             try
             {
+#if NET45
+                pipe.WaitForConnection();
+
+                await Task.Delay(TimeSpan.Zero, cancellationToken);
+#else
                 await pipe.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
+#endif
 
                 return pipe;
             }

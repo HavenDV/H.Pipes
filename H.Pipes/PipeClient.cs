@@ -224,6 +224,10 @@ namespace H.Pipes
 
 #if NETSTANDARD2_1
             await Connection.DisposeAsync().ConfigureAwait(false);
+#elif NET45
+            Connection.Dispose();
+
+            await Task.Delay(TimeSpan.Zero);
 #else
             Connection.Dispose();
 

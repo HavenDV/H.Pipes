@@ -148,7 +148,11 @@ namespace H.Pipes
             await StopAsync(cancellationToken);
 
             var source = new TaskCompletionSource<bool>();
+#if NET45
+            using var registration = cancellationToken.Register(() => source.TrySetCanceled());
+#else
             using var registration = cancellationToken.Register(() => source.TrySetCanceled(cancellationToken));
+#endif
 
             ListenWorker = new TaskWorker(async token =>
             {
@@ -170,7 +174,13 @@ namespace H.Pipes
 
                             source.TrySetResult(true);
 
+#if NET45
+                            serverStream.WaitForConnection();
+
+                            await Task.Delay(TimeSpan.Zero, cancellationToken);
+#else
                             await serverStream.WaitForConnectionAsync(token).ConfigureAwait(false);
+#endif
 
 #if NETSTANDARD2_1
                             await using var handshakeWrapper = new PipeStreamWrapper(serverStream);
@@ -199,7 +209,13 @@ namespace H.Pipes
 
                         try
                         {
+#if NET45
+                            connectionStream.WaitForConnection();
+
+                            await Task.Delay(TimeSpan.Zero, cancellationToken);
+#else
                             await connectionStream.WaitForConnectionAsync(token).ConfigureAwait(false);
+#endif
                         }
                         catch
                         {

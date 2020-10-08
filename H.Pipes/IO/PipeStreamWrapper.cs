@@ -92,6 +92,10 @@ namespace H.Pipes.IO
         {
 #if NETSTANDARD2_1
             await DisposeAsync().ConfigureAwait(false);
+#elif NET45
+            Dispose();
+
+            await Task.Delay(TimeSpan.Zero);
 #else
             Dispose();
 
@@ -99,9 +103,9 @@ namespace H.Pipes.IO
 #endif
         }
 
-#endregion
+        #endregion
 
-#region IDisposable
+        #region IDisposable
 
         /// <summary>
         /// Dispose internal <see cref="PipeStream"/>

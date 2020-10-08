@@ -137,7 +137,11 @@ namespace H.Pipes
             await StopAsync(cancellationToken);
 
             var source = new TaskCompletionSource<bool>();
+#if NET45
+            using var registration = cancellationToken.Register(() => source.TrySetCanceled());
+#else
             using var registration = cancellationToken.Register(() => source.TrySetCanceled(cancellationToken));
+#endif
 
             ListenWorker = new TaskWorker(async token =>
             {
@@ -165,7 +169,13 @@ namespace H.Pipes
 
                             source.TrySetResult(true);
 
+#if NET45
+                            connectionStream.WaitForConnection();
+
+                            await Task.Delay(TimeSpan.Zero, cancellationToken);
+#else
                             await connectionStream.WaitForConnectionAsync(token).ConfigureAwait(false);
+#endif
                         }
                         catch
                         {
