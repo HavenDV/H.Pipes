@@ -30,7 +30,7 @@
     <PackageProjectUrl>https://github.com/HavenDV/H.Pipes</PackageProjectUrl>
     <RepositoryUrl>https://github.com/HavenDV/H.Pipes</RepositoryUrl>
     <PackageTags>pipes, named pipes, async, async named pipes, namedpipes async, namedpipes, pipes async</PackageTags>
-    <PackageReleaseNotes>Added net46 target.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added net45 and net46 targets.</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
