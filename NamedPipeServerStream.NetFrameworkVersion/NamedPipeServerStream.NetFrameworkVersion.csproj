@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net40;net45</TargetFrameworks>
-    <Version>1.0.3</Version>
+    <Version>1.0.5</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>System.IO.Pipes</RootNamespace>
     <Description>This package adds original NamedPipeServerStream constructors from Net.Framework to NetStandard
@@ -19,7 +19,7 @@ Features:
     <RepositoryUrl>https://github.com/HavenDV/H.Pipes/tree/master/NamedPipeServerStream.NetFrameworkVersion</RepositoryUrl>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
-    <PackageReleaseNotes>Added net40 and net45 targets to support projects with multi target.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added System.Core.resources as EmbeddedResource.</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
@@ -33,6 +33,14 @@ Features:
     <PackageReference Include="System.IO.Pipes" Version="4.3.0" />
     <PackageReference Include="System.IO.Pipes.AccessControl" Version="4.5.1" />
     <PackageReference Include="System.Security.Permissions" Version="4.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="System.Core.resources" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="System.Core.resources" />
   </ItemGroup>
 
 </Project>
