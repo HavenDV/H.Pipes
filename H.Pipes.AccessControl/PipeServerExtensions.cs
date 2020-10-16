@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO.Pipes;
+using System.Security.AccessControl;
+using System.Security.Principal;
 
 namespace H.Pipes.AccessControl
 {
@@ -37,7 +39,7 @@ namespace H.Pipes.AccessControl
         /// <returns></returns>
         public static void AddAccessRules<T>(this IPipeServer<T> server, params PipeAccessRule[] rules)
         {
-            server = server ?? throw new ArgumentNullException(nameof(rules));
+            server = server ?? throw new ArgumentNullException(nameof(server));
             rules = rules ?? throw new ArgumentNullException(nameof(rules));
 
             var pipeSecurity = new PipeSecurity();
@@ -47,6 +49,23 @@ namespace H.Pipes.AccessControl
             }
 
             server.SetPipeSecurity(pipeSecurity);
+        }
+
+        /// <summary>
+        /// Adds <see cref="PipeAccessRule"/> that allow ReadWrite to BuiltinUsersSid.
+        /// </summary>
+        /// <param name="server"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <returns></returns>
+        public static void AllowUsersReadWrite<T>(this IPipeServer<T> server)
+        {
+            server = server ?? throw new ArgumentNullException(nameof(server));
+
+            server.AddAccessRules(
+                new PipeAccessRule(
+                    new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null),
+                    PipeAccessRights.ReadWrite,
+                    AccessControlType.Allow));
         }
     }
 }
