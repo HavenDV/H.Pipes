@@ -126,4 +126,7 @@ server.SetPipeSecurity(pipeSecurity);
 
 // or just add AccessRule's (Please be careful, the server will only consider AccessRules from the last call AddAccessRules())
 server.AddAccessRules(new PipeAccessRule(new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null), PipeAccessRights.ReadWrite, AccessControlType.Allow));
+
+// or just
+server.AllowUsersReadWrite();
 ```
