@@ -44,7 +44,11 @@ namespace H.Pipes.IO
         {
             var buffer = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(length));
 
+#if NETSTANDARD2_1
+            await BaseStream.WriteAsync(buffer, cancellationToken).ConfigureAwait(false);
+#else
             await BaseStream.WriteAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
+#endif
         }
 
         /// <summary>
@@ -54,13 +58,19 @@ namespace H.Pipes.IO
         /// <param name="cancellationToken"></param>
         public async Task WriteAsync(byte[] buffer, CancellationToken cancellationToken = default)
         {
+            buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
+
             try
             {
                 await SemaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
 
                 await WriteLengthAsync(buffer.Length, cancellationToken).ConfigureAwait(false);
 
+#if NETSTANDARD2_1
+                await BaseStream.WriteAsync(buffer, cancellationToken).ConfigureAwait(false);
+#else
                 await BaseStream.WriteAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
+#endif
 
                 await BaseStream.FlushAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -81,9 +91,9 @@ namespace H.Pipes.IO
             BaseStream.WaitForPipeDrain();
         }
 
-        #endregion
+#endregion
 
-        #region IDisposable
+#region IDisposable
 
         /// <summary>
         /// Dispose internal <see cref="PipeStream"/>
@@ -106,6 +116,6 @@ namespace H.Pipes.IO
         }
 #endif
 
-        #endregion
+#endregion
     }
 }

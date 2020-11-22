@@ -51,7 +51,11 @@ namespace H.Pipes.IO
         private async Task<int> ReadLengthAsync(CancellationToken cancellationToken = default)
         {
             var buffer = new byte[sizeof(int)];
+#if NETSTANDARD2_1
+            var read = await BaseStream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
+#else
             var read = await BaseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
+#endif
             if (read == 0)
             {
                 IsConnected = false;
@@ -69,7 +73,11 @@ namespace H.Pipes.IO
         private async Task<byte[]> ReadAsync(int length, CancellationToken cancellationToken = default)
         {
             var buffer = new byte[length];
+#if NETSTANDARD2_1
+            await BaseStream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
+#else
             await BaseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
+#endif
 
             return buffer;
         }
@@ -88,9 +96,9 @@ namespace H.Pipes.IO
                 : await ReadAsync(length, cancellationToken).ConfigureAwait(false);
         }
 
-        #endregion
+#endregion
 
-        #region IDisposable
+#region IDisposable
 
         /// <summary>
         /// Dispose internal <see cref="PipeStream"/>
@@ -110,6 +118,6 @@ namespace H.Pipes.IO
         }
 #endif
 
-        #endregion
+#endregion
     }
 }
