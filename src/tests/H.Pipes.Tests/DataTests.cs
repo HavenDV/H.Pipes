@@ -177,7 +177,7 @@ namespace H.Pipes.Tests
 
             server.ExceptionOccurred += (_, args) => Assert.Fail(args.Exception.ToString());
             client.ExceptionOccurred += (_, args) => Assert.Fail(args.Exception.ToString());
-            client.MessageReceived += (_, args) =>
+            server.MessageReceived += (_, args) =>
             {
                 Console.WriteLine($"MessageReceived: {args.Message as Exception}");
 
@@ -188,7 +188,7 @@ namespace H.Pipes.Tests
 
             await client.ConnectAsync(cancellationTokenSource.Token);
 
-            await server.WriteAsync(new Exception("Hello. It's server message"), cancellationTokenSource.Token);
+            await client.WriteAsync(new Exception("Hello. It's server message"), cancellationTokenSource.Token);
 
             Assert.IsTrue(await completionSource.Task);
         }
