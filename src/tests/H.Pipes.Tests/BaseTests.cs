@@ -22,11 +22,11 @@ namespace H.Pipes.Tests
             var actualHash = (string?)null;
             var clientDisconnected = false;
 
-            server.ClientConnected += (sender, args) =>
+            server.ClientConnected += (_, _) =>
             {
                 Trace.WriteLine("Client connected");
             };
-            server.ClientDisconnected += (sender, args) =>
+            server.ClientDisconnected += (_, _) =>
             {
                 Trace.WriteLine("Client disconnected");
                 clientDisconnected = true;
@@ -34,7 +34,7 @@ namespace H.Pipes.Tests
                 // ReSharper disable once AccessToModifiedClosure
                 completionSource.TrySetResult(true);
             };
-            server.MessageReceived += (sender, args) =>
+            server.MessageReceived += (_, args) =>
             {
                 Trace.WriteLine($"Server_OnMessageReceived: {args.Message}");
                 actualHash = hashFunc?.Invoke(args.Message);
@@ -43,24 +43,24 @@ namespace H.Pipes.Tests
                 // ReSharper disable once AccessToModifiedClosure
                 completionSource.TrySetResult(true);
             };
-            server.ExceptionOccurred += (sender, args) =>
+            server.ExceptionOccurred += (_, args) =>
             {
                 Trace.WriteLine($"Server exception occurred: {args.Exception}");
 
                 // ReSharper disable once AccessToModifiedClosure
                 completionSource.TrySetException(args.Exception);
             };
-            client.Connected += (sender, args) => Trace.WriteLine("Client_OnConnected");
-            client.Disconnected += (sender, args) => Trace.WriteLine("Client_OnDisconnected");
-            client.MessageReceived += (sender, args) => Trace.WriteLine($"Client_OnMessageReceived: {args.Message}");
-            client.ExceptionOccurred += (sender, args) =>
+            client.Connected += (_, _) => Trace.WriteLine("Client_OnConnected");
+            client.Disconnected += (_, _) => Trace.WriteLine("Client_OnDisconnected");
+            client.MessageReceived += (_, args) => Trace.WriteLine($"Client_OnMessageReceived: {args.Message}");
+            client.ExceptionOccurred += (_, args) =>
             {
                 Trace.WriteLine($"Client exception occurred: {args.Exception}");
 
                 // ReSharper disable once AccessToModifiedClosure
                 completionSource.TrySetException(args.Exception);
             };
-            AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+            AppDomain.CurrentDomain.UnhandledException += (_, args) =>
             {
                 if (args.ExceptionObject is Exception exception)
                 {
@@ -69,8 +69,8 @@ namespace H.Pipes.Tests
                 }
             };
 
-            server.ExceptionOccurred += (sender, args) => Trace.WriteLine(args.Exception.ToString());
-            client.ExceptionOccurred += (sender, args) => Trace.WriteLine(args.Exception.ToString());
+            server.ExceptionOccurred += (_, args) => Trace.WriteLine(args.Exception.ToString());
+            client.ExceptionOccurred += (_, args) => Trace.WriteLine(args.Exception.ToString());
 
             await server.StartAsync(cancellationToken).ConfigureAwait(false);
             await client.ConnectAsync(cancellationToken).ConfigureAwait(false);

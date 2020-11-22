@@ -49,8 +49,8 @@ namespace H.Pipes.Tests
 
             _server.MessageReceived += ServerOnMessageReceived;
 
-            _server.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
-            _client.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
+            _server.ExceptionOccurred += (_, args) => OnExceptionOccurred(args.Exception);
+            _client.ExceptionOccurred += (_, args) => OnExceptionOccurred(args.Exception);
 
             await _server.StartAsync();
             await _client.ConnectAsync();

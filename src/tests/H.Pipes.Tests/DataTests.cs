@@ -175,9 +175,9 @@ namespace H.Pipes.Tests
             await using var server = new PipeServer<object>(pipeName, formatter);
             await using var client = new PipeClient<object>(pipeName, formatter: formatter);
 
-            server.ExceptionOccurred += (sender, args) => Assert.Fail(args.Exception.ToString());
-            client.ExceptionOccurred += (sender, args) => Assert.Fail(args.Exception.ToString());
-            client.MessageReceived += (sender, args) =>
+            server.ExceptionOccurred += (_, args) => Assert.Fail(args.Exception.ToString());
+            client.ExceptionOccurred += (_, args) => Assert.Fail(args.Exception.ToString());
+            client.MessageReceived += (_, args) =>
             {
                 Console.WriteLine($"MessageReceived: {args.Message as Exception}");
 
