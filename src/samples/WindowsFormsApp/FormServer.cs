@@ -9,7 +9,7 @@ namespace WindowsFormsApp
     public sealed partial class FormServer : Form, IAsyncDisposable
     {
         private string PipeName { get; }
-        private PipeServer<string> Server { get; set; }
+        private PipeServer<string> Server { get; }
         private ISet<string> Clients { get; } = new HashSet<string>();
 
         public FormServer(string pipeName)
@@ -19,10 +19,7 @@ namespace WindowsFormsApp
             InitializeComponent();
 
             Load += OnLoad;
-        }
 
-        private async void OnLoad(object sender, EventArgs eventArgs)
-        {
             Server = new PipeServer<string>(PipeName);
             Server.ClientConnected += async (o, args) =>
             {
@@ -49,6 +46,10 @@ namespace WindowsFormsApp
             };
             Server.MessageReceived += (o, args) => AddLine($"{args.Connection.Name}: {args.Message}");
             Server.ExceptionOccurred += (o, args) => OnExceptionOccurred(args.Exception);
+        }
+
+        private async void OnLoad(object? sender, EventArgs eventArgs)
+        {
 
             try
             {

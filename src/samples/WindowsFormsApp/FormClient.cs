@@ -8,7 +8,7 @@ namespace WindowsFormsApp
     public partial class FormClient : Form, IAsyncDisposable
     {
         private string PipeName { get; }
-        private PipeClient<string> Client { get; set; }
+        private PipeClient<string> Client { get; }
 
         public FormClient(string pipeName)
         {
@@ -17,16 +17,16 @@ namespace WindowsFormsApp
             InitializeComponent();
 
             Load += OnLoad;
-        }
 
-        private async void OnLoad(object sender, EventArgs eventArgs)
-        {
             Client = new PipeClient<string>(PipeName);
             Client.MessageReceived += (o, args) => AddLine("MessageReceived: " + args.Message);
             Client.Disconnected += (o, args) => AddLine("Disconnected from server");
             Client.Connected += (o, args) => AddLine("Connected to server");
             Client.ExceptionOccurred += (o, args) => OnExceptionOccurred(args.Exception);
+        }
 
+        private async void OnLoad(object? sender, EventArgs eventArgs)
+        {
             try
             {
                 AddLine("Client connecting...");

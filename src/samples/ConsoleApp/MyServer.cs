@@ -24,7 +24,7 @@ namespace ConsoleApp
                 Console.WriteLine("Enter 'q' to exit");
 
                 await using var server = new PipeServer<MyMessage>(pipeName);
-                server.ClientConnected += async (o, args) =>
+                server.ClientConnected += async (_, args) =>
                 {
                     Console.WriteLine($"Client {args.Connection.Id} is now connected!");
 
@@ -41,15 +41,15 @@ namespace ConsoleApp
                         OnExceptionOccurred(exception);
                     }
                 };
-                server.ClientDisconnected += (o, args) =>
+                server.ClientDisconnected += (_, args) =>
                 {
                     Console.WriteLine($"Client {args.Connection.Id} disconnected");
                 };
-                server.MessageReceived += (sender, args) =>
+                server.MessageReceived += (_, args) =>
                 {
                     Console.WriteLine($"Client {args.Connection.Id} says: {args.Message}");
                 };
-                server.ExceptionOccurred += (o, args) => OnExceptionOccurred(args.Exception);
+                server.ExceptionOccurred += (_, args) => OnExceptionOccurred(args.Exception);
 
                 // Dispose is not required
                 var _ = Task.Run(async () =>
@@ -71,7 +71,7 @@ namespace ConsoleApp
                             {
                                 Id = new Random().Next(),
                                 Text = message,
-                            }, cancellationToken: source.Token).ConfigureAwait(false);
+                            }, source.Token).ConfigureAwait(false);
                         }
                         catch (Exception exception)
                         {

@@ -70,7 +70,9 @@ namespace System.IO.Pipes
                         int pipeMode = (int)transmissionMode << 2 | (int)transmissionMode << 1;
                         if (maxNumberOfServerInstances == -1)
                             maxNumberOfServerInstances = (int)byte.MaxValue;
+#pragma warning disable CA2000 // Dispose objects before losing scope
                         SafePipeHandle namedPipe = CreateNamedPipe(fullPath, openMode, pipeMode, maxNumberOfServerInstances, outBufferSize, inBufferSize, 0, secAttrs);
+#pragma warning restore CA2000 // Dispose objects before losing scope
                         if (namedPipe.IsInvalid)
                             WinIOError(Marshal.GetLastWin32Error(), string.Empty);
 
