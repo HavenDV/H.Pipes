@@ -10,6 +10,8 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.os }} - ${{ matrix.dotnet }}
+    env:
+      DOTNET_NOLOGO: true
     
     steps:
     - name: Getting code
