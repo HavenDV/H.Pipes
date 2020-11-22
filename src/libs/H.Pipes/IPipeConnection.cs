@@ -9,10 +9,7 @@ namespace H.Pipes
     /// Base class of all connections
     /// </summary>
     /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
-    public interface IPipeConnection<T> : IDisposable
-#if NETSTANDARD2_1
-        , IAsyncDisposable
-#endif
+    public interface IPipeConnection<T> : IAsyncDisposable
     {
         #region Events
 

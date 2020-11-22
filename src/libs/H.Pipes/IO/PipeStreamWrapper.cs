@@ -92,10 +92,6 @@ namespace H.Pipes.IO
         {
 #if NETSTANDARD2_1
             await DisposeAsync().ConfigureAwait(false);
-#elif NET45
-            Dispose();
-
-            await Task.Delay(TimeSpan.Zero).ConfigureAwait(false);
 #else
             Dispose();
 

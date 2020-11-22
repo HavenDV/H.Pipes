@@ -13,10 +13,7 @@ namespace H.Pipes
     /// Represents a connection between a named pipe client and server.
     /// </summary>
     /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
-    public sealed class PipeConnection<T> : IDisposable
-#if NETSTANDARD2_1
-        , IAsyncDisposable
-#endif
+    public sealed class PipeConnection<T> : IAsyncDisposable
     {
         #region Properties
 
@@ -175,23 +172,10 @@ namespace H.Pipes
         /// <summary>
         /// Dispose internal resources
         /// </summary>
-        public void Dispose()
-        {
-            ReadWorker?.Dispose();
-            ReadWorker = null;
-
-            PipeStreamWrapper.Dispose();
-        }
-
-#if NETSTANDARD2_1
-        /// <summary>
-        /// Dispose internal resources
-        /// </summary>
         public async ValueTask DisposeAsync()
         {
             await StopAsync().ConfigureAwait(false);
         }
-#endif
 
         #endregion
     }

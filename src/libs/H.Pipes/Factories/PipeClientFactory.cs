@@ -30,13 +30,7 @@ namespace H.Pipes.Factories
 
             try
             {
-#if NET45
-                pipe.Connect();
-
-                await Task.Delay(TimeSpan.Zero, cancellationToken).ConfigureAwait(false);
-#else
                 await pipe.ConnectAsync(cancellationToken).ConfigureAwait(false);
-#endif
 
                 return pipe;
             }

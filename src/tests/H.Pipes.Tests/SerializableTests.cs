@@ -73,7 +73,6 @@ namespace H.Pipes.Tests
             Trace.WriteLine("---");
             Trace.WriteLine("Stopping client and server...");
 
-#if NETCOREAPP3_1
             if (_server != null)
             {
                 await _server.DisposeAsync();
@@ -82,12 +81,6 @@ namespace H.Pipes.Tests
             {
                 await _client.DisposeAsync();
             }
-#else
-            _server?.Dispose();
-            _client?.Dispose();
-
-            await Task.CompletedTask;
-#endif
 
             Trace.WriteLine("Client and server stopped");
             Trace.WriteLine($"Test took {DateTime.Now - _startTime}");

@@ -148,11 +148,7 @@ namespace H.Pipes
             await StopAsync(cancellationToken).ConfigureAwait(false);
 
             var source = new TaskCompletionSource<bool>();
-#if NET45
-            using var registration = cancellationToken.Register(() => source.TrySetCanceled());
-#else
             using var registration = cancellationToken.Register(() => source.TrySetCanceled(cancellationToken));
-#endif
 
             ListenWorker = new TaskWorker(async token =>
             {
@@ -174,13 +170,7 @@ namespace H.Pipes
 
                             source.TrySetResult(true);
 
-#if NET45
-                            serverStream.WaitForConnection();
-
-                            await Task.Delay(TimeSpan.Zero, cancellationToken).ConfigureAwait(false);
-#else
                             await serverStream.WaitForConnectionAsync(token).ConfigureAwait(false);
-#endif
 
 #if NETSTANDARD2_1
                             await using var handshakeWrapper = new PipeStreamWrapper(serverStream);
@@ -209,13 +199,7 @@ namespace H.Pipes
 
                         try
                         {
-#if NET45
-                            connectionStream.WaitForConnection();
-
-                            await Task.Delay(TimeSpan.Zero, cancellationToken).ConfigureAwait(false);
-#else
                             await connectionStream.WaitForConnectionAsync(token).ConfigureAwait(false);
-#endif
                         }
                         catch
                         {
@@ -334,30 +318,6 @@ namespace H.Pipes
         /// <summary>
         /// Dispose internal resources
         /// </summary>
-        public void Dispose()
-        {
-            if (_isDisposed)
-            {
-                return;
-            }
-
-            _isDisposed = true;
-
-            ListenWorker?.Dispose();
-            ListenWorker = null;
-
-            foreach (var connection in Connections)
-            {
-                connection.Dispose();
-            }
-
-            Connections.Clear();
-        }
-
-#if NETSTANDARD2_1
-        /// <summary>
-        /// Dispose internal resources
-        /// </summary>
         public async ValueTask DisposeAsync()
         {
             if (_isDisposed)
@@ -369,7 +329,6 @@ namespace H.Pipes
 
             await StopAsync().ConfigureAwait(false);
         }
-#endif
 
 #endregion
     }

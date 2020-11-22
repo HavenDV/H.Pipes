@@ -15,6 +15,8 @@ namespace H.Pipes.AccessControl.Utilities
         /// <returns></returns>
         public static string GetClearedApplicationName(string name)
         {
+            name = name ?? throw new ArgumentNullException(nameof(name));
+
             return name.Contains(".")
                 ? name.Substring(0, name.IndexOf(".", StringComparison.Ordinal))
                 : name;

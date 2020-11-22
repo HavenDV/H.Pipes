@@ -15,10 +15,7 @@ namespace H.Pipes.AccessControl
     /// <summary>
     /// This class will save only one running application and passing arguments if it is already running.
     /// </summary>
-    public sealed class PipeApplication : IDisposable
-#if NETSTANDARD2_1
-        , IAsyncDisposable
-#endif
+    public sealed class PipeApplication : IAsyncDisposable
     {
 #region Properties
 
@@ -93,11 +90,7 @@ namespace H.Pipes.AccessControl
                 }
 
                 using var source = new CancellationTokenSource(ClientTimeout);
-#if NETSTANDARD2_1
                 await using var client = new PipeClient<string[]>(ApplicationName);
-#else
-                using var client = new PipeClient<string[]>(ApplicationName);
-#endif
                 client.ExceptionOccurred += (_, args) =>
                 {
                     OnExceptionOccurred(args.Exception);
@@ -170,24 +163,13 @@ namespace H.Pipes.AccessControl
         /// Disposes pipe server
         /// </summary>
         /// <returns></returns>
-        public void Dispose()
-        {
-            PipeServer?.Dispose();
-        }
-
-#if NETSTANDARD2_1
-        /// <summary>
-        /// Disposes pipe server
-        /// </summary>
-        /// <returns></returns>
         public async ValueTask DisposeAsync()
         {
             if (PipeServer != null)
             {
-                await PipeServer.DisposeAsync();
+                await PipeServer.DisposeAsync().ConfigureAwait(false);
             }
         }
-#endif
 
         #endregion
     }

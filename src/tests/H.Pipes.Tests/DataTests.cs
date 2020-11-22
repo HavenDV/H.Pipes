@@ -19,7 +19,9 @@ namespace H.Pipes.Tests
 
             await BaseTests.DataSingleTestAsync(values, HashFunc);
             await BaseTests.DataSingleTestAsync(values, HashFunc, new JsonFormatter());
+#if !NETFRAMEWORK
             await BaseTests.DataSingleTestAsync(values, HashFunc, new WireFormatter());
+#endif
         }
 
         [TestMethod]
@@ -30,13 +32,17 @@ namespace H.Pipes.Tests
 
             await BaseTests.DataSingleTestAsync(values, HashFunc);
             await BaseTests.DataSingleTestAsync(values, HashFunc, new JsonFormatter());
+#if !NETFRAMEWORK
             await BaseTests.DataSingleTestAsync(values, HashFunc, new WireFormatter());
+#endif
 
             values = new List<byte[]?> { null };
 
             await BaseTests.DataSingleTestAsync(values, HashFunc);
             await BaseTests.DataSingleTestAsync(values, HashFunc, new JsonFormatter());
+#if !NETFRAMEWORK
             await BaseTests.DataSingleTestAsync(values, HashFunc, new WireFormatter());
+#endif
         }
 
         [TestMethod]
@@ -46,19 +52,11 @@ namespace H.Pipes.Tests
             var cancellationToken = cancellationTokenSource.Token;
 
             const string pipeName = "data_test_pipe";
-#if NETCOREAPP3_1
             await using var server = new SingleConnectionPipeServer<string?>(pipeName)
             {
                 WaitFreePipe = true
             };
             await using var client = new SingleConnectionPipeClient<string?>(pipeName);
-#else
-            using var server = new SingleConnectionPipeServer<string?>(pipeName)
-            {
-                WaitFreePipe = true
-            };
-            using var client = new SingleConnectionPipeClient<string?>(pipeName);
-#endif
 
             await server.StartAsync(cancellationToken).ConfigureAwait(false);
             await client.ConnectAsync(cancellationToken).ConfigureAwait(false);
@@ -113,11 +111,13 @@ namespace H.Pipes.Tests
             await BaseTests.BinaryDataTestAsync(1025, 3, new JsonFormatter());
         }
 
+#if !NETFRAMEWORK
         [TestMethod]
         public async Task TestMessageSize1Kx3_Wire()
         {
             await BaseTests.BinaryDataTestAsync(1025, 3, new WireFormatter());
         }
+#endif
 
         [TestMethod]
         public async Task TestMessageSize129B()
@@ -155,11 +155,13 @@ namespace H.Pipes.Tests
             await BaseTests.BinaryDataSingleTestAsync(1025, 3, new JsonFormatter());
         }
 
+#if !NETFRAMEWORK
         [TestMethod]
         public async Task Single_TestMessageSize1Kx3_Wire()
         {
             await BaseTests.BinaryDataSingleTestAsync(1025, 3, new WireFormatter());
         }
+#endif
 
         [TestMethod]
         public async Task TypeTest()
@@ -170,14 +172,8 @@ namespace H.Pipes.Tests
 
             const string pipeName = "data_test_pipe";
             var formatter = new BinaryFormatter();
-            //var type = typeof(Exception);
-#if NETCOREAPP3_1
             await using var server = new PipeServer<object>(pipeName, formatter);
             await using var client = new PipeClient<object>(pipeName, formatter: formatter);
-#else
-            using var server = new PipeServer<object>(pipeName, formatter);
-            using var client = new PipeClient<object>(pipeName, formatter: formatter);
-#endif
 
             server.ExceptionOccurred += (sender, args) => Assert.Fail(args.Exception.ToString());
             client.ExceptionOccurred += (sender, args) => Assert.Fail(args.Exception.ToString());

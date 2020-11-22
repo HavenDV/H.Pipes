@@ -255,25 +255,12 @@ namespace H.Pipes
         /// <summary>
         /// Dispose internal resources
         /// </summary>
-        public void Dispose()
-        {
-            ReconnectionTimer.Dispose();
-
-            Connection?.Dispose();
-            Connection = null;
-        }
-
-#if NETSTANDARD2_1
-        /// <summary>
-        /// Dispose internal resources
-        /// </summary>
         public async ValueTask DisposeAsync()
         {
             ReconnectionTimer.Dispose();
 
             await DisconnectInternalAsync().ConfigureAwait(false);
         }
-#endif
 
         #endregion
     }

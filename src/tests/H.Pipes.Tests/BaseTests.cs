@@ -111,13 +111,8 @@ namespace H.Pipes.Tests
             using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromMinutes(1));
 
             const string pipeName = "data_test_pipe";
-#if NETCOREAPP3_1
             await using var server = new PipeServer<T>(pipeName, formatter ?? new BinaryFormatter());
             await using var client = new PipeClient<T>(pipeName, formatter: formatter ?? new BinaryFormatter());
-#else
-            using var server = new PipeServer<T>(pipeName, formatter ?? new BinaryFormatter());
-            using var client = new PipeClient<T>(pipeName, formatter: formatter ?? new BinaryFormatter());
-#endif
 
             await DataTestAsync(server, client, values, hashFunc, cancellationTokenSource.Token);
         }
@@ -127,19 +122,11 @@ namespace H.Pipes.Tests
             using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromMinutes(1));
 
             const string pipeName = "data_test_pipe";
-#if NETCOREAPP3_1
             await using var server = new SingleConnectionPipeServer<T>(pipeName, formatter ?? new BinaryFormatter())
             {
                 WaitFreePipe = true
             };
             await using var client = new SingleConnectionPipeClient<T>(pipeName, formatter: formatter ?? new BinaryFormatter());
-#else
-            using var server = new SingleConnectionPipeServer<T>(pipeName, formatter ?? new BinaryFormatter())
-            {
-                WaitFreePipe = true
-            };
-            using var client = new SingleConnectionPipeClient<T>(pipeName, formatter: formatter ?? new BinaryFormatter());
-#endif
 
             await DataTestAsync(server, client, values, hashFunc, cancellationTokenSource.Token);
         }
