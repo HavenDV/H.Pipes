@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Pipes", "H.Pipes\H.Pipes.csproj", "{73152691-3CDE-46DF-8D04-7117747DFFE7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Pipes", "src\libs\H.Pipes\H.Pipes.csproj", "{73152691-3CDE-46DF-8D04-7117747DFFE7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Pipes.Tests", "H.Pipes.Tests\H.Pipes.Tests.csproj", "{5E77C76A-E765-445A-96E5-681CB5B9A68B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Pipes.Tests", "src\tests\H.Pipes.Tests\H.Pipes.Tests.csproj", "{5E77C76A-E765-445A-96E5-681CB5B9A68B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "Examples\ConsoleApp\ConsoleApp.csproj", "{82BCEFD9-194E-4FF7-A28B-CA1AE2A87BAC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "src\samples\ConsoleApp\ConsoleApp.csproj", "{82BCEFD9-194E-4FF7-A28B-CA1AE2A87BAC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WindowsFormsApp", "Examples\WindowsFormsApp\WindowsFormsApp.csproj", "{199E5EF6-D1FA-4662-BDD4-1D49A747AFF9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WindowsFormsApp", "src\samples\WindowsFormsApp\WindowsFormsApp.csproj", "{199E5EF6-D1FA-4662-BDD4-1D49A747AFF9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E5162CF4-2D87-429E-991A-C37962DE5215}"
 	ProjectSection(SolutionItems) = preProject
@@ -21,21 +21,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Formatters.Json", "H.Formatters.Json\H.Formatters.Json.csproj", "{525826A0-BE89-46DA-8B39-0E590C3DE2E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Formatters.Json", "src\libs\H.Formatters.Json\H.Formatters.Json.csproj", "{525826A0-BE89-46DA-8B39-0E590C3DE2E1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Formatters.Wire", "H.Formatters.Wire\H.Formatters.Wire.csproj", "{7D8647AD-8390-4C7F-BCFF-B114A876554D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Formatters.Wire", "src\libs\H.Formatters.Wire\H.Formatters.Wire.csproj", "{7D8647AD-8390-4C7F-BCFF-B114A876554D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{A30A9D7F-0824-48AD-96F9-2944421541AD}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{A30A9D7F-0824-48AD-96F9-2944421541AD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Formatters", "H.Formatters\H.Formatters.csproj", "{87233522-19F4-40A2-82E3-AF6B05837344}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Formatters", "src\libs\H.Formatters\H.Formatters.csproj", "{87233522-19F4-40A2-82E3-AF6B05837344}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Formatters.BinaryFormatter", "H.Formatters.BinaryFormatter\H.Formatters.BinaryFormatter.csproj", "{335E1700-0E53-4D3E-B8E5-537A30FFCE7B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Formatters.BinaryFormatter", "src\libs\H.Formatters.BinaryFormatter\H.Formatters.BinaryFormatter.csproj", "{335E1700-0E53-4D3E-B8E5-537A30FFCE7B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Pipes.AccessControl", "H.Pipes.AccessControl\H.Pipes.AccessControl.csproj", "{207B142C-1972-4DC4-B66D-1B5B219E7992}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Pipes.AccessControl", "src\libs\H.Pipes.AccessControl\H.Pipes.AccessControl.csproj", "{207B142C-1972-4DC4-B66D-1B5B219E7992}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NamedPipeServerStream.NetFrameworkVersion", "NamedPipeServerStream.NetFrameworkVersion\NamedPipeServerStream.NetFrameworkVersion.csproj", "{2A8CC0AB-815B-4224-8F4D-96581C659537}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NamedPipeServerStream.NetFrameworkVersion", "src\libs\NamedPipeServerStream.NetFrameworkVersion\NamedPipeServerStream.NetFrameworkVersion.csproj", "{2A8CC0AB-815B-4224-8F4D-96581C659537}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NamedPipeServerStream.NetFrameworkVersion.Tests", "NamedPipeServerStream.NetFrameworkVersion.Tests\NamedPipeServerStream.NetFrameworkVersion.Tests.csproj", "{B7B5FFC8-CB09-4333-BDB8-C07A6A097B9A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NamedPipeServerStream.NetFrameworkVersion.Tests", "src\tests\NamedPipeServerStream.NetFrameworkVersion.Tests\NamedPipeServerStream.NetFrameworkVersion.Tests.csproj", "{B7B5FFC8-CB09-4333-BDB8-C07A6A097B9A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libs", "libs", "{DFAEA034-20D3-46BD-A2FB-E09CB731C4D7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C77AB22D-6ACF-4CFB-B100-54CFB74D9221}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -92,8 +96,17 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{73152691-3CDE-46DF-8D04-7117747DFFE7} = {DFAEA034-20D3-46BD-A2FB-E09CB731C4D7}
+		{5E77C76A-E765-445A-96E5-681CB5B9A68B} = {C77AB22D-6ACF-4CFB-B100-54CFB74D9221}
 		{82BCEFD9-194E-4FF7-A28B-CA1AE2A87BAC} = {A30A9D7F-0824-48AD-96F9-2944421541AD}
 		{199E5EF6-D1FA-4662-BDD4-1D49A747AFF9} = {A30A9D7F-0824-48AD-96F9-2944421541AD}
+		{525826A0-BE89-46DA-8B39-0E590C3DE2E1} = {DFAEA034-20D3-46BD-A2FB-E09CB731C4D7}
+		{7D8647AD-8390-4C7F-BCFF-B114A876554D} = {DFAEA034-20D3-46BD-A2FB-E09CB731C4D7}
+		{87233522-19F4-40A2-82E3-AF6B05837344} = {DFAEA034-20D3-46BD-A2FB-E09CB731C4D7}
+		{335E1700-0E53-4D3E-B8E5-537A30FFCE7B} = {DFAEA034-20D3-46BD-A2FB-E09CB731C4D7}
+		{207B142C-1972-4DC4-B66D-1B5B219E7992} = {DFAEA034-20D3-46BD-A2FB-E09CB731C4D7}
+		{2A8CC0AB-815B-4224-8F4D-96581C659537} = {DFAEA034-20D3-46BD-A2FB-E09CB731C4D7}
+		{B7B5FFC8-CB09-4333-BDB8-C07A6A097B9A} = {C77AB22D-6ACF-4CFB-B100-54CFB74D9221}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3A24ECAC-930F-4D6F-B45E-07B16DD51C4E}

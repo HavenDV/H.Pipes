@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;net4.5;net4.7.2</TargetFrameworks>
+    <RootNamespace>System.IO.Pipes.Tests</RootNamespace>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
@@ -13,9 +14,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\H.Pipes\H.Pipes.csproj" />
-    <ProjectReference Include="..\H.Formatters.Json\H.Formatters.Json.csproj" />
-    <ProjectReference Include="..\H.Formatters.Wire\H.Formatters.Wire.csproj" />
+    <ProjectReference Include="..\..\libs\NamedPipeServerStream.NetFrameworkVersion\NamedPipeServerStream.NetFrameworkVersion.csproj" />
   </ItemGroup>
   
 </Project>

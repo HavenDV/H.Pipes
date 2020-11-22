@@ -4,6 +4,6 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\H.Pipes\H.Pipes.csproj" />
+    <ProjectReference Include="..\..\libs\H.Pipes\H.Pipes.csproj" />
   </ItemGroup>
 </Project>

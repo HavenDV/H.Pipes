@@ -6,6 +6,6 @@
     <LangVersion>8</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\H.Pipes\H.Pipes.csproj" />
+    <ProjectReference Include="..\..\libs\H.Pipes\H.Pipes.csproj" />
   </ItemGroup>
 </Project>
