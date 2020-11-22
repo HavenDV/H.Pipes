@@ -21,7 +21,7 @@
       - Also available ready formatters in separate nuget packages: H.Formatters.Json and H.Formatters.Wire
       - Supports `PipeAccessRule`'s(see `H.Pipes.AccessControl` nuget package) or more complex code to access using the `PipeServer.PipeStreamInitializeAction` property
     </Description>
-    <PackageReleaseNotes>Added net45 and net46 targets.</PackageReleaseNotes>
+    <PackageReleaseNotes>To IAsyncDisposable.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">

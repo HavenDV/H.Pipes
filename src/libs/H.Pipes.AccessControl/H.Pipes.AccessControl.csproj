@@ -7,7 +7,7 @@
   <PropertyGroup Label="NuGet">
     <Version>1.14.3</Version>
     <Description>This package adds AccessControl extensions for PipeServerSetPipeSecurity() and other)</Description>
-    <PackageReleaseNotes>Added net45 and net46 targets. Added strong name. Added Net Framework constructor for net targets. Added server.AllowUsersReadWrite() extension.</PackageReleaseNotes>
+    <PackageReleaseNotes>To IAsyncDisposable.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
