@@ -25,7 +25,7 @@ namespace H.Pipes.Factories
 #if NET45
                 pipe.WaitForConnection();
 
-                await Task.Delay(TimeSpan.Zero, cancellationToken);
+                await Task.Delay(TimeSpan.Zero, cancellationToken).ConfigureAwait(false);
 #else
                 await pipe.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
 #endif

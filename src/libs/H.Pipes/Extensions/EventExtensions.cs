@@ -124,7 +124,7 @@ namespace H.Pipes.Extensions
                 {
                     try
                     {
-                        return await value.WaitEventAsync<T>(name, cancellationToken);
+                        return await value.WaitEventAsync<T>(name, cancellationToken).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {
@@ -179,7 +179,7 @@ namespace H.Pipes.Extensions
                 {
                     try
                     {
-                        return await value.WaitEventAsync<T>(name, cancellationToken);
+                        return await value.WaitEventAsync<T>(name, cancellationToken).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {

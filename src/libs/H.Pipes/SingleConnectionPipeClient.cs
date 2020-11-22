@@ -171,12 +171,13 @@ namespace H.Pipes
                 }
 
                 var dataPipe = await PipeClientFactory
-                    .CreateAndConnectAsync(PipeName, ServerName, cancellationToken).ConfigureAwait(false);
+                    .CreateAndConnectAsync(PipeName, ServerName, cancellationToken)
+                    .ConfigureAwait(false);
 
                 Connection = ConnectionFactory.Create<T>(dataPipe, Formatter);
                 Connection.Disconnected += async (sender, args) =>
                 {
-                    await DisconnectInternalAsync();
+                    await DisconnectInternalAsync().ConfigureAwait(false);
 
                     OnDisconnected(args);
                 };
@@ -233,11 +234,11 @@ namespace H.Pipes
         {
             if (!IsConnected && AutoReconnect && !IsConnecting)
             {
-                await ConnectAsync(cancellationToken);
+                await ConnectAsync(cancellationToken).ConfigureAwait(false);
             }
             while (IsConnecting)
             {
-                await Task.Delay(TimeSpan.FromMilliseconds(1), cancellationToken);
+                await Task.Delay(TimeSpan.FromMilliseconds(1), cancellationToken).ConfigureAwait(false);
             }
             if (Connection == null) // nullable detection system is not very smart
             {

@@ -25,7 +25,7 @@ namespace H.Pipes.Extensions
             return await connection.WaitEventAsync<ConnectionMessageEventArgs<T>>(
                 func ?? (token => Task.Delay(TimeSpan.Zero, cancellationToken)),
                 nameof(connection.MessageReceived),
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace H.Pipes.Extensions
         {
             using var tokenSource = new CancellationTokenSource(timeout);
 
-            return await connection.WaitMessageAsync(func, tokenSource.Token);
+            return await connection.WaitMessageAsync(func, tokenSource.Token).ConfigureAwait(false);
         }
     }
 }

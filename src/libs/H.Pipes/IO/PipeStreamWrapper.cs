@@ -95,11 +95,11 @@ namespace H.Pipes.IO
 #elif NET45
             Dispose();
 
-            await Task.Delay(TimeSpan.Zero);
+            await Task.Delay(TimeSpan.Zero).ConfigureAwait(false);
 #else
             Dispose();
 
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
 #endif
         }
 

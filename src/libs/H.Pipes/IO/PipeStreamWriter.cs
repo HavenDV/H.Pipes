@@ -56,7 +56,7 @@ namespace H.Pipes.IO
         {
             try
             {
-                await SemaphoreSlim.WaitAsync(cancellationToken);
+                await SemaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
 
                 await WriteLengthAsync(buffer.Length, cancellationToken).ConfigureAwait(false);
 

@@ -130,7 +130,7 @@ namespace H.Pipes
 
                         try
                         {
-                            await ConnectAsync(cancellationTokenSource.Token);
+                            await ConnectAsync(cancellationTokenSource.Token).ConfigureAwait(false);
                         }
                         catch (OperationCanceledException)
                         {
@@ -175,13 +175,14 @@ namespace H.Pipes
 
                 // Connect to the actual data pipe
                 var dataPipe = await PipeClientFactory
-                    .CreateAndConnectAsync(connectionPipeName, ServerName, cancellationToken).ConfigureAwait(false);
+                    .CreateAndConnectAsync(connectionPipeName, ServerName, cancellationToken)
+                    .ConfigureAwait(false);
 
                 // Create a Connection object for the data pipe
                 Connection = ConnectionFactory.Create<T>(dataPipe, Formatter);
                 Connection.Disconnected += async (sender, args) =>
                 {
-                    await DisconnectInternalAsync();
+                    await DisconnectInternalAsync().ConfigureAwait(false);
 
                     OnDisconnected(args);
                 };
@@ -227,11 +228,11 @@ namespace H.Pipes
 #elif NET45
             Connection.Dispose();
 
-            await Task.Delay(TimeSpan.Zero);
+            await Task.Delay(TimeSpan.Zero).ConfigureAwait(false);
 #else
             Connection.Dispose();
 
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
 #endif
 
             Connection = null;
@@ -248,11 +249,11 @@ namespace H.Pipes
         {
             if (!IsConnected && AutoReconnect && !IsConnecting)
             {
-                await ConnectAsync(cancellationToken);
+                await ConnectAsync(cancellationToken).ConfigureAwait(false);
             }
             while (IsConnecting)
             {
-                await Task.Delay(TimeSpan.FromMilliseconds(1), cancellationToken);
+                await Task.Delay(TimeSpan.FromMilliseconds(1), cancellationToken).ConfigureAwait(false);
             }
             if (Connection == null) // nullable detection system is not very smart
             {

@@ -165,7 +165,7 @@ namespace H.Pipes
                 ReadWorker = null;
             }
 
-            await PipeStreamWrapper.StopAsync();
+            await PipeStreamWrapper.StopAsync().ConfigureAwait(false);
         }
 
         #endregion
