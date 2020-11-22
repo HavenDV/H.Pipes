@@ -42,7 +42,7 @@ namespace H.Pipes.Tests
         [TestMethod]
         public async Task EmptyArrayParallelTest()
         {
-            using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1));
             var cancellationToken = cancellationTokenSource.Token;
 
             const string pipeName = "data_test_pipe";
@@ -164,7 +164,7 @@ namespace H.Pipes.Tests
         [TestMethod]
         public async Task TypeTest()
         {
-            using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1));
             var completionSource = new TaskCompletionSource<bool>(false);
             using var registration = cancellationTokenSource.Token.Register(() => completionSource.TrySetCanceled());
 

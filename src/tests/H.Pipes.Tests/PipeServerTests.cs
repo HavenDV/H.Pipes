@@ -16,7 +16,7 @@ namespace H.Pipes.Tests
             {
                 try
                 {
-                    using var source = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+                    using var source = new CancellationTokenSource(TimeSpan.FromMinutes(1));
 #if NETCOREAPP3_1
                     await using var pipe = await PipeServerFactory.CreateAndWaitAsync("test", source.Token).ConfigureAwait(false);
 #else

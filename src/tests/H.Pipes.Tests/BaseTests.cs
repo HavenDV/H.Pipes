@@ -108,7 +108,7 @@ namespace H.Pipes.Tests
 
         public static async Task DataTestAsync<T>(List<T> values, Func<T, string>? hashFunc = null, IFormatter? formatter = default, TimeSpan? timeout = default)
         {
-            using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(15));
+            using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromMinutes(1));
 
             const string pipeName = "data_test_pipe";
 #if NETCOREAPP3_1
@@ -124,7 +124,7 @@ namespace H.Pipes.Tests
 
         public static async Task DataSingleTestAsync<T>(List<T> values, Func<T, string>? hashFunc = null, IFormatter? formatter = default, TimeSpan? timeout = default)
         {
-            using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(15));
+            using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromMinutes(1));
 
             const string pipeName = "data_test_pipe";
 #if NETCOREAPP3_1
