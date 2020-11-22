@@ -13,7 +13,7 @@ namespace H.Pipes
     /// Wraps a <see cref="NamedPipeClientStream"/>.
     /// </summary>
     /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
-    public class PipeClient<T> : IPipeClient<T>
+    public sealed class PipeClient<T> : IPipeClient<T>
     {
         #region Fields
 

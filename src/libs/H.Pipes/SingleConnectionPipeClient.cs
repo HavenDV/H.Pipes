@@ -12,7 +12,7 @@ namespace H.Pipes
     /// Wraps a <see cref="NamedPipeClientStream"/>.
     /// </summary>
     /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
-    public class SingleConnectionPipeClient<T> : IPipeClient<T>
+    public sealed class SingleConnectionPipeClient<T> : IPipeClient<T>
     {
         #region Fields
 
@@ -129,7 +129,7 @@ namespace H.Pipes
 
                         try
                         {
-                            await ConnectAsync(cancellationTokenSource.Token);
+                            await ConnectAsync(cancellationTokenSource.Token).ConfigureAwait(false);
                         }
                         catch (OperationCanceledException)
                         {

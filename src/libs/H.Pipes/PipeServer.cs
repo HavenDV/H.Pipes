@@ -18,7 +18,7 @@ namespace H.Pipes
     /// Wraps a <see cref="NamedPipeServerStream"/> and provides multiple simultaneous client connection handling.
     /// </summary>
     /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
-    public class PipeServer<T> : IPipeServer<T>
+    public sealed class PipeServer<T> : IPipeServer<T>
     {
         #region Properties
 

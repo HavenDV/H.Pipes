@@ -14,7 +14,7 @@ namespace H.Pipes
     /// Wraps a <see cref="NamedPipeServerStream"/> and optimized for one connection.
     /// </summary>
     /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
-    public class SingleConnectionPipeServer<T> : IPipeServer<T>
+    public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
     {
         #region Properties
 
@@ -134,7 +134,7 @@ namespace H.Pipes
                 throw new InvalidOperationException("Server already started");
             }
 
-            await StopAsync(cancellationToken);
+            await StopAsync(cancellationToken).ConfigureAwait(false);
 
             var source = new TaskCompletionSource<bool>();
 #if NET45
@@ -172,7 +172,7 @@ namespace H.Pipes
 #if NET45
                             connectionStream.WaitForConnection();
 
-                            await Task.Delay(TimeSpan.Zero, cancellationToken);
+                            await Task.Delay(TimeSpan.Zero, cancellationToken).ConfigureAwait(false);
 #else
                             await connectionStream.WaitForConnectionAsync(token).ConfigureAwait(false);
 #endif
@@ -242,7 +242,7 @@ namespace H.Pipes
             }
             catch (Exception)
             {
-                await StopAsync(cancellationToken);
+                await StopAsync(cancellationToken).ConfigureAwait(false);
 
                 throw;
             }
