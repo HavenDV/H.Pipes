@@ -170,8 +170,10 @@ namespace H.Pipes
                     throw new InvalidOperationException("Already connected");
                 }
 
+#pragma warning disable CA2000 // Dispose objects before losing scope
                 var dataPipe = await PipeClientFactory
                     .CreateAndConnectAsync(PipeName, ServerName, cancellationToken)
+#pragma warning restore CA2000 // Dispose objects before losing scope
                     .ConfigureAwait(false);
 
                 Connection = ConnectionFactory.Create<T>(dataPipe, Formatter);

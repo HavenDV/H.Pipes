@@ -174,8 +174,10 @@ namespace H.Pipes
                 var connectionPipeName = await GetConnectionPipeName(cancellationToken).ConfigureAwait(false);
 
                 // Connect to the actual data pipe
+#pragma warning disable CA2000 // Dispose objects before losing scope
                 var dataPipe = await PipeClientFactory
                     .CreateAndConnectAsync(connectionPipeName, ServerName, cancellationToken)
+#pragma warning restore CA2000 // Dispose objects before losing scope
                     .ConfigureAwait(false);
 
                 // Create a Connection object for the data pipe
