@@ -20,8 +20,8 @@
       - Official dependencies only
       - Tested
     </Description>
-    <PackageProjectUrl>https://github.com/HavenDV/H.Pipes/tree/master/NamedPipeServerStream.NetFrameworkVersion</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/HavenDV/H.Pipes/tree/master/NamedPipeServerStream.NetFrameworkVersion</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/HavenDV/H.Pipes/tree/master/src/libs/NamedPipeServerStream.NetFrameworkVersion</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/HavenDV/H.Pipes/tree/master/src/libs/NamedPipeServerStream.NetFrameworkVersion</RepositoryUrl>
     <PackageReleaseNotes>Added System.Core.resources as EmbeddedResource.</PackageReleaseNotes>
   </PropertyGroup>
 

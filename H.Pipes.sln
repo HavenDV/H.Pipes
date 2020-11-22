@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
-		Directory.Build.props = Directory.Build.props
+		src\Directory.Build.props = src\Directory.Build.props
 		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
 		LICENSE.txt = LICENSE.txt
 		README.md = README.md
@@ -38,8 +38,14 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NamedPipeServerStream.NetFrameworkVersion.Tests", "src\tests\NamedPipeServerStream.NetFrameworkVersion.Tests\NamedPipeServerStream.NetFrameworkVersion.Tests.csproj", "{B7B5FFC8-CB09-4333-BDB8-C07A6A097B9A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libs", "libs", "{DFAEA034-20D3-46BD-A2FB-E09CB731C4D7}"
+	ProjectSection(SolutionItems) = preProject
+		src\libs\Directory.Build.props = src\libs\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C77AB22D-6ACF-4CFB-B100-54CFB74D9221}"
+	ProjectSection(SolutionItems) = preProject
+		src\tests\Directory.Build.props = src\tests\Directory.Build.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -10,24 +10,4 @@
     <AssemblyOriginatorKeyFile>$(SolutionDir)\src\key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   
-  <PropertyGroup Label="Nuget">
-    <GeneratePackageOnBuild Condition=" '$(Configuration)' == 'Release' ">true</GeneratePackageOnBuild>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <Authors>havendv</Authors>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/HavenDV/H.Pipes</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/HavenDV/H.Pipes</RepositoryUrl>
-    <PackageTags>pipes, named pipes, async, async named pipes, namedpipes async, namedpipes, pipes async</PackageTags>
-    <PackageIcon>nuget_icon.png</PackageIcon>
-  </PropertyGroup>
-
-  <ItemGroup Label="Nuget">
-    <None Include="$(SolutionDir)\docs\nuget_icon.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
-
 </Project>
