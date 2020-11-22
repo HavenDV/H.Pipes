@@ -1,22 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6;net45</TargetFrameworks>
-    <LangVersion>8</LangVersion>
-    <Nullable>enable</Nullable>
-    <Version>0.8.2.2</Version>
+    <TargetFrameworks>netstandard2.0;net4.5</TargetFrameworks>
     <RootNamespace>H.Formatters</RootNamespace>
-    <Description>This package adds WireFormatter(based on Wire nuget package)</Description>
-    <Authors>havendv</Authors>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/HavenDV/H.Pipes</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/HavenDV/H.Pipes</RepositoryUrl>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  <PropertyGroup Label="NuGet">
+    <Version>0.8.2.3</Version>
+    <Description>This package adds WireFormatter(based on Wire nuget package)</Description>
   </PropertyGroup>
 
   <ItemGroup>

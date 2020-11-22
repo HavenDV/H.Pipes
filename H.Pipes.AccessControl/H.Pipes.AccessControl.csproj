@@ -1,24 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net46;net45</TargetFrameworks>
-    <LangVersion>8</LangVersion>
-    <Nullable>enable</Nullable>
-    <Version>1.14.1.4</Version>
-    <Description>This package adds AccessControl extensions for PipeServerSetPipeSecurity() and other)</Description>
-    <Authors>havendv</Authors>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/HavenDV/H.Pipes</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/HavenDV/H.Pipes</RepositoryUrl>
-    <PackageReleaseNotes>Added net45 and net46 targets. Added strong name. Added Net Framework constructor for net targets. Added server.AllowUsersReadWrite() extension.</PackageReleaseNotes>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net4.5;net4.6</TargetFrameworks>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  <PropertyGroup Label="NuGet">
+    <Version>1.14.2</Version>
+    <Description>This package adds AccessControl extensions for PipeServerSetPipeSecurity() and other)</Description>
+    <PackageReleaseNotes>Added net45 and net46 targets. Added strong name. Added Net Framework constructor for net targets. Added server.AllowUsersReadWrite() extension.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

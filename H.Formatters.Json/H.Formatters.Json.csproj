@@ -1,24 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net45;net40</TargetFrameworks>
-    <LangVersion>8</LangVersion>
-    <Nullable>enable</Nullable>
-    <Version>12.0.3.2</Version>
+    <TargetFrameworks>netstandard2.0;net4.0;net4.5</TargetFrameworks>
     <RootNamespace>H.Formatters</RootNamespace>
-    <Description>This package adds JsonFormatter(based on Newtonsoft.Json)</Description>
-    <Authors>havendv</Authors>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/HavenDV/H.Pipes</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/HavenDV/H.Pipes</RepositoryUrl>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  <PropertyGroup Label="NuGet">
+    <Version>12.0.3.3</Version>
+    <Description>This package adds JsonFormatter(based on Newtonsoft.Json)</Description>
   </PropertyGroup>
 
   <ItemGroup>

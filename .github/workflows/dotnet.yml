@@ -1,0 +1,34 @@
+name: .NET
+on: [ push ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        dotnet: [ '5.0.x' ]
+        os: [ windows-latest ]
+
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }} - ${{ matrix.dotnet }}
+    
+    steps:
+    - name: Getting code
+      uses: actions/checkout@v1
+          
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ matrix.dotnet }}
+    
+    - name: Build
+      run: dotnet build --configuration Release --nologo
+    
+    - name: Run tests
+      run: dotnet test --configuration Release --nologo
+        
+    - name: Publish
+      run: dotnet nuget push
+        src\**.nupkg
+        --api-key ${{ secrets.NUGET_KEY }}
+        --source https://api.nuget.org/v3/index.json
+        --skip-duplicate

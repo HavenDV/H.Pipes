@@ -1,43 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net46;net45</TargetFrameworks>
-    <LangVersion>latest</LangVersion>
-    <Nullable>enable</Nullable>
-    <AssemblyTitle>Named Pipe Wrapper library</AssemblyTitle>
-    <AssemblyDescription>A simple, easy to use, strongly-typed wrapper around .NET named pipes.</AssemblyDescription>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
-    <Version>1.14.1</Version>
-    <PackageId>H.Pipes</PackageId>
-    <Description>Features:
-- Create named pipe servers that can handle multiple client connections simultaneously.
-- Send strongly-typed messages between clients and servers: any serializable .NET object can be sent over a pipe and will be automatically serialized/deserialized, including cyclical references and complex object graphs.
-- Async
-- Requires .NET Standard 2.0
-- Supports large messages - up to 300 MiB.
-- Server restart automatically
-- Automatically wait for the release of the pipe for the server, if it is already in use
-- Automatically waiting for a server pipe creating when client connecting
-- Automatic reconnect with a given interval and at each `client.WriteAsync`, if necessary
-- Supports variable formatters, default - BinaryFormatter which uses System.Runtime.Serialization.BinaryFormatter inside
-- Also available ready formatters in separate nuget packages: H.Formatters.Json and H.Formatters.Wire
-- Supports `PipeAccessRule`'s(see `H.Pipes.AccessControl` nuget package) or more complex code to access using the `PipeServer.PipeStreamInitializeAction` property
-    </Description>
-    <Authors>havendv</Authors>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageLicenseFile></PackageLicenseFile>
-    <PackageProjectUrl>https://github.com/HavenDV/H.Pipes</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/HavenDV/H.Pipes</RepositoryUrl>
-    <PackageTags>pipes, named pipes, async, async named pipes, namedpipes async, namedpipes, pipes async</PackageTags>
-    <PackageReleaseNotes>Added net45 and net46 targets.</PackageReleaseNotes>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net4.5;net4.6</TargetFrameworks>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  <PropertyGroup Label="NuGet">
+    <Version>1.14.2</Version>
+    <Description>
+      Features:
+      - Create named pipe servers that can handle multiple client connections simultaneously.
+      - Send strongly-typed messages between clients and servers: any serializable .NET object can be sent over a pipe and will be automatically serialized/deserialized, including cyclical references and complex object graphs.
+      - Async
+      - Requires .NET Standard 2.0
+      - Supports large messages - up to 300 MiB.
+      - Server restart automatically
+      - Automatically wait for the release of the pipe for the server, if it is already in use
+      - Automatically waiting for a server pipe creating when client connecting
+      - Automatic reconnect with a given interval and at each `client.WriteAsync`, if necessary
+      - Supports variable formatters, default - BinaryFormatter which uses System.Runtime.Serialization.BinaryFormatter inside
+      - Also available ready formatters in separate nuget packages: H.Formatters.Json and H.Formatters.Wire
+      - Supports `PipeAccessRule`'s(see `H.Pipes.AccessControl` nuget package) or more complex code to access using the `PipeServer.PipeStreamInitializeAction` property
+    </Description>
+    <PackageReleaseNotes>Added net45 and net46 targets.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
