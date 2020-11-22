@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netcoreapp3.1;net4.5;net4.8</TargetFrameworks>
+    <TargetFrameworks>net5.0;net4.5;net4.8</TargetFrameworks>
     <RootNamespace>System.IO.Pipes.Tests</RootNamespace>
   </PropertyGroup>
   

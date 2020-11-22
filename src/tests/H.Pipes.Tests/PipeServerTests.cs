@@ -17,7 +17,7 @@ namespace H.Pipes.Tests
                 try
                 {
                     using var source = new CancellationTokenSource(TimeSpan.FromSeconds(1));
-#if NETCOREAPP3_1
+#if !NETFRAMEWORK
                     await using var pipe = await PipeServerFactory.CreateAndWaitAsync("test", source.Token).ConfigureAwait(false);
 #else
                     using var pipe = await PipeServerFactory.CreateAndWaitAsync("test", source.Token).ConfigureAwait(false);
@@ -29,7 +29,7 @@ namespace H.Pipes.Tests
             }
 
             {
-#if NETCOREAPP3_1
+#if !NETFRAMEWORK
                 await using var pipe = PipeServerFactory.Create("test");
 #else
                 using var pipe = PipeServerFactory.Create("test");
