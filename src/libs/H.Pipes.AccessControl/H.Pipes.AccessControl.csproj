@@ -5,9 +5,9 @@
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">
-    <Version>1.14.4</Version>
+    <Version>1.14.5</Version>
     <Description>This package adds AccessControl extensions for PipeServerSetPipeSecurity() and other)</Description>
-    <PackageReleaseNotes>To IAsyncDisposable.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added Source Link.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

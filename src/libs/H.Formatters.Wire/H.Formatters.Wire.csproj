@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">
-    <Version>0.8.2.3</Version>
+    <Version>0.8.2.4</Version>
     <Description>This package adds WireFormatter(based on Wire nuget package)</Description>
   </PropertyGroup>
 

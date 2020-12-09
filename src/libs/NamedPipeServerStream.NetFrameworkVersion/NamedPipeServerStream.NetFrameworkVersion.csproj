@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">
-    <Version>1.0.6</Version>
+    <Version>1.0.7</Version>
     <Description>
       This package adds original NamedPipeServerStream constructors from Net.Framework to NetStandard
 
@@ -22,7 +22,7 @@
     </Description>
     <PackageProjectUrl>https://github.com/HavenDV/H.Pipes/tree/master/src/libs/NamedPipeServerStream.NetFrameworkVersion</PackageProjectUrl>
     <RepositoryUrl>https://github.com/HavenDV/H.Pipes/tree/master/src/libs/NamedPipeServerStream.NetFrameworkVersion</RepositoryUrl>
-    <PackageReleaseNotes>Added System.Core.resources as EmbeddedResource.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added Source Link.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup Label="Resources">
