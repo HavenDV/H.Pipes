@@ -23,6 +23,6 @@ namespace H.Formatters
         /// <param name="bytes"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<T> DeserializeAsync<T>(byte[]? bytes, CancellationToken cancellationToken = default);
+        Task<T?> DeserializeAsync<T>(byte[]? bytes, CancellationToken cancellationToken = default);
     }
 }

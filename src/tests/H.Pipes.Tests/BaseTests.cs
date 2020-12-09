@@ -11,7 +11,7 @@ namespace H.Pipes.Tests
 {
     public static class BaseTests
     {
-        public static async Task DataTestAsync<T>(IPipeServer<T> server, IPipeClient<T> client, List<T> values, Func<T, string>? hashFunc = null, CancellationToken cancellationToken = default)
+        public static async Task DataTestAsync<T>(IPipeServer<T> server, IPipeClient<T> client, List<T> values, Func<T?, string>? hashFunc = null, CancellationToken cancellationToken = default)
         {
             Trace.WriteLine("Setting up test...");
 
@@ -106,7 +106,7 @@ namespace H.Pipes.Tests
             Trace.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~");
         }
 
-        public static async Task DataTestAsync<T>(List<T> values, Func<T, string>? hashFunc = null, IFormatter? formatter = default, TimeSpan? timeout = default)
+        public static async Task DataTestAsync<T>(List<T> values, Func<T?, string>? hashFunc = null, IFormatter? formatter = default, TimeSpan? timeout = default)
         {
             using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromMinutes(1));
 
@@ -117,7 +117,7 @@ namespace H.Pipes.Tests
             await DataTestAsync(server, client, values, hashFunc, cancellationTokenSource.Token);
         }
 
-        public static async Task DataSingleTestAsync<T>(List<T> values, Func<T, string>? hashFunc = null, IFormatter? formatter = default, TimeSpan? timeout = default)
+        public static async Task DataSingleTestAsync<T>(List<T> values, Func<T?, string>? hashFunc = null, IFormatter? formatter = default, TimeSpan? timeout = default)
         {
             using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromMinutes(1));
 
@@ -163,8 +163,13 @@ namespace H.Pipes.Tests
         /// </summary>
         /// <param name="bytes"></param>
         /// <returns></returns>
-        private static string Hash(byte[] bytes)
+        private static string Hash(byte[]? bytes)
         {
+            if (bytes == null)
+            {
+                return "null";
+            }
+            
             using var sha1 = System.Security.Cryptography.SHA1.Create();
 
             var hash = sha1.ComputeHash(bytes);

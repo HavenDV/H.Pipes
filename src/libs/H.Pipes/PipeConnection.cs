@@ -53,7 +53,7 @@ namespace H.Pipes
         /// <summary>
         /// Invoked whenever a message is received from the other end of the pipe.
         /// </summary>
-        public event EventHandler<ConnectionMessageEventArgs<T>>? MessageReceived;
+        public event EventHandler<ConnectionMessageEventArgs<T?>>? MessageReceived;
 
         /// <summary>
         /// Invoked when an exception is thrown during any read/write operation over the named pipe.
@@ -65,9 +65,9 @@ namespace H.Pipes
             Disconnected?.Invoke(this, new ConnectionEventArgs<T>(this));
         }
 
-        private void OnMessageReceived(T message)
+        private void OnMessageReceived(T? message)
         {
-            MessageReceived?.Invoke(this, new ConnectionMessageEventArgs<T>(this, message));
+            MessageReceived?.Invoke(this, new ConnectionMessageEventArgs<T?>(this, message));
         }
 
         private void OnExceptionOccurred(Exception exception)

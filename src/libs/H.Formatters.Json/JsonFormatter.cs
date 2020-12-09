@@ -38,15 +38,15 @@ namespace H.Formatters
         /// <param name="bytes"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task<T> DeserializeAsync<T>(byte[]? bytes, CancellationToken cancellationToken = default)
+        public Task<T?> DeserializeAsync<T>(byte[]? bytes, CancellationToken cancellationToken = default)
         {
             if (bytes == null || !bytes.Any())
             {
-                return TaskUtilities.FromResult<T>(default!);
+                return TaskUtilities.FromResult<T?>(default);
             }
 
             var json = Encoding.UTF8.GetString(bytes);
-            var obj = JsonConvert.DeserializeObject<T>(json);
+            var obj = JsonConvert.DeserializeObject<T?>(json);
 
             return TaskUtilities.FromResult(obj);
         }

@@ -62,7 +62,7 @@ namespace H.Pipes
         /// <summary>
         /// Invoked whenever a message is received from the server.
         /// </summary>
-        public event EventHandler<ConnectionMessageEventArgs<T>>? MessageReceived;
+        public event EventHandler<ConnectionMessageEventArgs<T?>>? MessageReceived;
 
         /// <summary>
         /// Invoked when the client disconnects from the server (e.g., the pipe is closed or broken).
@@ -79,7 +79,7 @@ namespace H.Pipes
         /// </summary>
         public event EventHandler<ExceptionEventArgs>? ExceptionOccurred;
 
-        private void OnMessageReceived(ConnectionMessageEventArgs<T> args)
+        private void OnMessageReceived(ConnectionMessageEventArgs<T?> args)
         {
             MessageReceived?.Invoke(this, args);
         }

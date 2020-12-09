@@ -40,15 +40,15 @@ namespace H.Formatters
         /// <param name="bytes"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task<T> DeserializeAsync<T>(byte[]? bytes, CancellationToken cancellationToken = default)
+        public Task<T?> DeserializeAsync<T>(byte[]? bytes, CancellationToken cancellationToken = default)
         {
             if (bytes == null || !bytes.Any())
             {
-                return TaskUtilities.FromResult<T>(default!);
+                return TaskUtilities.FromResult<T?>(default);
             }
 
             using var memoryStream = new MemoryStream(bytes);
-            var obj = (T) InternalFormatter.Deserialize(memoryStream);
+            var obj = (T?)InternalFormatter.Deserialize(memoryStream);
 
             return TaskUtilities.FromResult(obj);
         }

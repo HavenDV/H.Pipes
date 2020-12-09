@@ -16,7 +16,7 @@ namespace H.Pipes
         /// <summary>
         /// Invoked whenever a message is received.
         /// </summary>
-        event EventHandler<ConnectionMessageEventArgs<T>>? MessageReceived;
+        event EventHandler<ConnectionMessageEventArgs<T?>>? MessageReceived;
 
         /// <summary>
         /// Invoked whenever an exception is thrown during a read or write operation on the named pipe.

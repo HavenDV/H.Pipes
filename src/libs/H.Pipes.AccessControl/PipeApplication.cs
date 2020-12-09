@@ -152,9 +152,9 @@ namespace H.Pipes.AccessControl
 
                 await PipeServer.StartAsync(cancellationToken).ConfigureAwait(false);
 
-                PipeServer.MessageReceived += (sender, args) =>
+                PipeServer.MessageReceived += (_, args) =>
                 {
-                    OnArgumentsReceived(args.Message);
+                    OnArgumentsReceived(args.Message ?? Array.Empty<string>());
                 };
             }, cancellationToken);
         }

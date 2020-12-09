@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">
-    <Version>1.14.5</Version>
+    <Version>1.14.6</Version>
     <Description>
       Features:
       - Create named pipe servers that can handle multiple client connections simultaneously.

@@ -3,10 +3,11 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net4.5</TargetFrameworks>
     <RootNamespace>H.Formatters</RootNamespace>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">
-    <Version>0.8.2.4</Version>
+    <Version>0.8.2.5</Version>
     <Description>This package adds WireFormatter(based on Wire nuget package)</Description>
   </PropertyGroup>
 

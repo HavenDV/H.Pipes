@@ -91,11 +91,11 @@ namespace H.Pipes.Tests
 
         #region Events
 
-        private void ServerOnMessageReceived(object? sender, ConnectionMessageEventArgs<TestCollection> args)
+        private void ServerOnMessageReceived(object? sender, ConnectionMessageEventArgs<TestCollection?> args)
         {
-            Trace.WriteLine($"Received collection with {args.Message.Count} items from the client");
+            Trace.WriteLine($"Received collection with {args.Message?.Count ?? 0} items from the client");
             _actualData = args.Message;
-            _actualHash = args.Message.GetHashCode();
+            _actualHash = args.Message?.GetHashCode() ?? 0;
             _barrier.Set();
         }
 
