@@ -219,7 +219,7 @@ namespace H.Pipes
 
         private async Task DisconnectInternalAsync()
         {
-            if (Connection == null) // nullable detection system is not very smart
+            if (Connection == null)
             {
                 return;
             }
@@ -246,7 +246,7 @@ namespace H.Pipes
             {
                 await Task.Delay(TimeSpan.FromMilliseconds(1), cancellationToken).ConfigureAwait(false);
             }
-            if (Connection == null) // nullable detection system is not very smart
+            if (Connection == null)
             {
                 throw new InvalidOperationException("Client is not connected");
             }
