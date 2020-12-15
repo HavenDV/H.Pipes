@@ -28,7 +28,7 @@ namespace H.Pipes
         /// due to an error or the other end terminating the connection. <br/>
         /// Default value is <see langword="true"/>.
         /// </summary>
-        public bool AutoReconnect { get; set; }
+        public bool AutoReconnect { get; set; } = true;
 
         /// <summary>
         /// Interval of reconnection
@@ -116,11 +116,10 @@ namespace H.Pipes
         {
             PipeName = pipeName;
             ServerName = serverName;
-            AutoReconnect = true;
 
             ReconnectionInterval = reconnectionInterval ?? TimeSpan.FromMilliseconds(100);
             ReconnectionTimer = new System.Timers.Timer(ReconnectionInterval.TotalMilliseconds);
-            ReconnectionTimer.Elapsed += async (sender, args) =>
+            ReconnectionTimer.Elapsed += async (_, _) =>
             {
                 try
                 {
@@ -182,14 +181,14 @@ namespace H.Pipes
 
                 // Create a Connection object for the data pipe
                 Connection = ConnectionFactory.Create<T>(dataPipe, Formatter);
-                Connection.Disconnected += async (sender, args) =>
+                Connection.Disconnected += async (_, args) =>
                 {
                     await DisconnectInternalAsync().ConfigureAwait(false);
 
                     OnDisconnected(args);
                 };
-                Connection.MessageReceived += (sender, args) => OnMessageReceived(args);
-                Connection.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
+                Connection.MessageReceived += (_, args) => OnMessageReceived(args);
+                Connection.ExceptionOccurred += (_, args) => OnExceptionOccurred(args.Exception);
                 Connection.Start();
 
                 OnConnected(new ConnectionEventArgs<T>(Connection));
