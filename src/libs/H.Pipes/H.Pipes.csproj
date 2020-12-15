@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">
-    <Version>1.14.6</Version>
+    <Version>1.14.7</Version>
     <Description>
       Features:
       - Create named pipe servers that can handle multiple client connections simultaneously.
@@ -21,7 +21,9 @@
       - Also available ready formatters in separate nuget packages: H.Formatters.Json and H.Formatters.Wire
       - Supports `PipeAccessRule`'s(see `H.Pipes.AccessControl` nuget package) or more complex code to access using the `PipeServer.PipeStreamInitializeAction` property
     </Description>
-    <PackageReleaseNotes>Added Source Link.</PackageReleaseNotes>
+    <PackageReleaseNotes>
+      Fixed Parallel WriteAsync calls bug.
+    </PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">

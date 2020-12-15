@@ -157,6 +157,16 @@ namespace H.Pipes
         /// <exception cref="InvalidOperationException"></exception>
         public async Task ConnectAsync(CancellationToken cancellationToken = default)
         {
+            while (IsConnecting)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(1), cancellationToken).ConfigureAwait(false);
+            }
+
+            if (IsConnected)
+            {
+                return;
+            }
+
             try
             {
                 IsConnecting = true;
@@ -164,10 +174,6 @@ namespace H.Pipes
                 if (AutoReconnect)
                 {
                     ReconnectionTimer.Start();
-                }
-                if (IsConnected)
-                {
-                    throw new InvalidOperationException("Already connected");
                 }
 
                 var connectionPipeName = await GetConnectionPipeName(cancellationToken).ConfigureAwait(false);
@@ -238,13 +244,9 @@ namespace H.Pipes
         /// <exception cref="InvalidOperationException"></exception>
         public async Task WriteAsync(T value, CancellationToken cancellationToken = default)
         {
-            if (!IsConnected && AutoReconnect && !IsConnecting)
+            if (!IsConnected && AutoReconnect)
             {
                 await ConnectAsync(cancellationToken).ConfigureAwait(false);
-            }
-            while (IsConnecting)
-            {
-                await Task.Delay(TimeSpan.FromMilliseconds(1), cancellationToken).ConfigureAwait(false);
             }
             if (Connection == null)
             {

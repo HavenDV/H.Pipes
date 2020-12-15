@@ -40,11 +40,13 @@ namespace H.Pipes.Tests
             {
                 using var source = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                 source.CancelAfter(TimeSpan.FromSeconds(1));
-                
-                await client.WriteAsync(string.Empty, source.Token);
+
+                await Assert.ThrowsExceptionAsync<OperationCanceledException>(
+                    async () => await client.WriteAsync(string.Empty, source.Token));
             }
 
-            await firstTask;
+            await Assert.ThrowsExceptionAsync<OperationCanceledException>(
+                async () => await firstTask);
         }
     }
 }
