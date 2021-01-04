@@ -40,7 +40,6 @@ namespace H.Pipes.AccessControl
         public static void AddAccessRules<T>(this IPipeServer<T> server, params PipeAccessRule[] rules)
         {
             server = server ?? throw new ArgumentNullException(nameof(server));
-            rules = rules ?? throw new ArgumentNullException(nameof(rules));
 
             var pipeSecurity = new PipeSecurity();
             foreach (var rule in rules)

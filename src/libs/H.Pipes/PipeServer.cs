@@ -50,12 +50,14 @@ namespace H.Pipes
         /// <summary>
         /// All connections(include disconnected clients)
         /// </summary>
-        public List<PipeConnection<T>> Connections { get; } = new List<PipeConnection<T>>();
+        private List<PipeConnection<T>> Connections { get; } = new();
 
         /// <summary>
         /// Connected clients
         /// </summary>
-        public List<PipeConnection<T>> ConnectedClients => Connections.Where(connection => connection.IsConnected).ToList();
+        public IReadOnlyCollection<PipeConnection<T>> ConnectedClients => Connections
+            .Where(connection => connection.IsConnected)
+            .ToList();
 
         /// <summary>
         /// IsStarted
@@ -214,9 +216,9 @@ namespace H.Pipes
 
                         // Add the client's connection to the list of connections
                         var connection = ConnectionFactory.Create<T>(connectionStream, Formatter);
-                        connection.MessageReceived += (sender, args) => OnMessageReceived(args);
-                        connection.Disconnected += (sender, args) => OnClientDisconnected(args);
-                        connection.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
+                        connection.MessageReceived += (_, args) => OnMessageReceived(args);
+                        connection.Disconnected += (_, args) => OnClientDisconnected(args);
+                        connection.ExceptionOccurred += (_, args) => OnExceptionOccurred(args.Exception);
                         connection.Start();
 
                         Connections.Add(connection);

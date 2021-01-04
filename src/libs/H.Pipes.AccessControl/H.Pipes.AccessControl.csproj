@@ -5,10 +5,11 @@
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">
-    <Version>1.14.7</Version>
+    <Version>1.14.8</Version>
     <Description>This package adds AccessControl extensions for PipeServerSetPipeSecurity() and other)</Description>
     <PackageReleaseNotes>
       Fixed Parallel WriteAsync calls bug.
+      Added CLSCompliant=True.
     </PackageReleaseNotes>
   </PropertyGroup>
 

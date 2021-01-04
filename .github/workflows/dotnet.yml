@@ -22,11 +22,14 @@ jobs:
       with:
         dotnet-version: ${{ matrix.dotnet }}
     
+    - name: Clean
+      run: dotnet clean --configuration Release && dotnet nuget locals all --clear
+    
     - name: Build
-      run: dotnet build --configuration Release --nologo
+      run: dotnet build --configuration Release
     
     - name: Run tests
-      run: dotnet test --configuration Release --nologo
+      run: dotnet test --configuration Release
         
     - name: Publish
       run: dotnet nuget push

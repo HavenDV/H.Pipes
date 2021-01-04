@@ -117,7 +117,6 @@ namespace H.Pipes.Extensions
         {
             value = value ?? throw new ArgumentNullException(nameof(value));
             func = func ?? throw new ArgumentNullException(nameof(func));
-            eventNames = eventNames ?? throw new ArgumentNullException(nameof(eventNames));
 
             var tasks = eventNames
                 .Select(async name =>
@@ -172,7 +171,6 @@ namespace H.Pipes.Extensions
         {
             value = value ?? throw new ArgumentNullException(nameof(value));
             func = func ?? throw new ArgumentNullException(nameof(func));
-            eventNames = eventNames ?? throw new ArgumentNullException(nameof(eventNames));
 
             var tasks = eventNames
                 .Select(async name =>

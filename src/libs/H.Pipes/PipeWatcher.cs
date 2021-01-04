@@ -24,7 +24,7 @@ namespace H.Pipes
 
         private Timer Timer { get; }
 
-        private List<string> LastPipes { get; set; } = new List<string>();
+        private IReadOnlyCollection<string> LastPipes { get; set; } = new List<string>();
 
         #endregion
 
@@ -153,7 +153,7 @@ namespace H.Pipes
         /// <summary>
         /// Returns list of active pipes
         /// </summary>
-        public static List<string> GetActivePipes()
+        public static IReadOnlyCollection<string> GetActivePipes()
         {
             return Directory
                 .EnumerateFiles(@"\\.\pipe\")

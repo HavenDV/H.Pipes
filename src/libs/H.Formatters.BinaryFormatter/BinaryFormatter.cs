@@ -49,7 +49,7 @@ namespace H.Formatters
 
             using var memoryStream = new MemoryStream(bytes);
             var obj = (T?)InternalFormatter.Deserialize(memoryStream);
-
+            
             return TaskUtilities.FromResult(obj);
         }
     }

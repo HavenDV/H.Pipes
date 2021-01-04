@@ -7,8 +7,12 @@
     <RootNamespace>System.IO.Pipes</RootNamespace>
   </PropertyGroup>
 
+  <PropertyGroup Label="Analyzers">
+    <NoWarn>$(NoWarn);CA5392;CA1838;CA1508</NoWarn>
+  </PropertyGroup>
+
   <PropertyGroup Label="NuGet">
-    <Version>1.0.7</Version>
+    <Version>1.0.8</Version>
     <Description>
       This package adds original NamedPipeServerStream constructors from Net.Framework to NetStandard
 
@@ -22,7 +26,10 @@
     </Description>
     <PackageProjectUrl>https://github.com/HavenDV/H.Pipes/tree/master/src/libs/NamedPipeServerStream.NetFrameworkVersion</PackageProjectUrl>
     <RepositoryUrl>https://github.com/HavenDV/H.Pipes/tree/master/src/libs/NamedPipeServerStream.NetFrameworkVersion</RepositoryUrl>
-    <PackageReleaseNotes>Added Source Link.</PackageReleaseNotes>
+    <PackageReleaseNotes>
+      Added Source Link.
+      Added CLSCompliant=True.
+    </PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup Label="Resources">
