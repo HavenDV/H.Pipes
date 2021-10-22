@@ -1,26 +1,23 @@
-﻿using System;
+﻿namespace H.Pipes.Args;
 
-namespace H.Pipes.Args
+/// <summary>
+/// Handles exceptions thrown during read/write operations.
+/// </summary>
+/// <typeparam name="T">Reference type</typeparam>
+public class ConnectionExceptionEventArgs<T> : ConnectionEventArgs<T>
 {
     /// <summary>
-    /// Handles exceptions thrown during read/write operations.
+    /// The exception that was thrown
     /// </summary>
-    /// <typeparam name="T">Reference type</typeparam>
-    public class ConnectionExceptionEventArgs<T> : ConnectionEventArgs<T>
-    {
-        /// <summary>
-        /// The exception that was thrown
-        /// </summary>
-        public Exception Exception { get; }
+    public Exception Exception { get; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <param name="exception"></param>
-        public ConnectionExceptionEventArgs(PipeConnection<T> connection, Exception exception) : base(connection)
-        {
-            Exception = exception ?? throw new ArgumentNullException(nameof(exception));
-        }
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="connection"></param>
+    /// <param name="exception"></param>
+    public ConnectionExceptionEventArgs(PipeConnection<T> connection, Exception exception) : base(connection)
+    {
+        Exception = exception ?? throw new ArgumentNullException(nameof(exception));
     }
 }

@@ -1,174 +1,170 @@
-﻿using System;
-using System.IO;
-using System.IO.Pipes;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.IO.Pipes;
 using H.Formatters;
 using H.Pipes.Args;
 using H.Pipes.Factories;
 using H.Pipes.Utilities;
 
-namespace H.Pipes
+namespace H.Pipes;
+
+/// <summary>
+/// Wraps a <see cref="NamedPipeServerStream"/> and optimized for one connection.
+/// </summary>
+/// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
+public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
 {
+    #region Properties
+
     /// <summary>
-    /// Wraps a <see cref="NamedPipeServerStream"/> and optimized for one connection.
+    /// Name of pipe
     /// </summary>
-    /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
-    public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
+    public string PipeName { get; }
+
+    /// <summary>
+    /// CreatePipeStreamFunc
+    /// </summary>
+    public Func<string, NamedPipeServerStream>? CreatePipeStreamFunc { get; set; }
+
+    /// <summary>
+    /// PipeStreamInitializeAction
+    /// </summary>
+    public Action<NamedPipeServerStream>? PipeStreamInitializeAction { get; set; }
+
+    /// <summary>
+    /// Used formatter
+    /// </summary>
+    public IFormatter Formatter { get; set; }
+
+    /// <summary>
+    /// Indicates whether to wait for a name to be released when calling StartAsync()
+    /// </summary>
+    public bool WaitFreePipe { get; set; }
+
+    /// <summary>
+    /// Connection
+    /// </summary>
+    public PipeConnection<T>? Connection { get; private set; }
+
+    /// <summary>
+    /// IsStarted
+    /// </summary>
+    public bool IsStarted => ListenWorker != null && !ListenWorker.Task.IsCompleted && !ListenWorker.Task.IsCanceled && !ListenWorker.Task.IsFaulted;
+
+
+    private TaskWorker? ListenWorker { get; set; }
+
+    private volatile bool _isDisposed;
+
+    #endregion
+
+    #region Events
+
+    /// <summary>
+    /// Invoked whenever a client connects to the server.
+    /// </summary>
+    public event EventHandler<ConnectionEventArgs<T>>? ClientConnected;
+
+    /// <summary>
+    /// Invoked whenever a client disconnects from the server.
+    /// </summary>
+    public event EventHandler<ConnectionEventArgs<T>>? ClientDisconnected;
+
+    /// <summary>
+    /// Invoked whenever a client sends a message to the server.
+    /// </summary>
+    public event EventHandler<ConnectionMessageEventArgs<T?>>? MessageReceived;
+
+    /// <summary>
+    /// Invoked whenever an exception is thrown during a read or write operation.
+    /// </summary>
+    public event EventHandler<ExceptionEventArgs>? ExceptionOccurred;
+
+    private void OnClientConnected(ConnectionEventArgs<T> args)
     {
-        #region Properties
+        ClientConnected?.Invoke(this, args);
+    }
 
-        /// <summary>
-        /// Name of pipe
-        /// </summary>
-        public string PipeName { get; }
+    private void OnClientDisconnected(ConnectionEventArgs<T> args)
+    {
+        ClientDisconnected?.Invoke(this, args);
+    }
 
-        /// <summary>
-        /// CreatePipeStreamFunc
-        /// </summary>
-        public Func<string, NamedPipeServerStream>? CreatePipeStreamFunc { get; set; }
+    private void OnMessageReceived(ConnectionMessageEventArgs<T?> args)
+    {
+        MessageReceived?.Invoke(this, args);
+    }
 
-        /// <summary>
-        /// PipeStreamInitializeAction
-        /// </summary>
-        public Action<NamedPipeServerStream>? PipeStreamInitializeAction { get; set; }
+    private void OnExceptionOccurred(Exception exception)
+    {
+        ExceptionOccurred?.Invoke(this, new ExceptionEventArgs(exception));
+    }
 
-        /// <summary>
-        /// Used formatter
-        /// </summary>
-        public IFormatter Formatter { get; set; }
+    #endregion
 
-        /// <summary>
-        /// Indicates whether to wait for a name to be released when calling StartAsync()
-        /// </summary>
-        public bool WaitFreePipe { get; set; }
+    #region Constructors
 
-        /// <summary>
-        /// Connection
-        /// </summary>
-        public PipeConnection<T>? Connection { get; private set; }
+    /// <summary>
+    /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName"/>.
+    /// </summary>
+    /// <param name="pipeName">Name of the pipe to listen on</param>
+    /// <param name="formatter">Default formatter - <see cref="BinaryFormatter"/></param>
+    public SingleConnectionPipeServer(string pipeName, IFormatter? formatter = default)
+    {
+        PipeName = pipeName;
+        Formatter = formatter ?? new BinaryFormatter();
+    }
 
-        /// <summary>
-        /// IsStarted
-        /// </summary>
-        public bool IsStarted => ListenWorker != null && !ListenWorker.Task.IsCompleted && !ListenWorker.Task.IsCanceled && !ListenWorker.Task.IsFaulted;
+    #endregion
 
+    #region Public methods
 
-        private TaskWorker? ListenWorker { get; set; }
-
-        private volatile bool _isDisposed;
-
-        #endregion
-
-        #region Events
-
-        /// <summary>
-        /// Invoked whenever a client connects to the server.
-        /// </summary>
-        public event EventHandler<ConnectionEventArgs<T>>? ClientConnected;
-
-        /// <summary>
-        /// Invoked whenever a client disconnects from the server.
-        /// </summary>
-        public event EventHandler<ConnectionEventArgs<T>>? ClientDisconnected;
-
-        /// <summary>
-        /// Invoked whenever a client sends a message to the server.
-        /// </summary>
-        public event EventHandler<ConnectionMessageEventArgs<T?>>? MessageReceived;
-
-        /// <summary>
-        /// Invoked whenever an exception is thrown during a read or write operation.
-        /// </summary>
-        public event EventHandler<ExceptionEventArgs>? ExceptionOccurred;
-
-        private void OnClientConnected(ConnectionEventArgs<T> args)
+    /// <summary>
+    /// Begins listening for client connections in a separate background thread.
+    /// This method waits when pipe will be created(or throws exception).
+    /// </summary>
+    /// <exception cref="InvalidOperationException"></exception>
+    /// <exception cref="IOException"></exception>
+    public async Task StartAsync(CancellationToken cancellationToken = default)
+    {
+        if (IsStarted)
         {
-            ClientConnected?.Invoke(this, args);
+            throw new InvalidOperationException("Server already started");
         }
 
-        private void OnClientDisconnected(ConnectionEventArgs<T> args)
+        await StopAsync(cancellationToken).ConfigureAwait(false);
+
+        var source = new TaskCompletionSource<bool>();
+        using var registration = cancellationToken.Register(() => source.TrySetCanceled(cancellationToken));
+
+        ListenWorker = new TaskWorker(async token =>
         {
-            ClientDisconnected?.Invoke(this, args);
-        }
-
-        private void OnMessageReceived(ConnectionMessageEventArgs<T?> args)
-        {
-            MessageReceived?.Invoke(this, args);
-        }
-
-        private void OnExceptionOccurred(Exception exception)
-        {
-            ExceptionOccurred?.Invoke(this, new ExceptionEventArgs(exception));
-        }
-
-        #endregion
-
-        #region Constructors
-
-        /// <summary>
-        /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName"/>.
-        /// </summary>
-        /// <param name="pipeName">Name of the pipe to listen on</param>
-        /// <param name="formatter">Default formatter - <see cref="BinaryFormatter"/></param>
-        public SingleConnectionPipeServer(string pipeName, IFormatter? formatter = default)
-        {
-            PipeName = pipeName;
-            Formatter = formatter ?? new BinaryFormatter();
-        }
-
-        #endregion
-
-        #region Public methods
-
-        /// <summary>
-        /// Begins listening for client connections in a separate background thread.
-        /// This method waits when pipe will be created(or throws exception).
-        /// </summary>
-        /// <exception cref="InvalidOperationException"></exception>
-        /// <exception cref="IOException"></exception>
-        public async Task StartAsync(CancellationToken cancellationToken = default)
-        {
-            if (IsStarted)
+            while (!token.IsCancellationRequested)
             {
-                throw new InvalidOperationException("Server already started");
-            }
-
-            await StopAsync(cancellationToken).ConfigureAwait(false);
-
-            var source = new TaskCompletionSource<bool>();
-            using var registration = cancellationToken.Register(() => source.TrySetCanceled(cancellationToken));
-
-            ListenWorker = new TaskWorker(async token =>
-            {
-                while (!token.IsCancellationRequested)
+                try
                 {
-                    try
+                    if (Connection != null && Connection.IsConnected)
                     {
-                        if (Connection != null && Connection.IsConnected)
-                        {
-                            await Task.Delay(TimeSpan.FromMilliseconds(1), cancellationToken).ConfigureAwait(false);
-                            continue;
-                        }
+                        await Task.Delay(TimeSpan.FromMilliseconds(1), cancellationToken).ConfigureAwait(false);
+                        continue;
+                    }
 
-                        if (Connection != null)
-                        {
-                            await Connection.StopAsync().ConfigureAwait(false);
-                        }
+                    if (Connection != null)
+                    {
+                        await Connection.StopAsync().ConfigureAwait(false);
+                    }
 
                         // Wait for the client to connect to the data pipe
                         var connectionStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName);
 
-                        try
-                        {
-                            PipeStreamInitializeAction?.Invoke(connectionStream);
+                    try
+                    {
+                        PipeStreamInitializeAction?.Invoke(connectionStream);
 
-                            source.TrySetResult(true);
+                        source.TrySetResult(true);
 
-                            await connectionStream.WaitForConnectionAsync(token).ConfigureAwait(false);
-                        }
-                        catch
-                        {
+                        await connectionStream.WaitForConnectionAsync(token).ConfigureAwait(false);
+                    }
+                    catch
+                    {
 #if NETSTANDARD2_1
                             await connectionStream.DisposeAsync().ConfigureAwait(false);
 #else
@@ -176,122 +172,121 @@ namespace H.Pipes
 #endif
 
                             throw;
-                        }
-
-                        var connection = ConnectionFactory.Create<T>(connectionStream, Formatter);
-                        try
-                        {
-                            connection.MessageReceived += (sender, args) => OnMessageReceived(args);
-                            connection.Disconnected += (sender, args) => OnClientDisconnected(args);
-                            connection.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
-                            connection.Start();
-                        }
-                        catch
-                        {
-                            await connection.StopAsync().ConfigureAwait(false);
-
-                            throw;
-                        }
-
-                        Connection = connection;
-
-                        OnClientConnected(new ConnectionEventArgs<T>(connection));
                     }
-                    catch (OperationCanceledException)
-                    {
-                        if (Connection != null)
-                        {
-                            await Connection.StopAsync().ConfigureAwait(false);
 
-                            Connection = null;
-                        }
+                    var connection = ConnectionFactory.Create<T>(connectionStream, Formatter);
+                    try
+                    {
+                        connection.MessageReceived += (sender, args) => OnMessageReceived(args);
+                        connection.Disconnected += (sender, args) => OnClientDisconnected(args);
+                        connection.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
+                        connection.Start();
+                    }
+                    catch
+                    {
+                        await connection.StopAsync().ConfigureAwait(false);
+
                         throw;
                     }
+
+                    Connection = connection;
+
+                    OnClientConnected(new ConnectionEventArgs<T>(connection));
+                }
+                catch (OperationCanceledException)
+                {
+                    if (Connection != null)
+                    {
+                        await Connection.StopAsync().ConfigureAwait(false);
+
+                        Connection = null;
+                    }
+                    throw;
+                }
                     // Catch the IOException that is raised if the pipe is broken or disconnected.
                     catch (IOException exception)
+                {
+                    if (!WaitFreePipe)
                     {
-                        if (!WaitFreePipe)
-                        {
-                            source.TrySetException(exception);
-                            break;
-                        }
-
-                        await Task.Delay(TimeSpan.FromMilliseconds(1), token).ConfigureAwait(false);
-                    }
-                    catch (Exception exception)
-                    {
-                        OnExceptionOccurred(exception);
+                        source.TrySetException(exception);
                         break;
                     }
+
+                    await Task.Delay(TimeSpan.FromMilliseconds(1), token).ConfigureAwait(false);
                 }
-            }, OnExceptionOccurred);
-
-            try
-            {
-                await source.Task.ConfigureAwait(false);
+                catch (Exception exception)
+                {
+                    OnExceptionOccurred(exception);
+                    break;
+                }
             }
-            catch (Exception)
-            {
-                await StopAsync(cancellationToken).ConfigureAwait(false);
+        }, OnExceptionOccurred);
 
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Sends a message to all connected clients asynchronously.
-        /// </summary>
-        /// <param name="value"></param>
-        /// <param name="cancellationToken"></param>
-        public async Task WriteAsync(T value, CancellationToken cancellationToken = default)
+        try
         {
-            if (Connection == null || !Connection.IsConnected)
-            {
-                return;
-            }
-
-            await Connection.WriteAsync(value, cancellationToken).ConfigureAwait(false);
+            await source.Task.ConfigureAwait(false);
         }
-
-        /// <summary>
-        /// Closes all open client connections and stops listening for new ones.
-        /// </summary>
-        public async Task StopAsync(CancellationToken _ = default)
+        catch (Exception)
         {
-            if (ListenWorker != null)
-            {
-                await ListenWorker.StopAsync().ConfigureAwait(false);
+            await StopAsync(cancellationToken).ConfigureAwait(false);
 
-                ListenWorker = null;
-            }
-
-            if (Connection != null)
-            {
-                await Connection.StopAsync().ConfigureAwait(false);
-
-                Connection = null;
-            }
+            throw;
         }
-
-        #endregion
-
-        #region IDisposable
-
-        /// <summary>
-        /// Dispose internal resources
-        /// </summary>
-        public async ValueTask DisposeAsync()
-        {
-            if (_isDisposed)
-            {
-                return;
-            }
-
-            _isDisposed = true;
-
-            await StopAsync().ConfigureAwait(false);
-        }
-
-        #endregion
     }
+
+    /// <summary>
+    /// Sends a message to all connected clients asynchronously.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="cancellationToken"></param>
+    public async Task WriteAsync(T value, CancellationToken cancellationToken = default)
+    {
+        if (Connection == null || !Connection.IsConnected)
+        {
+            return;
+        }
+
+        await Connection.WriteAsync(value, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Closes all open client connections and stops listening for new ones.
+    /// </summary>
+    public async Task StopAsync(CancellationToken _ = default)
+    {
+        if (ListenWorker != null)
+        {
+            await ListenWorker.StopAsync().ConfigureAwait(false);
+
+            ListenWorker = null;
+        }
+
+        if (Connection != null)
+        {
+            await Connection.StopAsync().ConfigureAwait(false);
+
+            Connection = null;
+        }
+    }
+
+    #endregion
+
+    #region IDisposable
+
+    /// <summary>
+    /// Dispose internal resources
+    /// </summary>
+    public async ValueTask DisposeAsync()
+    {
+        if (_isDisposed)
+        {
+            return;
+        }
+
+        _isDisposed = true;
+
+        await StopAsync().ConfigureAwait(false);
+    }
+
+    #endregion
 }
