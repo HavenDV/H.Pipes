@@ -24,13 +24,12 @@
     <RepositoryUrl>https://github.com/HavenDV/H.Pipes</RepositoryUrl>
     <PackageTags>pipes, named pipes, async, async named pipes, namedpipes async, namedpipes, pipes async</PackageTags>
     <PackageIcon>nuget_icon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup Label="Nuget">
-    <None Include="$(SolutionDir)\docs\nuget_icon.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
+    <None Include="$(SolutionDir)assets\nuget_icon.png" Pack="true" PackagePath=""/>
+    <None Include="$(SolutionDir)README.md" Pack="true" PackagePath=""/>
   </ItemGroup>
   
   <PropertyGroup Label="Source Link">
