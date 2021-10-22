@@ -164,24 +164,29 @@ namespace H.Pipes
                         try
                         {
 #if NETSTANDARD2_1
-                            await using var serverStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName);
+                            var serverStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName);
+                            await using (serverStream.ConfigureAwait(false))
 #else
-                            using var serverStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName);
+                            using (var serverStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName))
 #endif
-                            PipeStreamInitializeAction?.Invoke(serverStream);
+                            {
+                                PipeStreamInitializeAction?.Invoke(serverStream);
 
-                            source.TrySetResult(true);
+                                source.TrySetResult(true);
 
-                            await serverStream.WaitForConnectionAsync(token).ConfigureAwait(false);
+                                await serverStream.WaitForConnectionAsync(token).ConfigureAwait(false);
 
 #if NETSTANDARD2_1
-                            await using var handshakeWrapper = new PipeStreamWrapper(serverStream);
+                                using var handshakeWrapper = new PipeStreamWrapper(serverStream);
+                                await using (handshakeWrapper.ConfigureAwait(false))
 #else
-                            using var handshakeWrapper = new PipeStreamWrapper(serverStream);
+                                using (var handshakeWrapper = new PipeStreamWrapper(serverStream))
 #endif
-
-                            await handshakeWrapper.WriteAsync(Encoding.UTF8.GetBytes(connectionPipeName), token)
-                                .ConfigureAwait(false);
+                                {
+                                    await handshakeWrapper.WriteAsync(Encoding.UTF8.GetBytes(connectionPipeName), token)
+                                        .ConfigureAwait(false);
+                                }
+                            }
                         }
                         catch (Exception exception)
                         {

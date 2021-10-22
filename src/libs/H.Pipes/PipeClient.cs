@@ -282,18 +282,22 @@ namespace H.Pipes
         private async Task<string> GetConnectionPipeName(CancellationToken cancellationToken = default)
         {
 #if NETSTANDARD2_1
-            await using var handshake = await PipeClientFactory.ConnectAsync(PipeName, ServerName, cancellationToken).ConfigureAwait(false);
+#pragma warning disable CA2000 // Dispose objects before losing scope
+            var handshake = await PipeClientFactory.ConnectAsync(PipeName, ServerName, cancellationToken).ConfigureAwait(false);
+#pragma warning restore CA2000 // Dispose objects before losing scope
+            await using (handshake.ConfigureAwait(false))
 #else
-            using var handshake = await PipeClientFactory.ConnectAsync(PipeName, ServerName, cancellationToken).ConfigureAwait(false);
+            using (var handshake = await PipeClientFactory.ConnectAsync(PipeName, ServerName, cancellationToken).ConfigureAwait(false))
 #endif
-
-            var bytes = await handshake.ReadAsync(cancellationToken).ConfigureAwait(false);
-            if (bytes == null)
             {
-                throw new InvalidOperationException("Connection failed: Returned by server pipeName is null");
-            }
+                var bytes = await handshake.ReadAsync(cancellationToken).ConfigureAwait(false);
+                if (bytes == null)
+                {
+                    throw new InvalidOperationException("Connection failed: Returned by server pipeName is null");
+                }
 
-            return Encoding.UTF8.GetString(bytes);
+                return Encoding.UTF8.GetString(bytes);
+            }
         }
 
         #endregion
