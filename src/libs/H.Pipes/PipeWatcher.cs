@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Timers;
+﻿using Timer = System.Timers.Timer;
 using H.Pipes.Args;
+using System.Timers;
 
 // ReSharper disable UnusedMember.Global
 

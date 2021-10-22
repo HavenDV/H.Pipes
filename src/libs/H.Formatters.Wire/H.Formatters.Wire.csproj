@@ -4,6 +4,7 @@
     <TargetFrameworks>netstandard2.0;net4.5</TargetFrameworks>
     <RootNamespace>H.Formatters</RootNamespace>
     <SignAssembly>false</SignAssembly>
+    <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">

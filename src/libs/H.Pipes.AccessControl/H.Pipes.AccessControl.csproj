@@ -17,6 +17,10 @@
     <PackageReference Include="NamedPipeServerStream.NetFrameworkVersion" Version="1.0.9" />
   </ItemGroup>
 
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net4.6.1' ">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\H.Pipes\H.Pipes.csproj" />
   </ItemGroup>

@@ -1,19 +1,12 @@
-﻿using System;
-using System.Windows.Forms;
+﻿namespace WindowsFormsApp;
 
-namespace WindowsFormsApp
+internal static class Program
 {
-    internal static class Program
+    [STAThread]
+    private static void Main()
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        private static void Main()
-        {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FormMain());
-        }
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        Application.Run(new FormMain());
     }
 }

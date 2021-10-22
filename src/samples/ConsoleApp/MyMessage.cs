@@ -1,16 +1,13 @@
-﻿using System;
+﻿namespace ConsoleApp;
 
-namespace ConsoleApp
+[Serializable]
+internal class MyMessage
 {
-    [Serializable]
-    internal class MyMessage
-    {
-        public int Id { get; set; }
-        public string? Text { get; set; }
+    public int Id { get; set; }
+    public string? Text { get; set; }
 
-        public override string ToString()
-        {
-            return $"\"{Text}\" (message ID = {Id})";
-        }
+    public override string ToString()
+    {
+        return $"\"{Text}\" (message ID = {Id})";
     }
 }

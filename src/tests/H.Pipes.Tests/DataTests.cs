@@ -1,196 +1,189 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using H.Formatters;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using H.Formatters;
 
-namespace H.Pipes.Tests
+namespace H.Pipes.Tests;
+
+[TestClass]
+public class DataTests
 {
-    [TestClass]
-    public class DataTests
+    [TestMethod]
+    public async Task NullTest()
     {
-        [TestMethod]
-        public async Task NullTest()
-        {
-            var values = new List<string?> { null };
-            static string HashFunc(string? value) => value ?? "null";
+        var values = new List<string?> { null };
+        static string HashFunc(string? value) => value ?? "null";
 
-            await BaseTests.DataSingleTestAsync(values, HashFunc);
-            await BaseTests.DataSingleTestAsync(values, HashFunc, new JsonFormatter());
+        await BaseTests.DataSingleTestAsync(values, HashFunc);
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new JsonFormatter());
 #if !NETFRAMEWORK
-            await BaseTests.DataSingleTestAsync(values, HashFunc, new WireFormatter());
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new WireFormatter());
 #endif
-        }
+    }
 
-        [TestMethod]
-        public async Task EmptyArrayTest()
-        {
-            var values = new List<byte[]?> {Array.Empty<byte>()};
-            static string HashFunc(byte[]? value) => value?.Length.ToString() ?? "null";
+    [TestMethod]
+    public async Task EmptyArrayTest()
+    {
+        var values = new List<byte[]?> { Array.Empty<byte>() };
+        static string HashFunc(byte[]? value) => value?.Length.ToString() ?? "null";
 
-            await BaseTests.DataSingleTestAsync(values, HashFunc);
-            await BaseTests.DataSingleTestAsync(values, HashFunc, new JsonFormatter());
+        await BaseTests.DataSingleTestAsync(values, HashFunc);
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new JsonFormatter());
 #if !NETFRAMEWORK
-            await BaseTests.DataSingleTestAsync(values, HashFunc, new WireFormatter());
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new WireFormatter());
 #endif
 
-            values = new List<byte[]?> { null };
+        values = new List<byte[]?> { null };
 
-            await BaseTests.DataSingleTestAsync(values, HashFunc);
-            await BaseTests.DataSingleTestAsync(values, HashFunc, new JsonFormatter());
+        await BaseTests.DataSingleTestAsync(values, HashFunc);
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new JsonFormatter());
 #if !NETFRAMEWORK
-            await BaseTests.DataSingleTestAsync(values, HashFunc, new WireFormatter());
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new WireFormatter());
 #endif
-        }
+    }
 
-        [TestMethod]
-        public async Task EmptyArrayParallelTest()
+    [TestMethod]
+    public async Task EmptyArrayParallelTest()
+    {
+        using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+        var cancellationToken = cancellationTokenSource.Token;
+
+        const string pipeName = "data_test_pipe";
+        await using var server = new SingleConnectionPipeServer<string?>(pipeName)
         {
-            using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1));
-            var cancellationToken = cancellationTokenSource.Token;
+            WaitFreePipe = true
+        };
+        await using var client = new SingleConnectionPipeClient<string?>(pipeName);
 
-            const string pipeName = "data_test_pipe";
-            await using var server = new SingleConnectionPipeServer<string?>(pipeName)
-            {
-                WaitFreePipe = true
-            };
-            await using var client = new SingleConnectionPipeClient<string?>(pipeName);
+        await server.StartAsync(cancellationToken).ConfigureAwait(false);
+        await client.ConnectAsync(cancellationToken).ConfigureAwait(false);
 
-            await server.StartAsync(cancellationToken).ConfigureAwait(false);
-            await client.ConnectAsync(cancellationToken).ConfigureAwait(false);
+        var tasks = Enumerable
+            .Range(0, 10000)
+            .Select(async _ => await client.WriteAsync(null, cancellationTokenSource.Token))
+            .ToArray();
 
-            var tasks = Enumerable
-                .Range(0, 10000)
-                .Select(async _ => await client.WriteAsync(null, cancellationTokenSource.Token))
-                .ToArray();
+        await Task.WhenAll(tasks);
+    }
 
-            await Task.WhenAll(tasks);
-        }
+    [TestMethod]
+    public async Task TestEmptyMessageDoesNotDisconnectClient()
+    {
+        await BaseTests.BinaryDataTestAsync(0);
+    }
 
-        [TestMethod]
-        public async Task TestEmptyMessageDoesNotDisconnectClient()
-        {
-            await BaseTests.BinaryDataTestAsync(0);
-        }
+    [TestMethod]
+    public async Task TestMessageSize1B()
+    {
+        await BaseTests.BinaryDataTestAsync(1);
+    }
 
-        [TestMethod]
-        public async Task TestMessageSize1B()
-        {
-            await BaseTests.BinaryDataTestAsync(1);
-        }
+    [TestMethod]
+    public async Task TestMessageSize2B()
+    {
+        await BaseTests.BinaryDataTestAsync(2);
+    }
 
-        [TestMethod]
-        public async Task TestMessageSize2B()
-        {
-            await BaseTests.BinaryDataTestAsync(2);
-        }
+    [TestMethod]
+    public async Task TestMessageSize3B()
+    {
+        await BaseTests.BinaryDataTestAsync(3);
+    }
 
-        [TestMethod]
-        public async Task TestMessageSize3B()
-        {
-            await BaseTests.BinaryDataTestAsync(3);
-        }
+    [TestMethod]
+    public async Task TestMessageSize9B()
+    {
+        await BaseTests.BinaryDataTestAsync(9);
+    }
 
-        [TestMethod]
-        public async Task TestMessageSize9B()
-        {
-            await BaseTests.BinaryDataTestAsync(9);
-        }
+    [TestMethod]
+    public async Task TestMessageSize33B()
+    {
+        await BaseTests.BinaryDataTestAsync(33);
+    }
 
-        [TestMethod]
-        public async Task TestMessageSize33B()
-        {
-            await BaseTests.BinaryDataTestAsync(33);
-        }
-
-        [TestMethod]
-        public async Task TestMessageSize1Kx3_JSON()
-        {
-            await BaseTests.BinaryDataTestAsync(1025, 3, new JsonFormatter());
-        }
-
-#if !NETFRAMEWORK
-        [TestMethod]
-        public async Task TestMessageSize1Kx3_Wire()
-        {
-            await BaseTests.BinaryDataTestAsync(1025, 3, new WireFormatter());
-        }
-#endif
-
-        [TestMethod]
-        public async Task TestMessageSize129B()
-        {
-            await BaseTests.BinaryDataTestAsync(129);
-        }
-
-        [TestMethod]
-        public async Task TestMessageSize1K()
-        {
-            await BaseTests.BinaryDataTestAsync(1025);
-        }
-
-        [TestMethod]
-        public async Task TestMessageSize1M()
-        {
-            await BaseTests.BinaryDataTestAsync(1024 * 1024 + 1);
-        }
-
-        [TestMethod]
-        public async Task Single_TestEmptyMessageDoesNotDisconnectClient()
-        {
-            await BaseTests.BinaryDataSingleTestAsync(0);
-        }
-
-        [TestMethod]
-        public async Task Single_TestMessageSize1B()
-        {
-            await BaseTests.BinaryDataSingleTestAsync(1);
-        }
-
-        [TestMethod]
-        public async Task Single_TestMessageSize1Kx3_JSON()
-        {
-            await BaseTests.BinaryDataSingleTestAsync(1025, 3, new JsonFormatter());
-        }
+    [TestMethod]
+    public async Task TestMessageSize1Kx3_JSON()
+    {
+        await BaseTests.BinaryDataTestAsync(1025, 3, new JsonFormatter());
+    }
 
 #if !NETFRAMEWORK
-        [TestMethod]
-        public async Task Single_TestMessageSize1Kx3_Wire()
-        {
-            await BaseTests.BinaryDataSingleTestAsync(1025, 3, new WireFormatter());
-        }
+    [TestMethod]
+    public async Task TestMessageSize1Kx3_Wire()
+    {
+        await BaseTests.BinaryDataTestAsync(1025, 3, new WireFormatter());
+    }
 #endif
 
-        [TestMethod]
-        public async Task TypeTest()
+    [TestMethod]
+    public async Task TestMessageSize129B()
+    {
+        await BaseTests.BinaryDataTestAsync(129);
+    }
+
+    [TestMethod]
+    public async Task TestMessageSize1K()
+    {
+        await BaseTests.BinaryDataTestAsync(1025);
+    }
+
+    [TestMethod]
+    public async Task TestMessageSize1M()
+    {
+        await BaseTests.BinaryDataTestAsync(1024 * 1024 + 1);
+    }
+
+    [TestMethod]
+    public async Task Single_TestEmptyMessageDoesNotDisconnectClient()
+    {
+        await BaseTests.BinaryDataSingleTestAsync(0);
+    }
+
+    [TestMethod]
+    public async Task Single_TestMessageSize1B()
+    {
+        await BaseTests.BinaryDataSingleTestAsync(1);
+    }
+
+    [TestMethod]
+    public async Task Single_TestMessageSize1Kx3_JSON()
+    {
+        await BaseTests.BinaryDataSingleTestAsync(1025, 3, new JsonFormatter());
+    }
+
+#if !NETFRAMEWORK
+    [TestMethod]
+    public async Task Single_TestMessageSize1Kx3_Wire()
+    {
+        await BaseTests.BinaryDataSingleTestAsync(1025, 3, new WireFormatter());
+    }
+#endif
+
+    [TestMethod]
+    public async Task TypeTest()
+    {
+        using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+        var completionSource = new TaskCompletionSource<bool>(false);
+        using var registration = cancellationTokenSource.Token.Register(() => completionSource.TrySetCanceled());
+
+        const string pipeName = "data_test_pipe";
+        var formatter = new BinaryFormatter();
+        await using var server = new PipeServer<object>(pipeName, formatter);
+        await using var client = new PipeClient<object>(pipeName, formatter: formatter);
+
+        server.ExceptionOccurred += (_, args) => Assert.Fail(args.Exception.ToString());
+        client.ExceptionOccurred += (_, args) => Assert.Fail(args.Exception.ToString());
+        server.MessageReceived += (_, args) =>
         {
-            using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1));
-            var completionSource = new TaskCompletionSource<bool>(false);
-            using var registration = cancellationTokenSource.Token.Register(() => completionSource.TrySetCanceled());
+            Console.WriteLine($"MessageReceived: {args.Message as Exception}");
 
-            const string pipeName = "data_test_pipe";
-            var formatter = new BinaryFormatter();
-            await using var server = new PipeServer<object>(pipeName, formatter);
-            await using var client = new PipeClient<object>(pipeName, formatter: formatter);
+            completionSource.TrySetResult(args.Message is Exception);
+        };
 
-            server.ExceptionOccurred += (_, args) => Assert.Fail(args.Exception.ToString());
-            client.ExceptionOccurred += (_, args) => Assert.Fail(args.Exception.ToString());
-            server.MessageReceived += (_, args) =>
-            {
-                Console.WriteLine($"MessageReceived: {args.Message as Exception}");
+        await server.StartAsync(cancellationTokenSource.Token);
 
-                completionSource.TrySetResult(args.Message is Exception);
-            };
+        await client.ConnectAsync(cancellationTokenSource.Token);
 
-            await server.StartAsync(cancellationTokenSource.Token);
+        await client.WriteAsync(new Exception("Hello. It's server message"), cancellationTokenSource.Token);
 
-            await client.ConnectAsync(cancellationTokenSource.Token);
-
-            await client.WriteAsync(new Exception("Hello. It's server message"), cancellationTokenSource.Token);
-
-            Assert.IsTrue(await completionSource.Task);
-        }
+        Assert.IsTrue(await completionSource.Task);
     }
 }

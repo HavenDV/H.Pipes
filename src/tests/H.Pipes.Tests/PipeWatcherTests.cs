@@ -1,14 +1,11 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿namespace H.Pipes.Tests;
 
-namespace H.Pipes.Tests
+[TestClass]
+public class PipeWatcherTests
 {
-    [TestClass]
-    public class PipeWatcherTests
+    [TestMethod]
+    public void IsExistsTest()
     {
-        [TestMethod]
-        public void IsExistsTest()
-        {
-            Assert.IsFalse(PipeWatcher.IsExists("this_pipe_100%_is_not_exists"));
-        }
+        Assert.IsFalse(PipeWatcher.IsExists("this_pipe_100%_is_not_exists"));
     }
 }

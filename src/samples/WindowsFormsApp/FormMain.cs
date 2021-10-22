@@ -1,35 +1,31 @@
-﻿using System;
-using System.Windows.Forms;
+﻿namespace WindowsFormsApp;
 
-namespace WindowsFormsApp
+public partial class FormMain : Form
 {
-    public partial class FormMain : Form
+    private const string DefaultPipeName = "named_pipe_test_server";
+
+    public FormMain()
     {
-        private const string DefaultPipeName = "named_pipe_test_server";
+        InitializeComponent();
+    }
 
-        public FormMain()
-        {
-            InitializeComponent();
-        }
+    private async void ButtonClient_Click(object sender, EventArgs e)
+    {
+        Hide();
 
-        private async void ButtonClient_Click(object sender, EventArgs e)
-        {
-            Hide();
+        await using var client = new FormClient(DefaultPipeName);
+        client.ShowDialog(this);
 
-            await using var client = new FormClient(DefaultPipeName);
-            client.ShowDialog(this);
+        Close();
+    }
 
-            Close();
-        }
+    private async void ButtonServer_Click(object sender, EventArgs e)
+    {
+        Hide();
 
-        private async void ButtonServer_Click(object sender, EventArgs e)
-        {
-            Hide();
+        await using var server = new FormServer(DefaultPipeName);
+        server.ShowDialog(this);
 
-            await using var server = new FormServer(DefaultPipeName);
-            server.ShowDialog(this);
-
-            Close();
-        }
+        Close();
     }
 }
