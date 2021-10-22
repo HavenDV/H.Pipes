@@ -90,13 +90,19 @@ namespace H.Pipes.AccessControl
                 }
 
                 using var source = new CancellationTokenSource(ClientTimeout);
-                await using var client = new PipeClient<string[]>(ApplicationName);
-                client.ExceptionOccurred += (_, args) =>
-                {
-                    OnExceptionOccurred(args.Exception);
-                };
 
-                await client.WriteAsync(arguments, source.Token).ConfigureAwait(false);
+#pragma warning disable CA2000 // Dispose objects before losing scope
+                var client = new PipeClient<string[]>(ApplicationName);
+#pragma warning restore CA2000 // Dispose objects before losing scope
+                await using (client.ConfigureAwait(false))
+                {
+                    client.ExceptionOccurred += (_, args) =>
+                    {
+                        OnExceptionOccurred(args.Exception);
+                    };
+
+                    await client.WriteAsync(arguments, source.Token).ConfigureAwait(false);
+                }
 
                 return true;
             }

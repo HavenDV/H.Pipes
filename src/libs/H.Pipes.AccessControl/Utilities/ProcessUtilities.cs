@@ -17,7 +17,7 @@ namespace H.Pipes.AccessControl.Utilities
         {
             name = name ?? throw new ArgumentNullException(nameof(name));
 
-            return name.Contains(".")
+            return name.Contains('.')
                 ? name.Substring(0, name.IndexOf(".", StringComparison.Ordinal))
                 : name;
         }
