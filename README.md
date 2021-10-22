@@ -19,7 +19,7 @@ A simple, easy to use, strongly-typed, async wrapper around .NET named pipes.
 *  Automatically waiting for a server pipe creating when client connecting
 *  Automatic reconnect with a given interval and at each `client.WriteAsync`, if necessary
 *  Supports variable formatters, default - BinaryFormatter which uses System.Runtime.Serialization.BinaryFormatter inside
-*  Also available ready formatters in separate nuget packages: H.Formatters.Json and H.Formatters.Wire
+*  Also available ready formatters in separate nuget packages: H.Formatters.Json
 *  Supports `PipeAccessRule`'s(see `H.Pipes.AccessControl` nuget package) or more complex code to access using the `PipeServer.PipeStreamInitializeAction` property
 
 ### Nuget
@@ -27,7 +27,6 @@ A simple, easy to use, strongly-typed, async wrapper around .NET named pipes.
 [![NuGet](https://img.shields.io/nuget/dt/H.Pipes.svg?style=flat-square&label=H.Pipes)](https://www.nuget.org/packages/H.Pipes/)
 [![NuGet](https://img.shields.io/nuget/dt/H.Pipes.AccessControl.svg?style=flat-square&label=H.Pipes.AccessControl)](https://www.nuget.org/packages/H.Pipes.AccessControl/)
 [![NuGet](https://img.shields.io/nuget/dt/H.Formatters.Json.svg?style=flat-square&label=H.Formatters.Json)](https://www.nuget.org/packages/H.Formatters.Json/)
-[![NuGet](https://img.shields.io/nuget/dt/H.Formatters.Wire.svg?style=flat-square&label=H.Formatters.Wire)](https://www.nuget.org/packages/H.Formatters.Wire/)
 ```
 // All clients and servers that do not need support AccessControl.
 Install-Package H.Pipes
@@ -37,9 +36,6 @@ Install-Package H.Pipes.AccessControl
 
 // If you want to transfer any data that can be serialized/deserialized in json.
 Install-Package H.Formatters.Json
-
-// If you want to transfer any data that can be serialized/deserialized by Wire(Binary serializer).
-Install-Package H.Formatters.Wire
 ```
 
 ### Usage
