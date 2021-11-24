@@ -284,7 +284,7 @@ public sealed class PipeClient<T> : IPipeClient<T>
 #pragma warning restore CA2000 // Dispose objects before losing scope
         await using (handshake.ConfigureAwait(false))
 #else
-            using (var handshake = await PipeClientFactory.ConnectAsync(PipeName, ServerName, cancellationToken).ConfigureAwait(false))
+        using (var handshake = await PipeClientFactory.ConnectAsync(PipeName, ServerName, cancellationToken).ConfigureAwait(false))
 #endif
         {
             var bytes = await handshake.ReadAsync(cancellationToken).ConfigureAwait(false);

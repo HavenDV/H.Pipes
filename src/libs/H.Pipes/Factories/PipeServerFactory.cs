@@ -28,7 +28,7 @@ public static class PipeServerFactory
 #if NETSTANDARD2_1
             await pipe.DisposeAsync().ConfigureAwait(false);
 #else
-                pipe.Dispose();
+            pipe.Dispose();
 #endif
 
             throw;

@@ -154,16 +154,16 @@ public sealed class PipeServer<T> : IPipeServer<T>
                 {
                     var connectionPipeName = $"{PipeName}_{++NextPipeId}";
 
-                        // Send the client the name of the data pipe to use
-                        try
+                    // Send the client the name of the data pipe to use
+                    try
                     {
 #if NETSTANDARD2_1
-                            var serverStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName);
+                        var serverStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName);
                         await using (serverStream.ConfigureAwait(false))
 #else
-                            using (var serverStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName))
+                        using (var serverStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName))
 #endif
-                            {
+                        {
                             PipeStreamInitializeAction?.Invoke(serverStream);
 
                             source.TrySetResult(true);
@@ -171,12 +171,12 @@ public sealed class PipeServer<T> : IPipeServer<T>
                             await serverStream.WaitForConnectionAsync(token).ConfigureAwait(false);
 
 #if NETSTANDARD2_1
-                                using var handshakeWrapper = new PipeStreamWrapper(serverStream);
+                            using var handshakeWrapper = new PipeStreamWrapper(serverStream);
                             await using (handshakeWrapper.ConfigureAwait(false))
 #else
-                                using (var handshakeWrapper = new PipeStreamWrapper(serverStream))
+                            using (var handshakeWrapper = new PipeStreamWrapper(serverStream))
 #endif
-                                {
+                            {
                                 await handshakeWrapper.WriteAsync(Encoding.UTF8.GetBytes(connectionPipeName), token)
                                     .ConfigureAwait(false);
                             }
@@ -193,8 +193,8 @@ public sealed class PipeServer<T> : IPipeServer<T>
                         break;
                     }
 
-                        // Wait for the client to connect to the data pipe
-                        var connectionStream = CreatePipeStreamFunc?.Invoke(connectionPipeName) ?? PipeServerFactory.Create(connectionPipeName);
+                    // Wait for the client to connect to the data pipe
+                    var connectionStream = CreatePipeStreamFunc?.Invoke(connectionPipeName) ?? PipeServerFactory.Create(connectionPipeName);
 
                     PipeStreamInitializeAction?.Invoke(connectionStream);
 
@@ -205,16 +205,16 @@ public sealed class PipeServer<T> : IPipeServer<T>
                     catch
                     {
 #if NETSTANDARD2_1
-                            await connectionStream.DisposeAsync().ConfigureAwait(false);
+                        await connectionStream.DisposeAsync().ConfigureAwait(false);
 #else
-                            connectionStream.Dispose();
+                        connectionStream.Dispose();
 #endif
 
-                            throw;
+                        throw;
                     }
 
-                        // Add the client's connection to the list of connections
-                        var connection = ConnectionFactory.Create<T>(connectionStream, Formatter);
+                    // Add the client's connection to the list of connections
+                    var connection = ConnectionFactory.Create<T>(connectionStream, Formatter);
                     connection.MessageReceived += (_, args) => OnMessageReceived(args);
                     connection.Disconnected += (_, args) => OnClientDisconnected(args);
                     connection.ExceptionOccurred += (_, args) => OnExceptionOccurred(args.Exception);
@@ -228,8 +228,8 @@ public sealed class PipeServer<T> : IPipeServer<T>
                 {
                     throw;
                 }
-                    // Catch the IOException that is raised if the pipe is broken or disconnected.
-                    catch (IOException)
+                // Catch the IOException that is raised if the pipe is broken or disconnected.
+                catch (IOException)
                 {
                     await Task.Delay(TimeSpan.FromMilliseconds(1), token).ConfigureAwait(false);
                 }
