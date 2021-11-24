@@ -109,6 +109,7 @@ public static class BaseTests
         await using var server = new PipeServer<T>(pipeName, formatter ?? new BinaryFormatter())
         {
 #if NET48
+            // https://github.com/HavenDV/H.Pipes/issues/6
             WaitFreePipe = true,
 #endif
         };
