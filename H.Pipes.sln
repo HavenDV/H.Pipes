@@ -40,6 +40,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C77AB22D
 		src\tests\Directory.Build.props = src\tests\Directory.Build.props
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Formatters.Ceras", "src\libs\H.Formatters.Ceras\H.Formatters.Ceras.csproj", "{6534EA7B-75B6-4DEE-B703-023B417B11E2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,6 +80,10 @@ Global
 		{207B142C-1972-4DC4-B66D-1B5B219E7992}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{207B142C-1972-4DC4-B66D-1B5B219E7992}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{207B142C-1972-4DC4-B66D-1B5B219E7992}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6534EA7B-75B6-4DEE-B703-023B417B11E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6534EA7B-75B6-4DEE-B703-023B417B11E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6534EA7B-75B6-4DEE-B703-023B417B11E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6534EA7B-75B6-4DEE-B703-023B417B11E2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -91,6 +97,7 @@ Global
 		{87233522-19F4-40A2-82E3-AF6B05837344} = {DFAEA034-20D3-46BD-A2FB-E09CB731C4D7}
 		{335E1700-0E53-4D3E-B8E5-537A30FFCE7B} = {DFAEA034-20D3-46BD-A2FB-E09CB731C4D7}
 		{207B142C-1972-4DC4-B66D-1B5B219E7992} = {DFAEA034-20D3-46BD-A2FB-E09CB731C4D7}
+		{6534EA7B-75B6-4DEE-B703-023B417B11E2} = {DFAEA034-20D3-46BD-A2FB-E09CB731C4D7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3A24ECAC-930F-4D6F-B45E-07B16DD51C4E}

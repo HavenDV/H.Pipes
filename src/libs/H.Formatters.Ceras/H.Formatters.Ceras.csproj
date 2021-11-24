@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net4.5.1;net4.7.2</TargetFrameworks>
+    <RootNamespace>H.Formatters</RootNamespace>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+
+  <PropertyGroup Label="NuGet">
+    <Version>1.0.0.7</Version>
+    <Description>This package adds CerasFormatter(based on Ceras)</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Ceras" Version="4.1.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\H.Formatters\H.Formatters.csproj" />
+  </ItemGroup>
+  
+</Project>
