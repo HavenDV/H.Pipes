@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace H.Formatters.Utilities;
 
 /// <summary>

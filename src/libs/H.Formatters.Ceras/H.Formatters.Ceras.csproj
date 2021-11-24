@@ -6,6 +6,10 @@
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Using Remove="System.Net.Http" />
+  </ItemGroup>
+
   <PropertyGroup Label="NuGet">
     <Version>1.0.0.7</Version>
     <Description>This package adds CerasFormatter(based on Ceras)</Description>

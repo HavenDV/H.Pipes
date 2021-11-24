@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Text;
 using H.Formatters.Utilities;
 using Newtonsoft.Json;
 

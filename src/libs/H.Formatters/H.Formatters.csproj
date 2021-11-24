@@ -2,8 +2,11 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net4.5.1</TargetFrameworks>
-    <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Using Remove="System.Net.Http" />
+  </ItemGroup>
 
   <PropertyGroup Label="NuGet">
     <Version>1.0.0.7</Version>
