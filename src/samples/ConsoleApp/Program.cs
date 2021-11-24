@@ -1,33 +1,27 @@
-﻿namespace ConsoleApp;
+﻿using ConsoleApp;
 
-internal class Program
+const string DefaultPipeName = "named_pipe_test_server";
+
+string? mode;
+string pipeName = DefaultPipeName;
+if (args.Any())
 {
-    private const string DefaultPipeName = "named_pipe_test_server";
+    mode = args.ElementAt(0);
+    pipeName = args.ElementAtOrDefault(1) ?? DefaultPipeName;
+}
+else
+{
+    Console.WriteLine("Enter mode('server' or 'client'):");
+    mode = await Console.In.ReadLineAsync().ConfigureAwait(false);
+}
 
-    private static async Task Main(string[] arguments)
-    {
-        string? mode;
-        string pipeName = DefaultPipeName;
-        if (arguments.Any())
-        {
-            mode = arguments.ElementAt(0);
-            pipeName = arguments.ElementAtOrDefault(1) ?? DefaultPipeName;
-        }
-        else
-        {
-            Console.WriteLine("Enter mode('server' or 'client'):");
-            mode = await Console.In.ReadLineAsync().ConfigureAwait(false);
-        }
+switch (mode?.ToUpperInvariant())
+{
+    case "SERVER":
+        await MyServer.RunAsync(pipeName).ConfigureAwait(false);
+        break;
 
-        switch (mode?.ToUpperInvariant())
-        {
-            case "SERVER":
-                await MyServer.RunAsync(pipeName);
-                break;
-
-            default:
-                await MyClient.RunAsync(pipeName);
-                break;
-        }
-    }
+    default:
+        await MyClient.RunAsync(pipeName).ConfigureAwait(false);
+        break;
 }
