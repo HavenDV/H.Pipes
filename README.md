@@ -36,13 +36,13 @@ Install-Package H.Pipes
 // Servers that need support AccessControl.
 Install-Package H.Pipes.AccessControl
 
-// If you want to transfer any data that can be serialized/deserialized in json using [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json).
+// If you want to transfer any data that can be serialized/deserialized in json using Newtonsoft.Json.
 Install-Package H.Formatters.Newtonsoft.Json
 
-// If you want to transfer any data that can be serialized/deserialized in json using [System.Text.Json](https://www.nuget.org/packages/System.Text.Json).
+// If you want to transfer any data that can be serialized/deserialized in json using System.Text.Json.
 Install-Package H.Formatters.System.Text.Json
 
-// If you want to transfer any data that can be serialized/deserialized in binary using [Ceras](https://github.com/rikimaru0345/Ceras).
+// If you want to transfer any data that can be serialized/deserialized in binary using Ceras.
 Install-Package H.Formatters.Ceras
 ```
 
