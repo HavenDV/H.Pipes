@@ -12,7 +12,8 @@ public class DataTests
         static string HashFunc(string? value) => value ?? "null";
 
         await BaseTests.DataSingleTestAsync(values, HashFunc);
-        await BaseTests.DataSingleTestAsync(values, HashFunc, new JsonFormatter());
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new NewtonsoftJsonFormatter());
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new SystemTextJsonFormatter());
         await BaseTests.DataSingleTestAsync(values, HashFunc, new CerasFormatter());
     }
 
@@ -23,13 +24,15 @@ public class DataTests
         static string HashFunc(byte[]? value) => value?.Length.ToString() ?? "null";
 
         await BaseTests.DataSingleTestAsync(values, HashFunc);
-        await BaseTests.DataSingleTestAsync(values, HashFunc, new JsonFormatter());
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new NewtonsoftJsonFormatter());
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new SystemTextJsonFormatter());
         await BaseTests.DataSingleTestAsync(values, HashFunc, new CerasFormatter());
 
         values = new List<byte[]?> { null };
 
         await BaseTests.DataSingleTestAsync(values, HashFunc);
-        await BaseTests.DataSingleTestAsync(values, HashFunc, new JsonFormatter());
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new NewtonsoftJsonFormatter());
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new SystemTextJsonFormatter());
         await BaseTests.DataSingleTestAsync(values, HashFunc, new CerasFormatter());
     }
 
@@ -94,9 +97,15 @@ public class DataTests
     }
 
     [TestMethod]
-    public async Task TestMessageSize1Kx3_JSON()
+    public async Task TestMessageSize1Kx3_NewtonsoftJson()
     {
-        await BaseTests.BinaryDataTestAsync(1025, 3, new JsonFormatter());
+        await BaseTests.BinaryDataTestAsync(1025, 3, new NewtonsoftJsonFormatter());
+    }
+
+    [TestMethod]
+    public async Task TestMessageSize1Kx3_SystemTextJson()
+    {
+        await BaseTests.BinaryDataTestAsync(1025, 3, new SystemTextJsonFormatter());
     }
 
     //[TestMethod]
@@ -136,9 +145,15 @@ public class DataTests
     }
 
     [TestMethod]
-    public async Task Single_TestMessageSize1Kx3_JSON()
+    public async Task Single_TestMessageSize1Kx3_NewtonsoftJson()
     {
-        await BaseTests.BinaryDataSingleTestAsync(1025, 3, new JsonFormatter());
+        await BaseTests.BinaryDataSingleTestAsync(1025, 3, new NewtonsoftJsonFormatter());
+    }
+
+    [TestMethod]
+    public async Task Single_TestMessageSize1Kx3_SystemTextJson()
+    {
+        await BaseTests.BinaryDataSingleTestAsync(1025, 3, new SystemTextJsonFormatter());
     }
 
     //[TestMethod]
