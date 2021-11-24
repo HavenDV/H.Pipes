@@ -1,16 +1,16 @@
 ﻿using System.Text;
 using H.Formatters.Utilities;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace H.Formatters;
 
 /// <summary>
-/// A formatter that uses <see cref="JsonConvert"/> inside for serialization/deserialization
+/// A formatter that uses <see cref="JsonSerializer"/> inside for serialization/deserialization
 /// </summary>
-public class NewtonsoftJsonFormatter : IFormatter
+public class SystemTextJsonFormatter : IFormatter
 {
     /// <summary>
-    /// Serializes using <see cref="JsonConvert"/>
+    /// Serializes using <see cref="JsonSerializer"/>
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="cancellationToken"></param>
@@ -22,14 +22,14 @@ public class NewtonsoftJsonFormatter : IFormatter
             return Task.FromResult(ArrayUtilities.Empty<byte>());
         }
 
-        var json = JsonConvert.SerializeObject(obj);
+        var json = JsonSerializer.Serialize(obj);
         var bytes = Encoding.UTF8.GetBytes(json);
 
         return Task.FromResult(bytes);
     }
 
     /// <summary>
-    /// Deserializes using <see cref="JsonConvert"/>
+    /// Deserializes using <see cref="JsonSerializer"/>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="bytes"></param>
@@ -43,7 +43,7 @@ public class NewtonsoftJsonFormatter : IFormatter
         }
 
         var json = Encoding.UTF8.GetString(bytes);
-        var obj = JsonConvert.DeserializeObject<T?>(json);
+        var obj = JsonSerializer.Deserialize<T?>(json);
 
         return Task.FromResult(obj);
     }

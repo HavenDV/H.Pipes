@@ -19,14 +19,15 @@ A simple, easy to use, strongly-typed, async wrapper around .NET named pipes.
 *  Automatically waiting for a server pipe creating when client connecting
 *  Automatic reconnect with a given interval and at each `client.WriteAsync`, if necessary
 *  Supports variable formatters, default - BinaryFormatter which uses System.Runtime.Serialization.BinaryFormatter inside
-*  Also available ready formatters in separate nuget packages: H.Formatters.Json and H.Formatters.Ceras
+*  Also available ready formatters in separate nuget packages: H.Formatters.Newtonsoft.Json, H.Formatters.System.Text.Json and H.Formatters.Ceras
 *  Supports `PipeAccessRule`'s(see `H.Pipes.AccessControl` nuget package) or more complex code to access using the `PipeServer.PipeStreamInitializeAction` property
 
 ### Nuget
 
 [![NuGet](https://img.shields.io/nuget/dt/H.Pipes.svg?style=flat-square&label=H.Pipes)](https://www.nuget.org/packages/H.Pipes/)
 [![NuGet](https://img.shields.io/nuget/dt/H.Pipes.AccessControl.svg?style=flat-square&label=H.Pipes.AccessControl)](https://www.nuget.org/packages/H.Pipes.AccessControl/)
-[![NuGet](https://img.shields.io/nuget/dt/H.Formatters.Json.svg?style=flat-square&label=H.Formatters.Json)](https://www.nuget.org/packages/H.Formatters.Json/)
+[![NuGet](https://img.shields.io/nuget/dt/H.Formatters.Newtonsoft.Json.svg?style=flat-square&label=H.Formatters.Newtonsoft.Json)](https://www.nuget.org/packages/H.Formatters.Newtonsoft.Json/)
+[![NuGet](https://img.shields.io/nuget/dt/H.Formatters.System.Text.Json.svg?style=flat-square&label=H.Formatters.System.Text.Json)](https://www.nuget.org/packages/H.Formatters.System.Text.Json/)
 [![NuGet](https://img.shields.io/nuget/dt/H.Formatters.Ceras.svg?style=flat-square&label=H.Formatters.Ceras)](https://www.nuget.org/packages/H.Formatters.Ceras/)
 ```
 // All clients and servers that do not need support AccessControl.
@@ -35,8 +36,11 @@ Install-Package H.Pipes
 // Servers that need support AccessControl.
 Install-Package H.Pipes.AccessControl
 
-// If you want to transfer any data that can be serialized/deserialized in json.
-Install-Package H.Formatters.Json
+// If you want to transfer any data that can be serialized/deserialized in json using [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json).
+Install-Package H.Formatters.Newtonsoft.Json
+
+// If you want to transfer any data that can be serialized/deserialized in json using [System.Text.Json](https://www.nuget.org/packages/System.Text.Json).
+Install-Package H.Formatters.System.Text.Json
 
 // If you want to transfer any data that can be serialized/deserialized in binary using [Ceras](https://github.com/rikimaru0345/Ceras).
 Install-Package H.Formatters.Ceras
@@ -99,15 +103,16 @@ await Task.Delay(Timeout.InfiniteTimeSpan);
 Since BinaryFormatter is used by default, you should check out this article:
 https://docs.microsoft.com/en-us/dotnet/standard/serialization/binaryformatter-security-guide
 ```
-Install-Package H.Formatters.Json
+Install-Package H.Formatters.Newtonsoft.Json
+Install-Package H.Formatters.System.Text.Json
 Install-Package H.Formatters.Ceras
 ```
 
 ```csharp
 using H.Formatters;
 
-await using var server = new PipeServer<MyMessage>(pipeName, formatter: new JsonFormatter());
-await using var client = new PipeClient<MyMessage>(pipeName, formatter: new JsonFormatter());
+await using var server = new PipeServer<MyMessage>(pipeName, formatter: new NewtonsoftJsonFormatter());
+await using var client = new PipeClient<MyMessage>(pipeName, formatter: new NewtonsoftJsonFormatter());
 ```
 
 ### Access Control
