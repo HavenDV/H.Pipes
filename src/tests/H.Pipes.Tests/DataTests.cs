@@ -13,6 +13,7 @@ public class DataTests
 
         await BaseTests.DataSingleTestAsync(values, HashFunc);
         await BaseTests.DataSingleTestAsync(values, HashFunc, new JsonFormatter());
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new CerasFormatter());
     }
 
     [TestMethod]
@@ -23,11 +24,13 @@ public class DataTests
 
         await BaseTests.DataSingleTestAsync(values, HashFunc);
         await BaseTests.DataSingleTestAsync(values, HashFunc, new JsonFormatter());
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new CerasFormatter());
 
         values = new List<byte[]?> { null };
 
         await BaseTests.DataSingleTestAsync(values, HashFunc);
         await BaseTests.DataSingleTestAsync(values, HashFunc, new JsonFormatter());
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new CerasFormatter());
     }
 
     [TestMethod]
@@ -96,6 +99,12 @@ public class DataTests
         await BaseTests.BinaryDataTestAsync(1025, 3, new JsonFormatter());
     }
 
+    //[TestMethod]
+    //public async Task TestMessageSize1Kx3_Ceras()
+    //{
+    //    await BaseTests.BinaryDataTestAsync(1025, 3, new CerasFormatter());
+    //}
+
     [TestMethod]
     public async Task TestMessageSize129B()
     {
@@ -131,6 +140,12 @@ public class DataTests
     {
         await BaseTests.BinaryDataSingleTestAsync(1025, 3, new JsonFormatter());
     }
+
+    //[TestMethod]
+    //public async Task Single_TestMessageSize1Kx3_Ceras()
+    //{
+    //    await BaseTests.BinaryDataSingleTestAsync(1025, 3, new CerasFormatter());
+    //}
 
     [TestMethod]
     public async Task TypeTest()

@@ -8,6 +8,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\libs\H.Pipes\H.Pipes.csproj" />
     <ProjectReference Include="..\..\libs\H.Formatters.Json\H.Formatters.Json.csproj" />
+    <ProjectReference Include="..\..\libs\H.Formatters.Ceras\H.Formatters.Ceras.csproj" />
   </ItemGroup>
   
 </Project>
