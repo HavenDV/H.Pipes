@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net4.0;net4.5</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net4.5.1</TargetFrameworks>
     <RootNamespace>H.Formatters</RootNamespace>
     <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">
-    <Version>1.0.0.6</Version>
+    <Version>1.0.0.7</Version>
     <Description>This package adds BinaryFormatter(based on System.Runtime.Serialization.Formatters.Binary.BinaryFormatter)</Description>
   </PropertyGroup>
 

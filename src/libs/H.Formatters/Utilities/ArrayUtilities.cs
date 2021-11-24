@@ -13,7 +13,7 @@ public static class ArrayUtilities
     /// <returns></returns>
     public static T[] Empty<T>()
     {
-#if NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2 || NET40 || NET45 || NET452
+#if NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2 || NET451 || NET452
         return new T[0];
 #else
         return System.Array.Empty<T>();
