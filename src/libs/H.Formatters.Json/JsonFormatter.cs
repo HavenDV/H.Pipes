@@ -19,13 +19,13 @@ public class JsonFormatter : IFormatter
     {
         if (obj == null)
         {
-            return TaskUtilities.FromResult(ArrayUtilities.Empty<byte>());
+            return Task.FromResult(ArrayUtilities.Empty<byte>());
         }
 
         var json = JsonConvert.SerializeObject(obj);
         var bytes = Encoding.UTF8.GetBytes(json);
 
-        return TaskUtilities.FromResult(bytes);
+        return Task.FromResult(bytes);
     }
 
     /// <summary>
@@ -39,12 +39,12 @@ public class JsonFormatter : IFormatter
     {
         if (bytes == null || !bytes.Any())
         {
-            return TaskUtilities.FromResult<T?>(default);
+            return Task.FromResult<T?>(default);
         }
 
         var json = Encoding.UTF8.GetString(bytes);
         var obj = JsonConvert.DeserializeObject<T?>(json);
 
-        return TaskUtilities.FromResult(obj);
+        return Task.FromResult(obj);
     }
 }

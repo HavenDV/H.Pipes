@@ -20,12 +20,12 @@ public class CerasFormatter : IFormatter
     {
         if (obj == null)
         {
-            return TaskUtilities.FromResult(ArrayUtilities.Empty<byte>());
+            return Task.FromResult(ArrayUtilities.Empty<byte>());
         }
 
         var bytes = InternalFormatter.Serialize(obj);
 
-        return TaskUtilities.FromResult(bytes);
+        return Task.FromResult(bytes);
     }
 
     /// <summary>
@@ -39,11 +39,11 @@ public class CerasFormatter : IFormatter
     {
         if (bytes == null || !bytes.Any())
         {
-            return TaskUtilities.FromResult<T?>(default);
+            return Task.FromResult<T?>(default);
         }
 
         var obj = InternalFormatter.Deserialize<T?>(bytes);
 
-        return TaskUtilities.FromResult(obj);
+        return Task.FromResult(obj);
     }
 }

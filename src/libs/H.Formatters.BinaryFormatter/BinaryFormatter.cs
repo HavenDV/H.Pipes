@@ -19,14 +19,14 @@ public class BinaryFormatter : IFormatter
     {
         if (obj == null)
         {
-            return TaskUtilities.FromResult(ArrayUtilities.Empty<byte>());
+            return Task.FromResult(ArrayUtilities.Empty<byte>());
         }
 
         using var stream = new MemoryStream();
         InternalFormatter.Serialize(stream, obj);
         var bytes = stream.ToArray();
 
-        return TaskUtilities.FromResult(bytes);
+        return Task.FromResult(bytes);
     }
 
     /// <summary>
@@ -40,12 +40,12 @@ public class BinaryFormatter : IFormatter
     {
         if (bytes == null || !bytes.Any())
         {
-            return TaskUtilities.FromResult<T?>(default);
+            return Task.FromResult<T?>(default);
         }
 
         using var memoryStream = new MemoryStream(bytes);
         var obj = (T?)InternalFormatter.Deserialize(memoryStream);
 
-        return TaskUtilities.FromResult(obj);
+        return Task.FromResult(obj);
     }
 }
