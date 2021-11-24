@@ -19,7 +19,7 @@ A simple, easy to use, strongly-typed, async wrapper around .NET named pipes.
 *  Automatically waiting for a server pipe creating when client connecting
 *  Automatic reconnect with a given interval and at each `client.WriteAsync`, if necessary
 *  Supports variable formatters, default - BinaryFormatter which uses System.Runtime.Serialization.BinaryFormatter inside
-*  Also available ready formatters in separate nuget packages: H.Formatters.Json
+*  Also available ready formatters in separate nuget packages: H.Formatters.Json and H.Formatters.Ceras
 *  Supports `PipeAccessRule`'s(see `H.Pipes.AccessControl` nuget package) or more complex code to access using the `PipeServer.PipeStreamInitializeAction` property
 
 ### Nuget
