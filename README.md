@@ -27,6 +27,7 @@ A simple, easy to use, strongly-typed, async wrapper around .NET named pipes.
 [![NuGet](https://img.shields.io/nuget/dt/H.Pipes.svg?style=flat-square&label=H.Pipes)](https://www.nuget.org/packages/H.Pipes/)
 [![NuGet](https://img.shields.io/nuget/dt/H.Pipes.AccessControl.svg?style=flat-square&label=H.Pipes.AccessControl)](https://www.nuget.org/packages/H.Pipes.AccessControl/)
 [![NuGet](https://img.shields.io/nuget/dt/H.Formatters.Json.svg?style=flat-square&label=H.Formatters.Json)](https://www.nuget.org/packages/H.Formatters.Json/)
+[![NuGet](https://img.shields.io/nuget/dt/H.Formatters.Ceras.svg?style=flat-square&label=H.Formatters.Ceras)](https://www.nuget.org/packages/H.Formatters.Ceras/)
 ```
 // All clients and servers that do not need support AccessControl.
 Install-Package H.Pipes
@@ -36,6 +37,9 @@ Install-Package H.Pipes.AccessControl
 
 // If you want to transfer any data that can be serialized/deserialized in json.
 Install-Package H.Formatters.Json
+
+// If you want to transfer any data that can be serialized/deserialized in binary using [Ceras](https://github.com/rikimaru0345/Ceras).
+Install-Package H.Formatters.Ceras
 ```
 
 ### Usage
@@ -92,8 +96,11 @@ await Task.Delay(Timeout.InfiniteTimeSpan);
 ```
 
 ### Custom Formatters
+Since BinaryFormatter is used by default, you should check out this article:
+https://docs.microsoft.com/en-us/dotnet/standard/serialization/binaryformatter-security-guide
 ```
 Install-Package H.Formatters.Json
+Install-Package H.Formatters.Ceras
 ```
 
 ```csharp
