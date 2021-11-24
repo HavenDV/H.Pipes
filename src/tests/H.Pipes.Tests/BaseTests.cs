@@ -106,7 +106,12 @@ public static class BaseTests
         using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromMinutes(1));
 
         const string pipeName = "data_test_pipe";
-        await using var server = new PipeServer<T>(pipeName, formatter ?? new BinaryFormatter());
+        await using var server = new PipeServer<T>(pipeName, formatter ?? new BinaryFormatter())
+        {
+#if NET48
+            WaitFreePipe = true,
+#endif
+        };
         await using var client = new PipeClient<T>(pipeName, formatter: formatter ?? new BinaryFormatter());
 
         await DataTestAsync(server, client, values, hashFunc, cancellationTokenSource.Token);
@@ -136,7 +141,7 @@ public static class BaseTests
         await DataSingleTestAsync(GenerateData(numBytes, count), Hash, formatter, timeout);
     }
 
-    #region Helper methods
+#region Helper methods
 
     public static List<byte[]> GenerateData(int numBytes, int count = 1)
     {
@@ -176,5 +181,5 @@ public static class BaseTests
         return sb.ToString();
     }
 
-    #endregion
+#endregion
 }
