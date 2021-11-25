@@ -34,8 +34,12 @@ public sealed class PipeConnection<T> : IAsyncDisposable
     /// </summary>
     public bool IsStarted => ReadWorker != null;
 
+    /// <summary>
+    /// Raw pipe stream. You can cast it to <see cref="NamedPipeClientStream"/> or <see cref="NamedPipeServerStream"/>.
+    /// </summary>
+    public PipeStream PipeStream { get; }
+
     private IFormatter Formatter { get; }
-    private PipeStream PipeStream { get; }
     private PipeStreamWrapper PipeStreamWrapper { get; }
     private TaskWorker? ReadWorker { get; set; }
 
