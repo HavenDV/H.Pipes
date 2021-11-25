@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <PropertyGroup Label="NuGet">
-    <Version>1.0.0.7</Version>
+    <Version>1.0.0.8</Version>
     <Description>A IFormatter interface for serialization/deserialization</Description>
   </PropertyGroup>
   
