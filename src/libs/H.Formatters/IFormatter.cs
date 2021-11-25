@@ -6,19 +6,17 @@
 public interface IFormatter
 {
     /// <summary>
-    /// Serializes to bytes
+    /// Serializes to bytes.
     /// </summary>
     /// <param name="obj"></param>
-    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<byte[]> SerializeAsync(object? obj, CancellationToken cancellationToken = default);
+    public byte[] Serialize(object? obj);
 
     /// <summary>
-    /// Deserializes from bytes
+    /// Deserializes from bytes.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="bytes"></param>
-    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<T?> DeserializeAsync<T>(byte[]? bytes, CancellationToken cancellationToken = default);
+    public T? Deserialize<T>(byte[]? bytes);
 }

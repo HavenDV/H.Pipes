@@ -111,7 +111,10 @@ public sealed class PipeConnection<T> : IAsyncDisposable
                         break;
                     }
 
-                    var obj = await Formatter.DeserializeAsync<T>(bytes, cancellationToken).ConfigureAwait(false);
+
+                    var obj = Formatter is IAsyncFormatter asyncFormatter
+                        ? await asyncFormatter.DeserializeAsync<T>(bytes, cancellationToken).ConfigureAwait(false)
+                        : Formatter.Deserialize<T>(bytes);
 
                     OnMessageReceived(obj);
                 }
@@ -142,7 +145,9 @@ public sealed class PipeConnection<T> : IAsyncDisposable
             throw new InvalidOperationException("Client is not connected");
         }
 
-        var bytes = await Formatter.SerializeAsync(value, cancellationToken).ConfigureAwait(false);
+        var bytes = Formatter is IAsyncFormatter asyncFormatter
+            ? await asyncFormatter.SerializeAsync(value, cancellationToken).ConfigureAwait(false)
+            : Formatter.Serialize(value);
 
         await PipeStreamWrapper.WriteAsync(bytes, cancellationToken).ConfigureAwait(false);
     }

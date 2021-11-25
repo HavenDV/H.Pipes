@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using H.Formatters.Utilities;
 using Newtonsoft.Json;
 
 namespace H.Formatters;
@@ -7,25 +6,24 @@ namespace H.Formatters;
 /// <summary>
 /// A formatter that uses <see cref="JsonConvert"/> inside for serialization/deserialization
 /// </summary>
-public class NewtonsoftJsonFormatter : IFormatter
+public class NewtonsoftJsonFormatter : FormatterBase
 {
+    /// <summary>
+    /// Default: UTF8.
+    /// </summary>
+    public Encoding Encoding { get; set; } = Encoding.UTF8;
+
     /// <summary>
     /// Serializes using <see cref="JsonConvert"/>
     /// </summary>
     /// <param name="obj"></param>
-    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Task<byte[]> SerializeAsync(object? obj, CancellationToken cancellationToken = default)
+    public override byte[] SerializeInternal(object obj)
     {
-        if (obj == null)
-        {
-            return Task.FromResult(ArrayUtilities.Empty<byte>());
-        }
-
         var json = JsonConvert.SerializeObject(obj);
-        var bytes = Encoding.UTF8.GetBytes(json);
+        var bytes = Encoding.GetBytes(json);
 
-        return Task.FromResult(bytes);
+        return bytes;
     }
 
     /// <summary>
@@ -33,18 +31,12 @@ public class NewtonsoftJsonFormatter : IFormatter
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="bytes"></param>
-    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Task<T?> DeserializeAsync<T>(byte[]? bytes, CancellationToken cancellationToken = default)
+    public override T DeserializeInternal<T>(byte[] bytes)
     {
-        if (bytes == null || !bytes.Any())
-        {
-            return Task.FromResult<T?>(default);
-        }
+        var json = Encoding.GetString(bytes);
+        var obj = JsonConvert.DeserializeObject<T>(json);
 
-        var json = Encoding.UTF8.GetString(bytes);
-        var obj = JsonConvert.DeserializeObject<T?>(json);
-
-        return Task.FromResult(obj);
+        return obj;
     }
 }

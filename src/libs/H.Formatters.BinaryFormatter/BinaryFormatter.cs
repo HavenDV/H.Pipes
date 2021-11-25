@@ -1,32 +1,24 @@
-﻿using H.Formatters.Utilities;
-
-namespace H.Formatters;
+﻿namespace H.Formatters;
 
 /// <summary>
 /// A formatter that uses <see cref="System.Runtime.Serialization.Formatters.Binary.BinaryFormatter"/> inside for serialization/deserialization
 /// </summary>
-public class BinaryFormatter : IFormatter
+public class BinaryFormatter : FormatterBase
 {
-    private System.Runtime.Serialization.Formatters.Binary.BinaryFormatter InternalFormatter { get; } = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+    private System.Runtime.Serialization.Formatters.Binary.BinaryFormatter InternalFormatter { get; } = new();
 
     /// <summary>
     /// Serializes using <see cref="System.Runtime.Serialization.Formatters.Binary.BinaryFormatter"/>
     /// </summary>
     /// <param name="obj"></param>
-    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Task<byte[]> SerializeAsync(object? obj, CancellationToken cancellationToken = default)
+    public override byte[] SerializeInternal(object obj)
     {
-        if (obj == null)
-        {
-            return Task.FromResult(ArrayUtilities.Empty<byte>());
-        }
-
         using var stream = new MemoryStream();
         InternalFormatter.Serialize(stream, obj);
         var bytes = stream.ToArray();
 
-        return Task.FromResult(bytes);
+        return bytes;
     }
 
     /// <summary>
@@ -34,18 +26,12 @@ public class BinaryFormatter : IFormatter
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="bytes"></param>
-    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Task<T?> DeserializeAsync<T>(byte[]? bytes, CancellationToken cancellationToken = default)
+    public override T DeserializeInternal<T>(byte[] bytes)
     {
-        if (bytes == null || !bytes.Any())
-        {
-            return Task.FromResult<T?>(default);
-        }
-
         using var memoryStream = new MemoryStream(bytes);
-        var obj = (T?)InternalFormatter.Deserialize(memoryStream);
+        var obj = (T)InternalFormatter.Deserialize(memoryStream);
 
-        return Task.FromResult(obj);
+        return obj;
     }
 }
