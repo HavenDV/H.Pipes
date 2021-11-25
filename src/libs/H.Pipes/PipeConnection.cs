@@ -35,6 +35,7 @@ public sealed class PipeConnection<T> : IAsyncDisposable
     public bool IsStarted => ReadWorker != null;
 
     private IFormatter Formatter { get; }
+    private PipeStream PipeStream { get; }
     private PipeStreamWrapper PipeStreamWrapper { get; }
     private TaskWorker? ReadWorker { get; set; }
 
@@ -80,6 +81,7 @@ public sealed class PipeConnection<T> : IAsyncDisposable
     {
         Id = id;
         Name = name;
+        PipeStream = stream;
         PipeStreamWrapper = new PipeStreamWrapper(stream);
         Formatter = formatter;
     }
@@ -165,6 +167,27 @@ public sealed class PipeConnection<T> : IAsyncDisposable
         }
 
         await PipeStreamWrapper.StopAsync().ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Gets the user name of the client on the other end of the pipe.
+    /// </summary>
+    /// <returns>The user name of the client on the other end of the pipe.</returns>
+    /// <exception cref="InvalidOperationException"><see cref="PipeStream"/> is not <see cref="NamedPipeServerStream"/>.</exception>
+    /// <exception cref="InvalidOperationException">No pipe connections have been made yet.</exception>
+    /// <exception cref="InvalidOperationException">The connected pipe has already disconnected.</exception>
+    /// <exception cref="InvalidOperationException">The pipe handle has not been set.</exception>
+    /// <exception cref="ObjectDisposedException">The pipe is closed.</exception>
+    /// <exception cref="IOException">The pipe connection has been broken.</exception>
+    /// <exception cref="IOException">The user name of the client is longer than 19 characters.</exception>
+    public string GetImpersonationUserName()
+    {
+        if (PipeStream is not NamedPipeServerStream serverStream)
+        {
+            throw new InvalidOperationException($"{nameof(PipeStream)} is not {nameof(NamedPipeServerStream)}.");
+        }
+
+        return serverStream.GetImpersonationUserName();
     }
 
     #endregion
