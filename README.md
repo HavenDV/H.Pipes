@@ -139,5 +139,15 @@ server.AddAccessRules(new PipeAccessRule(new SecurityIdentifier(WellKnownSidType
 server.AllowUsersReadWrite();
 ```
 
+### GetImpersonationUserName
+```csharp
+server.ClientConnected += async (o, args) =>
+{
+    var name = args.Connection.GetImpersonationUserName();
+
+    Console.WriteLine($"Client {name} is now connected!");
+};
+```
+
 ### Contacts
 * [mail](mailto:havendv@gmail.com)
