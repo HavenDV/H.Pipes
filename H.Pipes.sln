@@ -45,6 +45,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Formatters.Newtonsoft.Jso
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Formatters.System.Text.Json", "src\libs\H.Formatters.System.Text.Json\H.Formatters.System.Text.Json.csproj", "{45B6CF87-D741-4848-A903-8703C931464D}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Pipes.Apps.ConsoleApp.Polly", "src\samples\H.Pipes.Apps.ConsoleApp.Polly\H.Pipes.Apps.ConsoleApp.Polly.csproj", "{97649173-79F3-4F73-9781-A1BF02C068F1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +93,10 @@ Global
 		{45B6CF87-D741-4848-A903-8703C931464D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45B6CF87-D741-4848-A903-8703C931464D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{45B6CF87-D741-4848-A903-8703C931464D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97649173-79F3-4F73-9781-A1BF02C068F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97649173-79F3-4F73-9781-A1BF02C068F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97649173-79F3-4F73-9781-A1BF02C068F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97649173-79F3-4F73-9781-A1BF02C068F1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -106,6 +112,7 @@ Global
 		{6534EA7B-75B6-4DEE-B703-023B417B11E2} = {DFAEA034-20D3-46BD-A2FB-E09CB731C4D7}
 		{C59B2734-C1CA-4A37-AF84-D1E4A26AF62A} = {DFAEA034-20D3-46BD-A2FB-E09CB731C4D7}
 		{45B6CF87-D741-4848-A903-8703C931464D} = {DFAEA034-20D3-46BD-A2FB-E09CB731C4D7}
+		{97649173-79F3-4F73-9781-A1BF02C068F1} = {A30A9D7F-0824-48AD-96F9-2944421541AD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3A24ECAC-930F-4D6F-B45E-07B16DD51C4E}
