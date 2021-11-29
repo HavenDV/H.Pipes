@@ -5,6 +5,10 @@
     <NoWarn>$(NoWarn);CA1031</NoWarn>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Using Remove="System.Net.Http"/>
+  </ItemGroup>
+
   <PropertyGroup Label="NuGet">
     <Description>Features:
 - Create named pipe servers that can handle multiple client connections simultaneously.
@@ -28,7 +32,6 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net4.6.1' ">
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
-    <Reference Include="System.Net.Http" />
   </ItemGroup>
 
   <ItemGroup>
