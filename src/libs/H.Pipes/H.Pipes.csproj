@@ -5,10 +5,6 @@
     <NoWarn>$(NoWarn);CA1031</NoWarn>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Using Remove="System.Net.Http"/>
-  </ItemGroup>
-
   <PropertyGroup Label="NuGet">
     <Description>Features:
 - Create named pipe servers that can handle multiple client connections simultaneously.

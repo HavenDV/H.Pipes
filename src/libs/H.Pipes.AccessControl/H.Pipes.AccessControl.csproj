@@ -5,10 +5,6 @@
     <NoWarn>$(NoWarn);CA1003;CA1031</NoWarn>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Using Remove="System.Net.Http"/>
-  </ItemGroup>
-
   <PropertyGroup Label="NuGet">
     <Description>This package adds AccessControl extensions for PipeServerSetPipeSecurity()</Description>
   </PropertyGroup>

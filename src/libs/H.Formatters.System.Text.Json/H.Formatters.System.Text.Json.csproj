@@ -5,10 +5,6 @@
     <RootNamespace>H.Formatters</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Using Remove="System.Net.Http" />
-  </ItemGroup>
-
   <PropertyGroup Label="NuGet">
     <Version>12.0.3.8</Version>
     <Description>This package adds SystemTextJsonFormatter(based on System.Text.Json)</Description>

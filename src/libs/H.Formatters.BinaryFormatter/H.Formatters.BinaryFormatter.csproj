@@ -6,10 +6,6 @@
     <NoWarn>$(NoWarn);CA2300;CA2302</NoWarn>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Using Remove="System.Net.Http" />
-  </ItemGroup>
-
   <PropertyGroup Label="NuGet">
     <Version>1.0.0.8</Version>
     <Description>This package adds BinaryFormatter(based on System.Runtime.Serialization.Formatters.Binary.BinaryFormatter)</Description>
