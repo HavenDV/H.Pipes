@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "H.Pipes.Apps.ConsoleApp.Polly": {
+      "commandName": "Project",
+      "commandLineArgs": "server"
+    }
+  }
+}
