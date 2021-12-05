@@ -182,8 +182,7 @@ public sealed class PipeClient<T> : IPipeClient<T>
 #pragma warning restore CA2000 // Dispose objects before losing scope
                     .ConfigureAwait(false);
 
-            // Create a Connection object for the data pipe
-            Connection = ConnectionFactory.Create<T>(dataPipe, Formatter);
+            Connection = new PipeConnection<T>(dataPipe, connectionPipeName, Formatter, ServerName);
             Connection.Disconnected += async (_, args) =>
             {
                 await DisconnectInternalAsync().ConfigureAwait(false);

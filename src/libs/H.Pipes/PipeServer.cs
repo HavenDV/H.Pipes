@@ -212,7 +212,7 @@ public sealed class PipeServer<T> : IPipeServer<T>
                     }
 
                     // Add the client's connection to the list of connections
-                    var connection = ConnectionFactory.Create<T>(connectionStream, Formatter);
+                    var connection = new PipeConnection<T>(connectionStream, PipeName, Formatter);
                     connection.MessageReceived += (_, args) => OnMessageReceived(args);
                     connection.Disconnected += (_, args) => OnClientDisconnected(args);
                     connection.ExceptionOccurred += (_, args) => OnExceptionOccurred(args.Exception);
@@ -279,14 +279,14 @@ public sealed class PipeServer<T> : IPipeServer<T>
     }
 
     /// <summary>
-    /// Sends a message to the given client ny name.
+    /// Sends a message to the given client by pipe name.
     /// </summary>
     /// <param name="value"></param>
-    /// <param name="clientName"></param>
+    /// <param name="pipeName"></param>
     /// <param name="cancellationToken"></param>
-    public async Task WriteAsync(T value, string clientName, CancellationToken cancellationToken = default)
+    public async Task WriteAsync(T value, string pipeName, CancellationToken cancellationToken = default)
     {
-        await WriteAsync(value, connection => connection.Name == clientName, cancellationToken).ConfigureAwait(false);
+        await WriteAsync(value, connection => connection.PipeName == pipeName, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>

@@ -173,7 +173,7 @@ public sealed class SingleConnectionPipeClient<T> : IPipeClient<T>
 #pragma warning restore CA2000 // Dispose objects before losing scope
                     .ConfigureAwait(false);
 
-            Connection = ConnectionFactory.Create<T>(dataPipe, Formatter);
+            Connection = new PipeConnection<T>(dataPipe, PipeName, Formatter, ServerName);
             Connection.Disconnected += async (sender, args) =>
             {
                 await DisconnectInternalAsync().ConfigureAwait(false);

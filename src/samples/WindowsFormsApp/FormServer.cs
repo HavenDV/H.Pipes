@@ -19,10 +19,10 @@ public sealed partial class FormServer : Form, IAsyncDisposable
         Server = new PipeServer<string>(PipeName);
         Server.ClientConnected += async (o, args) =>
         {
-            Clients.Add(args.Connection.Name);
+            Clients.Add(args.Connection.PipeName);
             UpdateClientList();
 
-            AddLine($"{args.Connection.Name} connected!");
+            AddLine($"{args.Connection.PipeName} connected!");
 
             try
             {
@@ -35,12 +35,12 @@ public sealed partial class FormServer : Form, IAsyncDisposable
         };
         Server.ClientDisconnected += (o, args) =>
         {
-            Clients.Remove(args.Connection.Name);
+            Clients.Remove(args.Connection.PipeName);
             UpdateClientList();
 
-            AddLine($"{args.Connection.Name} disconnected!");
+            AddLine($"{args.Connection.PipeName} disconnected!");
         };
-        Server.MessageReceived += (o, args) => AddLine($"{args.Connection.Name}: {args.Message}");
+        Server.MessageReceived += (o, args) => AddLine($"{args.Connection.PipeName}: {args.Message}");
         Server.ExceptionOccurred += (o, args) => OnExceptionOccurred(args.Exception);
     }
 

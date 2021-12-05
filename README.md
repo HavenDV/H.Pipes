@@ -54,21 +54,20 @@ Server:
 await using var server = new PipeServer<MyMessage>(pipeName);
 server.ClientConnected += async (o, args) =>
 {
-    Console.WriteLine($"Client {args.Connection.Id} is now connected!");
+    Console.WriteLine($"Client {args.Connection.PipeName} is now connected!");
 
     await args.Connection.WriteAsync(new MyMessage
     {
-        Id = new Random().Next(),
         Text = "Welcome!"
     });
 };
 server.ClientDisconnected += (o, args) =>
 {
-    Console.WriteLine($"Client {args.Connection.Id} disconnected");
+    Console.WriteLine($"Client {args.Connection.PipeName} disconnected");
 };
 server.MessageReceived += (sender, args) =>
 {
-    Console.WriteLine($"Client {args.Connection.Id} says: {args.Message}");
+    Console.WriteLine($"Client {args.Connection.PipeName} says: {args.Message}");
 };
 server.ExceptionOccurred += (o, args) => OnExceptionOccurred(args.Exception);
 
@@ -92,7 +91,6 @@ await client.ConnectAsync();
 
 await client.WriteAsync(new MyMessage
 {
-    Id = new Random().Next(),
     Text = "Hello!",
 });
 

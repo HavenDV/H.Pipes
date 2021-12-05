@@ -174,7 +174,7 @@ public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
                             throw;
                     }
 
-                    var connection = ConnectionFactory.Create<T>(connectionStream, Formatter);
+                    var connection = new PipeConnection<T>(connectionStream, PipeName, Formatter);
                     try
                     {
                         connection.MessageReceived += (sender, args) => OnMessageReceived(args);

@@ -15,7 +15,7 @@ public class PipeServerTests
 #if !NETFRAMEWORK
                 await using var pipe = await PipeServerFactory.CreateAndWaitAsync("test", source.Token).ConfigureAwait(false);
 #else
-                    using var pipe = await PipeServerFactory.CreateAndWaitAsync("test", source.Token).ConfigureAwait(false);
+                using var pipe = await PipeServerFactory.CreateAndWaitAsync("test", source.Token).ConfigureAwait(false);
 #endif
             }
             catch (OperationCanceledException)
@@ -27,7 +27,7 @@ public class PipeServerTests
 #if !NETFRAMEWORK
             await using var pipe = PipeServerFactory.Create("test");
 #else
-                using var pipe = PipeServerFactory.Create("test");
+            using var pipe = PipeServerFactory.Create("test");
 #endif
         }
     }

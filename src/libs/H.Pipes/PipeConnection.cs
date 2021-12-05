@@ -15,14 +15,14 @@ public sealed class PipeConnection<T> : IAsyncDisposable
     #region Properties
 
     /// <summary>
-    /// Gets the connection's unique identifier.
+    /// Gets the connection's pipe name.
     /// </summary>
-    public int Id { get; }
+    public string PipeName { get; }
 
     /// <summary>
-    /// Gets the connection's name.
+    /// Gets the connection's server name. Only for client connections.
     /// </summary>
-    public string Name { get; }
+    public string ServerName { get; }
 
     /// <summary>
     /// Gets a value indicating whether the pipe is connected or not.
@@ -81,13 +81,13 @@ public sealed class PipeConnection<T> : IAsyncDisposable
 
     #region Constructors
 
-    internal PipeConnection(int id, string name, PipeStream stream, IFormatter formatter)
+    internal PipeConnection(PipeStream stream, string pipeName, IFormatter formatter, string serverName = "")
     {
-        Id = id;
-        Name = name;
+        PipeName = pipeName;
         PipeStream = stream;
         PipeStreamWrapper = new PipeStreamWrapper(stream);
         Formatter = formatter;
+        ServerName = serverName;
     }
 
     #endregion

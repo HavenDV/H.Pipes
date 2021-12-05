@@ -30,7 +30,7 @@ try
                 await using var server = new PipeServer<string>(pipeName);
                 server.ClientConnected += async (_, args) =>
                 {
-                    Console.WriteLine($"Client {args.Connection.Id} is now connected!");
+                    Console.WriteLine($"Client {args.Connection.PipeName} is now connected!");
 
                     try
                     {
@@ -43,11 +43,11 @@ try
                 };
                 server.ClientDisconnected += (_, args) =>
                 {
-                    Console.WriteLine($"Client {args.Connection.Id} disconnected");
+                    Console.WriteLine($"Client {args.Connection.PipeName} disconnected");
                 };
                 server.MessageReceived += (_, args) =>
                 {
-                    Console.WriteLine($"Client {args.Connection.Id} says: {args.Message}");
+                    Console.WriteLine($"Client {args.Connection.PipeName} says: {args.Message}");
                 };
                 server.ExceptionOccurred += (_, args) => OnExceptionOccurred(args.Exception);
 
