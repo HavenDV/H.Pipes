@@ -212,7 +212,7 @@ public sealed class PipeServer<T> : IPipeServer<T>
                     }
 
                     // Add the client's connection to the list of connections
-                    var connection = new PipeConnection<T>(connectionStream, PipeName, Formatter);
+                    var connection = new PipeConnection<T>(connectionStream, connectionPipeName, Formatter);
                     connection.MessageReceived += (_, args) => OnMessageReceived(args);
                     connection.Disconnected += (_, args) => OnClientDisconnected(args);
                     connection.ExceptionOccurred += (_, args) => OnExceptionOccurred(args.Exception);
