@@ -59,8 +59,6 @@ public sealed class PipeServer<T> : IPipeServer<T>
     public bool IsStarted => ListenWorker != null && !ListenWorker.Task.IsCompleted && !ListenWorker.Task.IsCanceled && !ListenWorker.Task.IsFaulted;
 
 
-    private int NextPipeId { get; set; }
-
     private TaskWorker? ListenWorker { get; set; }
 
     private volatile bool _isDisposed;
@@ -152,7 +150,7 @@ public sealed class PipeServer<T> : IPipeServer<T>
             {
                 try
                 {
-                    var connectionPipeName = $"{PipeName}_{++NextPipeId}";
+                    var connectionPipeName = $"{PipeName}_{Guid.NewGuid()}";
 
                     // Send the client the name of the data pipe to use
                     try
