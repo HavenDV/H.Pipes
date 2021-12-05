@@ -42,7 +42,6 @@ internal static class MyClient
 
                         await client.WriteAsync(new MyMessage
                         {
-                            Id = new Random().Next(),
                             Text = message,
                         }, source.Token).ConfigureAwait(false);
                     }

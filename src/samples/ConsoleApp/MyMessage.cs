@@ -3,7 +3,7 @@
 [Serializable]
 internal class MyMessage
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
     public string? Text { get; set; }
 
     public override string ToString()

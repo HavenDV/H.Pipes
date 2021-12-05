@@ -29,7 +29,6 @@ internal static class MyServer
                 {
                     await args.Connection.WriteAsync(new MyMessage
                     {
-                        Id = new Random().Next(),
                         Text = "Welcome!"
                     }, source.Token).ConfigureAwait(false);
                 }
@@ -65,7 +64,6 @@ internal static class MyServer
 
                         await server.WriteAsync(new MyMessage
                         {
-                            Id = new Random().Next(),
                             Text = message,
                         }, source.Token).ConfigureAwait(false);
                     }
