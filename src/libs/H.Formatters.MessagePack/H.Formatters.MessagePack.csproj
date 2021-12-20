@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">
-    <Version>1.0.0.8</Version>
     <Description>This package adds MessagePack (based on neuecc/MessagePack-CSharp)</Description>
   </PropertyGroup>
 

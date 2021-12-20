@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">
-    <Version>1.0.0.8</Version>
     <Description>This package adds CerasFormatter(based on Ceras)</Description>
   </PropertyGroup>
 
