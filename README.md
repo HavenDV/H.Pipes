@@ -137,6 +137,21 @@ server.AddAccessRules(new PipeAccessRule(new SecurityIdentifier(WellKnownSidType
 server.AllowUsersReadWrite();
 ```
 
+### Encryption
+```
+Install-Package H.Formatters.Inferno
+```
+
+```csharp
+using H.Formatters;
+
+await using var server = new PipeServer<MyMessage>(pipeName, formatter: new InfernoFormatter(new SystemTextJsonFormatter()));
+server.EnableEncryption();
+
+await using var client = new PipeClient<MyMessage>(pipeName, formatter: new InfernoFormatter(new SystemTextJsonFormatter()));
+client.EnableEncryption();
+```
+
 ### GetImpersonationUserName
 ```csharp
 server.ClientConnected += async (o, args) =>
