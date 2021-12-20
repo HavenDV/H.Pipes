@@ -7,7 +7,7 @@ namespace H.Pipes.Apps.ConsoleApp.Encryption;
 
 internal static class MyServer
 {
-    private static readonly CryptoFormatter _formatter = new(new SystemTextJsonFormatter());
+    private static readonly InfernoFormatter _formatter = new(new SystemTextJsonFormatter());
     private static readonly Dictionary<string, KeyPair> _pipeKeyStore = new();
 
     private static void OnExceptionOccurred(Exception exception)
