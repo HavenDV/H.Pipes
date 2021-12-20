@@ -27,6 +27,8 @@ internal static class MyServer
 
                 try
                 {
+                    await args.Connection.WaitExchangeAsync();
+
                     await args.Connection.WriteAsync(new MyMessage
                     {
                         Text = "Welcome!"

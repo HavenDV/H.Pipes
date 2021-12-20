@@ -26,7 +26,6 @@ internal static class MyClient
             client.Connected += (o, args) => Console.WriteLine("Connected to server");
             client.ExceptionOccurred += (o, args) => OnExceptionOccurred(args.Exception);
 
-            // Dispose is not required
             var _ = Task.Run(async () =>
             {
                 while (true)
@@ -55,6 +54,8 @@ internal static class MyClient
             Console.WriteLine("Client connecting...");
 
             await client.ConnectAsync(source.Token).ConfigureAwait(false);
+
+            await client.Connection!.WaitExchangeAsync();
 
             await Task.Delay(Timeout.InfiniteTimeSpan, source.Token).ConfigureAwait(false);
         }

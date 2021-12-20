@@ -150,6 +150,21 @@ server.EnableEncryption();
 
 await using var client = new PipeClient<MyMessage>(pipeName, formatter: new SystemTextJsonFormatter());
 client.EnableEncryption();
+
+await client.ConnectAsync(source.Token).ConfigureAwait(false);
+// Waits for key exchange.
+await client.Connection!.WaitExchangeAsync();
+
+server.ClientConnected += async (_, args) =>
+{
+    // Waits for key exchange.
+    await args.Connection.WaitExchangeAsync();
+
+    await args.Connection.WriteAsync(new MyMessage
+    {
+        Text = "Welcome!"
+    }, source.Token).ConfigureAwait(false);
+};
 ```
 
 ### GetImpersonationUserName

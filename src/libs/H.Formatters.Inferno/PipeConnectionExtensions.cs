@@ -14,7 +14,7 @@ public static class PipeConnectionExtensions
     /// <param name="connection"></param>
     /// <param name="cancellationToken"></param>
     /// <exception cref="ArgumentNullException"></exception>
-    public static async void WaitExchangeAsync<T>(
+    public static async Task WaitExchangeAsync<T>(
         this PipeConnection<T> connection,
         CancellationToken cancellationToken = default)
     {
