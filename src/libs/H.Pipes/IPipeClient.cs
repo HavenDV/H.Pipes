@@ -20,19 +20,34 @@ public interface IPipeClient<T> : IPipeConnection<T>
     bool AutoReconnect { get; set; }
 
     /// <summary>
-    /// Interval of reconnection
+    /// Interval of reconnection.
     /// </summary>
     TimeSpan ReconnectionInterval { get; }
 
     /// <summary>
-    /// Checks that connection is exists
+    /// Checks that connection is exists.
     /// </summary>
     bool IsConnected { get; }
 
     /// <summary>
-    /// <see langword="true"/> if <see cref="ConnectAsync"/> in process
+    /// <see langword="true"/> if <see cref="ConnectAsync"/> in process.
     /// </summary>
     bool IsConnecting { get; }
+
+    /// <summary>
+    /// Used pipe name.
+    /// </summary>
+    public string PipeName { get; }
+
+    /// <summary>
+    /// Used server name.
+    /// </summary>
+    public string ServerName { get; }
+
+    /// <summary>
+    /// Active connection.
+    /// </summary>
+    public PipeConnection<T>? Connection { get; set; }
 
     #endregion
 

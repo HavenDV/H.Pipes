@@ -38,10 +38,15 @@ public sealed class SingleConnectionPipeClient<T> : IPipeClient<T>
     /// <inheritdoc/>
     public IFormatter Formatter { get; }
 
-    private string PipeName { get; }
-    private string ServerName { get; }
+    /// <inheritdoc/>
+    public string PipeName { get; }
 
-    private PipeConnection<T>? Connection { get; set; }
+    /// <inheritdoc/>
+    public string ServerName { get; }
+
+    /// <inheritdoc/>
+    public PipeConnection<T>? Connection { get; set; }
+
     private System.Timers.Timer ReconnectionTimer { get; }
 
     #endregion
