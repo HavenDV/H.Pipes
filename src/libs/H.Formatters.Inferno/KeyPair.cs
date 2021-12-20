@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using SecurityDriven.Inferno.Extensions;
 
-namespace H.Pipes.Encryption;
+namespace H.Formatters;
 
 /// <summary>
 /// 

@@ -1,6 +1,6 @@
 ﻿using SecurityDriven.Inferno;
 
-namespace H.Pipes.Encryption;
+namespace H.Formatters;
 
 internal static class Encryption
 {

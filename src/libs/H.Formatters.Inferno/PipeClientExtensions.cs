@@ -1,5 +1,4 @@
 ﻿using H.Pipes;
-using H.Pipes.Encryption;
 using H.Pipes.Extensions;
 using System.Diagnostics;
 

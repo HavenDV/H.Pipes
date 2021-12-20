@@ -1,6 +1,4 @@
-﻿using H.Pipes.Encryption;
-
-namespace H.Formatters;
+﻿namespace H.Formatters;
 
 /// <summary>
 /// A formatter that uses <see cref="Encryption"/> inside for serialization/deserialization
