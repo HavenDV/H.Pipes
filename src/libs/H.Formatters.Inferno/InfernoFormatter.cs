@@ -30,7 +30,7 @@ public class InfernoFormatter : FormatterBase
     /// <returns></returns>
     public override byte[] SerializeInternal(object obj)
     {
-        var bytes = SerializeAsyncIfPossible(obj).GetAwaiter().GetResult();
+        var bytes = Formatter.Serialize(obj);
         if (Key == null)
         {
             return bytes;
@@ -54,12 +54,5 @@ public class InfernoFormatter : FormatterBase
             : bytes;
 
         return Formatter.Deserialize<T>(message)!;
-    }
-
-    private async Task<byte[]> SerializeAsyncIfPossible(object value, CancellationToken cancellationToken = default)
-    {
-        return Formatter is IAsyncFormatter asyncFormatter
-            ? await asyncFormatter.SerializeAsync(value, cancellationToken).ConfigureAwait(false)
-            : Formatter.Serialize(value);
     }
 }
