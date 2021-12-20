@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netcoreapp3.1;net5.0</TargetFrameworks>
+    <RootNamespace>H.Formatters</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Label="NuGet">
+    <Version>1.0.0.8</Version>
+    <Description>This package adds MessagePack (based on neuecc/MessagePack-CSharp)</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MessagePack" Version="2.3.85" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\H.Formatters\H.Formatters.csproj" />
+  </ItemGroup>
+
+</Project>

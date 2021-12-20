@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MessagePackAnalyzer" Version="2.3.85" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\libs\H.Formatters.MessagePack\H.Formatters.MessagePack.csproj" />
+    <ProjectReference Include="..\..\libs\H.Pipes\H.Pipes.csproj" />
+  </ItemGroup>
+
+</Project>
