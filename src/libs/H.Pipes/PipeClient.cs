@@ -20,35 +20,27 @@ public sealed class PipeClient<T> : IPipeClient<T>
 
     #region Properties
 
-    /// <summary>
-    /// Gets or sets whether the client should attempt to reconnect when the pipe breaks
-    /// due to an error or the other end terminating the connection. <br/>
-    /// Default value is <see langword="true"/>.
-    /// </summary>
+    /// <inheritdoc/>
     public bool AutoReconnect { get; set; } = true;
 
-    /// <summary>
-    /// Interval of reconnection
-    /// </summary>
+    /// <inheritdoc/>
     public TimeSpan ReconnectionInterval { get; }
 
-    /// <summary>
-    /// Checks that connection is exists
-    /// </summary>
+    /// <inheritdoc/>
     public bool IsConnected => Connection != null;
 
-    /// <summary>
-    /// <see langword="true"/> if <see cref="ConnectAsync"/> in process
-    /// </summary>
+    /// <inheritdoc/>
     public bool IsConnecting
     {
         get => _isConnecting;
         private set => _isConnecting = value;
     }
 
+    /// <inheritdoc/>
+    public IFormatter Formatter { get; }
+
     private string PipeName { get; }
     private string ServerName { get; }
-    private IFormatter Formatter { get; }
 
     private PipeConnection<T>? Connection { get; set; }
     private System.Timers.Timer ReconnectionTimer { get; }

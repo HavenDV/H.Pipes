@@ -1,4 +1,5 @@
 ﻿using System.IO.Pipes;
+using H.Formatters;
 using H.Pipes.Args;
 
 namespace H.Pipes;
@@ -32,6 +33,11 @@ public interface IPipeClient<T> : IPipeConnection<T>
     /// <see langword="true"/> if <see cref="ConnectAsync"/> in process
     /// </summary>
     bool IsConnecting { get; }
+
+    /// <summary>
+    /// Current formatter
+    /// </summary>
+    public IFormatter Formatter { get; }
 
     #endregion
 
