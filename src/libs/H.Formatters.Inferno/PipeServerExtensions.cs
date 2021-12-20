@@ -41,7 +41,7 @@ public static class PipeServerExtensions
                     var clientPublicKey = response.Message;
                     KeyPair.ValidatePublicKey(clientPublicKey);
 
-                    var keyPair = new KeyPair();
+                    using var keyPair = new KeyPair();
                     formatter.Key = keyPair.GenerateSharedKey(clientPublicKey);
 
                     await server.WriteAsync(keyPair.PublicKey, cancellationToken).ConfigureAwait(false);

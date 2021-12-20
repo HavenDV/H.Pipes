@@ -9,8 +9,6 @@ namespace H.Formatters;
 /// </summary>
 public static class PipeClientExtensions
 {
-    private static KeyPair? _keyPair;
-
     /// <summary>
     /// Enables encryption using <see cref="InfernoFormatter"/>.
     /// </summary>
@@ -31,7 +29,6 @@ public static class PipeClientExtensions
             try
             {
                 var pipeName = $"{args.Connection.PipeName}_Inferno";
-                _keyPair = new KeyPair();
 
                 using var source = new CancellationTokenSource(TimeSpan.FromSeconds(10));
                 var cancellationToken = source.Token;
@@ -39,6 +36,7 @@ public static class PipeClientExtensions
                 var client = new SingleConnectionPipeClient<byte[]>(pipeName);
                 await using (client.ConfigureAwait(false))
                 {
+                    using var _keyPair = new KeyPair();
                     await client.WriteAsync(_keyPair.PublicKey, cancellationToken).ConfigureAwait(false);
 
                     var response = await client.WaitMessageAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
