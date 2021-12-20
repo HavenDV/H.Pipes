@@ -32,13 +32,14 @@ public static class PipeServerExtensions
                 var cancellationToken = source.Token;
 
                 var pipeName = $"{args.Connection.PipeName}_Inferno";
-                var server = new SingleConnectionPipeServer<string>(pipeName);
+                var server = new SingleConnectionPipeServer<byte[]>(pipeName);
                 await using (server.ConfigureAwait(false))
                 {
                     await server.StartAsync(cancellationToken).ConfigureAwait(false);
 
                     var response = await server.WaitMessageAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-                    var clientPublicKey = KeyPair.ValidatePublicKey(response.Message);
+                    var clientPublicKey = response.Message;
+                    KeyPair.ValidatePublicKey(clientPublicKey);
 
                     var keyPair = new KeyPair();
                     formatter.Key = keyPair.GenerateSharedKey(clientPublicKey);

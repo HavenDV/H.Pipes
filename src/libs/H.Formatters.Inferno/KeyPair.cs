@@ -3,42 +3,54 @@ using SecurityDriven.Inferno.Extensions;
 
 namespace H.Formatters;
 
-internal class KeyPair
+internal class KeyPair : IDisposable
 {
-    public string PublicKey => new(publicKey.Select(b => (char)b).ToArray());
+    #region Properties
 
-    private readonly CngKey privateKey;
-    private readonly byte[] publicKey;
+    private CngKey PrivateKey { get; }
+    public byte[] PublicKey { get; }
 
-    public KeyPair()
-    {
-        privateKey = CngKeyExtensions.CreateNewDhmKey();
-        publicKey = privateKey.Export(CngKeyBlobFormat.EccPublicBlob);
-    }
+    #endregion
+
+    #region Constructors
 
     public KeyPair(CngKey key)
     {
         key = key ?? throw new ArgumentNullException(nameof(key));
 
-        privateKey = key;
-        publicKey = key.Export(CngKeyBlobFormat.EccPublicBlob);
+        PrivateKey = key;
+        PublicKey = key.Export(CngKeyBlobFormat.EccPublicBlob);
     }
+
+    public KeyPair() : this(CngKeyExtensions.CreateNewDhmKey())
+    {
+    }
+
+    #endregion
+
+    #region Methods
 
     public byte[] GenerateSharedKey(byte[] recipientPublicKey)
     {
-        return privateKey.GetSharedDhmSecret(CngKey.Import(recipientPublicKey, CngKeyBlobFormat.EccPublicBlob));
+        using var key = CngKey.Import(recipientPublicKey, CngKeyBlobFormat.EccPublicBlob);
+
+        return PrivateKey.GetSharedDhmSecret(key);
     }
 
-    public static byte[] ValidatePublicKey(string message)
+    public static void ValidatePublicKey(byte[] bytes)
     {
-        message = message ?? throw new ArgumentNullException(nameof(message));
+        bytes = bytes ?? throw new ArgumentNullException(nameof(bytes));
 
-        var bytes = message.ToCharArray().Select(c => (byte)c).ToArray();
         if (bytes.Length != 104)
         {
-            throw new ArgumentException("message.Lenght is not 104");
+            throw new ArgumentException("bytes.Lenght is not 104.");
         }
-
-        return bytes;
     }
+
+    public void Dispose()
+    {
+        PrivateKey.Dispose();
+    }
+
+    #endregion
 }
