@@ -1,43 +1,69 @@
 ﻿using System.Security.Cryptography;
-using System.Text;
 using SecurityDriven.Inferno.Extensions;
-using System.Linq;
 
-namespace H.Pipes.Encryption
+namespace H.Pipes.Encryption;
+
+/// <summary>
+/// 
+/// </summary>
+public class KeyPair
 {
-    public class KeyPair
+    /// <summary>
+    /// 
+    /// </summary>
+    public string PublicKey => new(publicKey.Select(b => (char)b).ToArray());
+
+    private readonly CngKey privateKey;
+    private readonly byte[] publicKey;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public KeyPair()
     {
-        public string PublicKey => new(publicKey.Select(b => (char)b).ToArray());
+        privateKey = CngKeyExtensions.CreateNewDhmKey();
+        publicKey = privateKey.Export(CngKeyBlobFormat.EccPublicBlob);
+    }
 
-        private readonly CngKey privateKey;
-        private readonly byte[] publicKey;
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="key"></param>
+    public KeyPair(CngKey key)
+    {
+        key = key ?? throw new ArgumentNullException(nameof(key));
 
-        public KeyPair()
-        {
-            privateKey = CngKeyExtensions.CreateNewDhmKey();
-            publicKey = privateKey.Export(CngKeyBlobFormat.EccPublicBlob);
-        }
-        public KeyPair(CngKey cngKey)
-        {
-            privateKey = cngKey;
-            publicKey = cngKey.Export(CngKeyBlobFormat.EccPublicBlob);
-        }
+        privateKey = key;
+        publicKey = key.Export(CngKeyBlobFormat.EccPublicBlob);
+    }
 
-        public byte[] GenerateSharedKey(byte[] recipientPublicKey)
-        {
-            return privateKey.GetSharedDhmSecret(CngKey.Import(recipientPublicKey, CngKeyBlobFormat.EccPublicBlob));
-        }
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="recipientPublicKey"></param>
+    /// <returns></returns>
+    public byte[] GenerateSharedKey(byte[] recipientPublicKey)
+    {
+        return privateKey.GetSharedDhmSecret(CngKey.Import(recipientPublicKey, CngKeyBlobFormat.EccPublicBlob));
+    }
 
-        public bool ValidatePublicKey(string message, out byte[]? publicKey)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="publicKey"></param>
+    /// <returns></returns>
+    public bool ValidatePublicKey(string message, out byte[]? publicKey)
+    {
+        message = message ?? throw new ArgumentNullException(nameof(message));
+
+        var bytes = message.ToCharArray().Select(c => (byte)c).ToArray();
+        if (bytes.Length == 104)
         {
-            var bytes = message.ToCharArray().Select(c => (byte)c).ToArray();
-            if (bytes.Length == 104)
-            {
-                publicKey = bytes;
-                return true;
-            }
-            publicKey = null;
-            return false;
+            publicKey = bytes;
+            return true;
         }
+        publicKey = null;
+        return false;
     }
 }
