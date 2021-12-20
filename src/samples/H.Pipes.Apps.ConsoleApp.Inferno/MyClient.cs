@@ -1,14 +1,9 @@
-﻿// ReSharper disable AccessToDisposedClosure
-
-using H.Formatters;
-using H.Pipes.Encryption;
+﻿using H.Formatters;
 
 namespace H.Pipes.Apps.ConsoleApp.Encryption;
 
 internal static class MyClient
 {
-    private static readonly InfernoFormatter _formatter = new(new SystemTextJsonFormatter());
-    private static KeyPair? _keyPair;
     private static void OnExceptionOccurred(Exception exception)
     {
         Console.Error.WriteLine($"Exception: {exception}");
@@ -23,53 +18,12 @@ internal static class MyClient
             Console.WriteLine($"Running in CLIENT mode. PipeName: {pipeName}");
             Console.WriteLine("Enter 'q' to exit");
 
-            await using var client = new PipeClient<MyMessage>(pipeName, formatter: _formatter);
-            client.Connected += (o, args) =>
-            {
-                Console.WriteLine("Connected to server");
-                _keyPair = new KeyPair();
-                Task.Run(async () => await client.WriteAsync(new MyMessage
-                {
-                    Text = _keyPair.PublicKey,
-                }, source.Token).ConfigureAwait(false));
-                Console.WriteLine("Sent the public key");
-            };
+            await using var client = new PipeClient<MyMessage>(pipeName, formatter: new InfernoFormatter(new SystemTextJsonFormatter()));
+            client.EnableEncryption();
 
-            client.MessageReceived += (o, args) =>
-            {
-                if(args.Message?.Text == null)
-                {
-                    return;
-                }
-
-                if (_formatter.Key == null)
-                {
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-                    if (_keyPair.ValidatePublicKey(args.Message.Text, out var serverPublicKey))
-                    {
-                        Console.WriteLine("Received server public key");
-#pragma warning disable CS8604 // Possible null reference argument.
-                        _formatter.Key = _keyPair.GenerateSharedKey(serverPublicKey);
-#pragma warning restore CS8604 // Possible null reference argument.
-                    }
-                    else
-                    {
-                        // Do nothing
-                    }
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-
-                }
-                else
-                {
-                    Console.WriteLine("Message Received: " + args.Message);
-                }
-            };
-            client.Disconnected += (o, args) =>
-            {
-                Console.WriteLine("Disconnected from server");
-                _formatter.Key = null;
-            };
-
+            client.MessageReceived += (o, args) => Console.WriteLine("MessageReceived: " + args.Message);
+            client.Disconnected += (o, args) => Console.WriteLine("Disconnected from server");
+            client.Connected += (o, args) => Console.WriteLine("Connected to server");
             client.ExceptionOccurred += (o, args) => OnExceptionOccurred(args.Exception);
 
             // Dispose is not required

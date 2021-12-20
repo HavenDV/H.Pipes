@@ -51,19 +51,17 @@ public class KeyPair
     /// 
     /// </summary>
     /// <param name="message"></param>
-    /// <param name="publicKey"></param>
     /// <returns></returns>
-    public bool ValidatePublicKey(string message, out byte[]? publicKey)
+    public static byte[] ValidatePublicKey(string message)
     {
         message = message ?? throw new ArgumentNullException(nameof(message));
 
         var bytes = message.ToCharArray().Select(c => (byte)c).ToArray();
-        if (bytes.Length == 104)
+        if (bytes.Length != 104)
         {
-            publicKey = bytes;
-            return true;
+            throw new ArgumentException("message.Lenght is not 104");
         }
-        publicKey = null;
-        return false;
+
+        return bytes;
     }
 }
