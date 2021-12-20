@@ -32,7 +32,7 @@ public static class PipeServerExtensions
                 var cancellationToken = source.Token;
 
                 var pipeName = $"{args.Connection.PipeName}_Inferno";
-                var server = new SingleConnectionPipeServer<byte[]>(pipeName);
+                var server = new SingleConnectionPipeServer<byte[]>(pipeName, formatter.Formatter);
                 await using (server.ConfigureAwait(false))
                 {
                     await server.StartAsync(cancellationToken).ConfigureAwait(false);

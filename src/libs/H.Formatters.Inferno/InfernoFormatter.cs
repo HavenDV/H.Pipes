@@ -5,7 +5,7 @@
 /// </summary>
 public class InfernoFormatter : FormatterBase
 {
-    private IFormatter Formatter { get; }
+    public IFormatter Formatter { get; }
 
     /// <summary>
     /// Public key

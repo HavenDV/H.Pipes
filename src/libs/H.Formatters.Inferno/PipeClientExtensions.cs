@@ -33,7 +33,7 @@ public static class PipeClientExtensions
                 using var source = new CancellationTokenSource(TimeSpan.FromSeconds(10));
                 var cancellationToken = source.Token;
 
-                var client = new SingleConnectionPipeClient<byte[]>(pipeName);
+                var client = new SingleConnectionPipeClient<byte[]>(pipeName, args.Connection.ServerName, formatter: formatter.Formatter);
                 await using (client.ConfigureAwait(false))
                 {
                     using var _keyPair = new KeyPair();
