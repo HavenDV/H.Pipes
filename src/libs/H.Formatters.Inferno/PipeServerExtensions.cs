@@ -21,18 +21,13 @@ public static class PipeServerExtensions
         server = server ?? throw new ArgumentNullException(nameof(server));
         server.ClientConnected += async (_, args) =>
         {
-            if (server.Formatter is not InfernoFormatter formatter)
-            {
-                return;
-            }
-
             try
             {
                 using var source = new CancellationTokenSource(TimeSpan.FromSeconds(10));
                 var cancellationToken = source.Token;
 
                 var pipeName = $"{args.Connection.PipeName}_Inferno";
-                var server = new SingleConnectionPipeServer<byte[]>(pipeName, formatter.Formatter);
+                var server = new SingleConnectionPipeServer<byte[]>(pipeName, args.Connection.Formatter);
                 await using (server.ConfigureAwait(false))
                 {
                     await server.StartAsync(cancellationToken).ConfigureAwait(false);
@@ -42,7 +37,10 @@ public static class PipeServerExtensions
                     KeyPair.ValidatePublicKey(clientPublicKey);
 
                     using var keyPair = new KeyPair();
-                    formatter.Key = keyPair.GenerateSharedKey(clientPublicKey);
+
+                    args.Connection.Formatter = new InfernoFormatter(
+                        args.Connection.Formatter,
+                        keyPair.GenerateSharedKey(clientPublicKey));
 
                     await server.WriteAsync(keyPair.PublicKey, cancellationToken).ConfigureAwait(false);
                 }

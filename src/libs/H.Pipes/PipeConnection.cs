@@ -30,7 +30,7 @@ public sealed class PipeConnection<T> : IAsyncDisposable
     public bool IsConnected => PipeStreamWrapper.IsConnected;
 
     /// <summary>
-    /// <see langword="true"/> if started and not disposed
+    /// <see langword="true"/> if started and not disposed.
     /// </summary>
     public bool IsStarted => ReadWorker != null;
 
@@ -39,7 +39,11 @@ public sealed class PipeConnection<T> : IAsyncDisposable
     /// </summary>
     public PipeStream PipeStream { get; }
 
-    private IFormatter Formatter { get; }
+    /// <summary>
+    /// Used formatter.
+    /// </summary>
+    public IFormatter Formatter { get; set; }
+
     private PipeStreamWrapper PipeStreamWrapper { get; }
     private TaskWorker? ReadWorker { get; set; }
 

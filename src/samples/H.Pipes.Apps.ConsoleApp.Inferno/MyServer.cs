@@ -18,8 +18,9 @@ internal static class MyServer
             Console.WriteLine($"Running in SERVER mode. PipeName: {pipeName}");
             Console.WriteLine("Enter 'q' to exit");
 
-            await using var server = new PipeServer<MyMessage>(pipeName, formatter: new InfernoFormatter(new SystemTextJsonFormatter()));
+            await using var server = new PipeServer<MyMessage>(pipeName, formatter: new SystemTextJsonFormatter());
             server.EnableEncryption();
+
             server.ClientConnected += async (_, args) =>
             {
                 Console.WriteLine($"Client {args.Connection.PipeName} is now connected!");

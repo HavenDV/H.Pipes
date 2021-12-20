@@ -21,11 +21,6 @@ public static class PipeClientExtensions
         client = client ?? throw new ArgumentNullException(nameof(client));
         client.Connected += async (o, args) =>
         {
-            if (client.Formatter is not InfernoFormatter formatter)
-            {
-                return;
-            }
-
             try
             {
                 var pipeName = $"{args.Connection.PipeName}_Inferno";
@@ -33,7 +28,7 @@ public static class PipeClientExtensions
                 using var source = new CancellationTokenSource(TimeSpan.FromSeconds(10));
                 var cancellationToken = source.Token;
 
-                var client = new SingleConnectionPipeClient<byte[]>(pipeName, args.Connection.ServerName, formatter: formatter.Formatter);
+                var client = new SingleConnectionPipeClient<byte[]>(pipeName, args.Connection.ServerName, formatter: args.Connection.Formatter);
                 await using (client.ConfigureAwait(false))
                 {
                     using var _keyPair = new KeyPair();
@@ -43,7 +38,9 @@ public static class PipeClientExtensions
                     var serverPublicKey = response.Message;
                     KeyPair.ValidatePublicKey(serverPublicKey);
 
-                    formatter.Key = _keyPair.GenerateSharedKey(serverPublicKey);
+                    args.Connection.Formatter = new InfernoFormatter(
+                        args.Connection.Formatter,
+                        _keyPair.GenerateSharedKey(serverPublicKey));
                 }
             }
             catch (Exception exception)
@@ -53,12 +50,12 @@ public static class PipeClientExtensions
         };
         client.Disconnected += (o, args) =>
         {
-            if (client.Formatter is not InfernoFormatter formatter)
+            if (args.Connection.Formatter is not InfernoFormatter infernoFormatter)
             {
                 return;
             }
 
-            formatter.Key = null;
+            args.Connection.Formatter = infernoFormatter.Formatter;
         };
     }
 }

@@ -18,7 +18,7 @@ internal static class MyClient
             Console.WriteLine($"Running in CLIENT mode. PipeName: {pipeName}");
             Console.WriteLine("Enter 'q' to exit");
 
-            await using var client = new PipeClient<MyMessage>(pipeName, formatter: new InfernoFormatter(new SystemTextJsonFormatter()));
+            await using var client = new PipeClient<MyMessage>(pipeName, formatter: new SystemTextJsonFormatter());
             client.EnableEncryption();
 
             client.MessageReceived += (o, args) => Console.WriteLine("MessageReceived: " + args.Message);
