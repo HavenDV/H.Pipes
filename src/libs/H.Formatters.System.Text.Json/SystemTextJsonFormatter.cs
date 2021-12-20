@@ -13,12 +13,7 @@ public class SystemTextJsonFormatter : FormatterBase
     /// </summary>
     public Encoding Encoding { get; set; } = Encoding.UTF8;
 
-    /// <summary>
-    /// Serializes using <see cref="JsonSerializer"/>
-    /// </summary>
-    /// <param name="obj"></param>
-    /// <returns></returns>
-    public override byte[] SerializeInternal(object? obj)
+    protected override byte[] SerializeInternal(object? obj)
     {
         var json = JsonSerializer.Serialize(obj);
         var bytes = Encoding.GetBytes(json);
@@ -26,13 +21,7 @@ public class SystemTextJsonFormatter : FormatterBase
         return bytes;
     }
 
-    /// <summary>
-    /// Deserializes using <see cref="JsonSerializer"/>
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="bytes"></param>
-    /// <returns></returns>
-    public override T DeserializeInternal<T>(byte[] bytes)
+    protected override T DeserializeInternal<T>(byte[] bytes)
     {
         var json = Encoding.GetString(bytes);
         var obj = JsonSerializer.Deserialize<T>(json);

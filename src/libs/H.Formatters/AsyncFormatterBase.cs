@@ -7,22 +7,9 @@ namespace H.Formatters;
 /// </summary>
 public abstract class AsyncFormatterBase : FormatterBase, IAsyncFormatter
 {
-    /// <summary>
-    /// Serializes to bytes.
-    /// </summary>
-    /// <param name="obj"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    public abstract Task<byte[]> SerializeInternalAsync(object? obj, CancellationToken cancellationToken = default);
+    protected abstract Task<byte[]> SerializeInternalAsync(object? obj, CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// Deserializes from bytes.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="bytes"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    public abstract Task<T?> DeserializeInternalAsync<T>(byte[]? bytes, CancellationToken cancellationToken = default);
+    protected abstract Task<T?> DeserializeInternalAsync<T>(byte[]? bytes, CancellationToken cancellationToken = default);
 
     /// <inheritdoc/>
     public async Task<byte[]> SerializeAsync(object? obj, CancellationToken cancellationToken = default)

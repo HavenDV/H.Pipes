@@ -7,23 +7,12 @@ namespace H.Formatters;
 /// </summary>
 public abstract class FormatterBase : IFormatter
 {
-    /// <summary>
-    /// Serializes to bytes.
-    /// </summary>
-    /// <param name="obj"></param>
-    /// <returns></returns>
-    public virtual byte[] SerializeInternal(object obj)
+    protected virtual byte[] SerializeInternal(object obj)
     {
         return ArrayUtilities.Empty<byte>();
     }
 
-    /// <summary>
-    /// Deserializes from bytes.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="bytes"></param>
-    /// <returns></returns>
-    public virtual T? DeserializeInternal<T>(byte[] bytes)
+    protected virtual T? DeserializeInternal<T>(byte[] bytes)
     {
         return default;
     }

@@ -13,12 +13,7 @@ public class NewtonsoftJsonFormatter : FormatterBase
     /// </summary>
     public Encoding Encoding { get; set; } = Encoding.UTF8;
 
-    /// <summary>
-    /// Serializes using <see cref="JsonConvert"/>
-    /// </summary>
-    /// <param name="obj"></param>
-    /// <returns></returns>
-    public override byte[] SerializeInternal(object obj)
+    protected override byte[] SerializeInternal(object obj)
     {
         var json = JsonConvert.SerializeObject(obj);
         var bytes = Encoding.GetBytes(json);
@@ -26,13 +21,7 @@ public class NewtonsoftJsonFormatter : FormatterBase
         return bytes;
     }
 
-    /// <summary>
-    /// Deserializes using <see cref="JsonConvert"/>
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="bytes"></param>
-    /// <returns></returns>
-    public override T DeserializeInternal<T>(byte[] bytes)
+    protected override T DeserializeInternal<T>(byte[] bytes)
     {
         var json = Encoding.GetString(bytes);
         var obj = JsonConvert.DeserializeObject<T>(json);

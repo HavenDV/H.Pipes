@@ -3,14 +3,14 @@
 namespace H.Formatters;
 
 /// <summary>
-/// 
+/// A formatter that uses <see cref="Encryption"/> inside for serialization/deserialization
 /// </summary>
 public class InfernoFormatter : FormatterBase
 {
     private IFormatter Formatter { get; }
 
     /// <summary>
-    /// 
+    /// Public key
     /// </summary>
     public byte[]? Key { get; set; }
 
@@ -23,12 +23,7 @@ public class InfernoFormatter : FormatterBase
         Formatter = formatter ?? throw new ArgumentNullException(nameof(formatter));
     }
 
-    /// <summary>
-    /// Encrypts and serializes using any <see cref="FormatterBase"/>
-    /// </summary>
-    /// <param name="obj"></param>
-    /// <returns></returns>
-    public override byte[] SerializeInternal(object obj)
+    protected override byte[] SerializeInternal(object obj)
     {
         var bytes = Formatter.Serialize(obj);
         if (Key == null)
@@ -39,13 +34,7 @@ public class InfernoFormatter : FormatterBase
         return Encryption.EncryptMessage(Key, bytes);
     }
 
-    /// <summary>
-    /// Decrypts and deserializes using <see cref="FormatterBase"/>
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="bytes"></param>
-    /// <returns></returns>
-    public override T DeserializeInternal<T>(byte[] bytes)
+    protected override T DeserializeInternal<T>(byte[] bytes)
     {
         bytes = bytes ?? throw new ArgumentNullException(nameof(bytes));
 
