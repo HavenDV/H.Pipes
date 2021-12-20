@@ -7,6 +7,9 @@ namespace H.Formatters;
 /// </summary>
 public abstract class FormatterBase : IFormatter
 {
+    /// <inheritdoc/>
+    public FormatterContext Context { get; } = new();
+
     /// <summary>
     /// Serializes to bytes.
     /// </summary>
@@ -28,11 +31,7 @@ public abstract class FormatterBase : IFormatter
         return default;
     }
 
-    /// <summary>
-    /// Serializes.
-    /// </summary>
-    /// <param name="obj"></param>
-    /// <returns></returns>
+    /// <inheritdoc/>
     public byte[] Serialize(object? obj)
     {
         if (obj == null)
@@ -43,12 +42,7 @@ public abstract class FormatterBase : IFormatter
         return SerializeInternal(obj);
     }
 
-    /// <summary>
-    /// Deserializes.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="bytes"></param>
-    /// <returns></returns>
+    /// <inheritdoc/>
     public T? Deserialize<T>(byte[]? bytes)
     {
         if (bytes == null || !bytes.Any())

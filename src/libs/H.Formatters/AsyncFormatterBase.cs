@@ -3,7 +3,7 @@
 namespace H.Formatters;
 
 /// <summary>
-/// A base formatter class.
+/// A base async formatter class.
 /// </summary>
 public abstract class AsyncFormatterBase : FormatterBase, IAsyncFormatter
 {
@@ -24,12 +24,7 @@ public abstract class AsyncFormatterBase : FormatterBase, IAsyncFormatter
     /// <returns></returns>
     public abstract Task<T?> DeserializeInternalAsync<T>(byte[]? bytes, CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// Serializes.
-    /// </summary>
-    /// <param name="obj"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <inheritdoc/>
     public async Task<byte[]> SerializeAsync(object? obj, CancellationToken cancellationToken = default)
     {
         if (obj == null)
@@ -40,13 +35,7 @@ public abstract class AsyncFormatterBase : FormatterBase, IAsyncFormatter
         return await SerializeInternalAsync(obj, cancellationToken).ConfigureAwait(false);
     }
 
-    /// <summary>
-    /// Deserializes.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="bytes"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <inheritdoc/>
     public async Task<T?> DeserializeAsync<T>(byte[]? bytes, CancellationToken cancellationToken = default)
     {
         if (bytes == null || !bytes.Any())
