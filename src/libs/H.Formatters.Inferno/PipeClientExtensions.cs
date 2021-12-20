@@ -11,6 +11,12 @@ public static class PipeClientExtensions
 {
     private static KeyPair? _keyPair;
 
+    /// <summary>
+    /// Enables encryption using <see cref="InfernoFormatter"/>.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="client"></param>
+    /// <exception cref="ArgumentNullException"></exception>
     public static void EnableEncryption<T>(
         this IPipeClient<T> client)
     {

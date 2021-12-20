@@ -9,6 +9,12 @@ namespace H.Formatters;
 /// </summary>
 public static class PipeServerExtensions
 {
+    /// <summary>
+    /// Enables encryption using <see cref="InfernoFormatter"/>.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="server"></param>
+    /// <exception cref="ArgumentNullException"></exception>
     public static void EnableEncryption<T>(
         this IPipeServer<T> server)
     {
