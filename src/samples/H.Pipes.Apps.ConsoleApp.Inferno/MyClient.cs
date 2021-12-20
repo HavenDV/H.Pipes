@@ -2,7 +2,6 @@
 
 using H.Formatters;
 using H.Pipes.Encryption;
-using System.Linq;
 
 namespace H.Pipes.Apps.ConsoleApp.Encryption;
 

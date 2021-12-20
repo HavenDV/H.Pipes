@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net4.6.2</TargetFrameworks>
     <RootNamespace>H.Formatters</RootNamespace>
+    <NoWarn>$(NoWarn);CA1819</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">

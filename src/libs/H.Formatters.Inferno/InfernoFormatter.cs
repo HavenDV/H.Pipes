@@ -7,9 +7,12 @@ namespace H.Formatters;
 /// </summary>
 public class InfernoFormatter : FormatterBase
 {
+    private IFormatter Formatter { get; }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public byte[]? Key { get; set; }
-    private readonly IFormatter _formatter;
-    private bool StartEncrypting() => Key != null || Key != default;
 
     /// <summary>
     /// 
@@ -17,7 +20,7 @@ public class InfernoFormatter : FormatterBase
     /// <param name="formatter"></param>
     public InfernoFormatter(IFormatter formatter)
     {
-        _formatter = formatter;
+        Formatter = formatter ?? throw new ArgumentNullException(nameof(formatter));
     }
 
     /// <summary>
@@ -28,8 +31,12 @@ public class InfernoFormatter : FormatterBase
     public override byte[] SerializeInternal(object obj)
     {
         var bytes = SerializeAsyncIfPossible(obj).GetAwaiter().GetResult();
+        if (Key == null)
+        {
+            return bytes;
+        }
 
-        return StartEncrypting() ? Encryption.EncryptMessage(Key, bytes) : bytes;
+        return Encryption.EncryptMessage(Key, bytes);
     }
 
     /// <summary>
@@ -40,11 +47,19 @@ public class InfernoFormatter : FormatterBase
     /// <returns></returns>
     public override T DeserializeInternal<T>(byte[] bytes)
     {
-        byte[] message = StartEncrypting() ? Encryption.DecryptMessage(Key, bytes) : bytes;
-        return _formatter.Deserialize<T>(message);
+        bytes = bytes ?? throw new ArgumentNullException(nameof(bytes));
+
+        var message = Key != null
+            ? Encryption.DecryptMessage(Key, bytes)
+            : bytes;
+
+        return Formatter.Deserialize<T>(message)!;
     }
 
-    private async Task<byte[]> SerializeAsyncIfPossible(object value, CancellationToken cancellationToken = default) => _formatter is IAsyncFormatter asyncFormatter
+    private async Task<byte[]> SerializeAsyncIfPossible(object value, CancellationToken cancellationToken = default)
+    {
+        return Formatter is IAsyncFormatter asyncFormatter
             ? await asyncFormatter.SerializeAsync(value, cancellationToken).ConfigureAwait(false)
-            : _formatter.Serialize(value);
+            : Formatter.Serialize(value);
+    }
 }

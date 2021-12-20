@@ -10,6 +10,7 @@ internal static class Encryption
         var hash = CalculateHash(encrypted, key); // while reading, get the last 48 bytes as hash key to validate
         return encrypted.Concat(hash).ToArray();
     }
+
     internal static byte[] DecryptMessage(byte[] key, byte[] encryptedMessage)
     {
         var hash = encryptedMessage.Skip(encryptedMessage.Length - 48).ToArray();
