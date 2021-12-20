@@ -4,13 +4,13 @@ using System.Threading.Tasks;
 
 namespace H.Formatters
 {
-    public class CryptoFormatter : FormatterBase
+    public class InfernoFormatter : FormatterBase
     {
         public byte[]? Key { get; set; }
         private readonly IFormatter _formatter;
         private bool StartEncrypting() => Key != null || Key != default;
 
-        public CryptoFormatter(IFormatter formatter)
+        public InfernoFormatter(IFormatter formatter)
         {
             _formatter = formatter;
         }
