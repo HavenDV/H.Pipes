@@ -7,9 +7,6 @@ namespace H.Formatters;
 /// </summary>
 public abstract class FormatterBase : IFormatter
 {
-    /// <inheritdoc/>
-    public FormatterContext Context { get; } = new();
-
     /// <summary>
     /// Serializes to bytes.
     /// </summary>

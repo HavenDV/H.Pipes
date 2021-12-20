@@ -117,8 +117,6 @@ public sealed class PipeConnection<T> : IAsyncDisposable
                         break;
                     }
 
-                    Formatter.Context.PipeName = PipeName;
-
                     var obj = Formatter is IAsyncFormatter asyncFormatter
                         ? await asyncFormatter.DeserializeAsync<T>(bytes, cancellationToken).ConfigureAwait(false)
                         : Formatter.Deserialize<T>(bytes);
