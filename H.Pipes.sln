@@ -46,9 +46,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Formatters.System.Text.Json", "src\libs\H.Formatters.System.Text.Json\H.Formatters.System.Text.Json.csproj", "{45B6CF87-D741-4848-A903-8703C931464D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Pipes.Apps.ConsoleApp.Polly", "src\samples\H.Pipes.Apps.ConsoleApp.Polly\H.Pipes.Apps.ConsoleApp.Polly.csproj", "{97649173-79F3-4F73-9781-A1BF02C068F1}"
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Pipes.Encryption", "H.Pipes.Encryption\H.Pipes.Encryption.csproj", "{A56990ED-1283-41C6-B3E5-4C4CDEE09345}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "H.Pipes.Apps.ConsoleApp.Encryption", "H.Pipes.Apps.ConsoleApp.Encryption\H.Pipes.Apps.ConsoleApp.Encryption.csproj", "{0062A318-9F4A-4668-8FB0-3B282EE57F9F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Formatters.MessagePack", "src\libs\H.Formatters.MessagePack\H.Formatters.MessagePack.csproj", "{B8079D17-F15D-4D02-B2DB-798CE303B0AA}"
 EndProject
