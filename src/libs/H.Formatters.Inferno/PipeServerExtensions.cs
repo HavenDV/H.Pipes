@@ -28,15 +28,18 @@ public static class PipeServerExtensions
 
                 var pipeName = $"{args.Connection.PipeName}_Inferno";
                 var server = new SingleConnectionPipeServer<string>(pipeName);
-                await server.StartAsync(cancellationToken).ConfigureAwait(false);
+                await using (server.ConfigureAwait(false))
+                {
+                    await server.StartAsync(cancellationToken).ConfigureAwait(false);
 
-                var response = await server.WaitMessageAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-                var clientPublicKey = KeyPair.ValidatePublicKey(response.Message);
+                    var response = await server.WaitMessageAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                    var clientPublicKey = KeyPair.ValidatePublicKey(response.Message);
 
-                var keyPair = new KeyPair();
-                formatter.Key = keyPair.GenerateSharedKey(clientPublicKey);
+                    var keyPair = new KeyPair();
+                    formatter.Key = keyPair.GenerateSharedKey(clientPublicKey);
 
-                await server.WriteAsync(keyPair.PublicKey, cancellationToken).ConfigureAwait(false);
+                    await server.WriteAsync(keyPair.PublicKey, cancellationToken).ConfigureAwait(false);
+                }
             }
             catch (Exception exception)
             {

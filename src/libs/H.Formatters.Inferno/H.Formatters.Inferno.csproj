@@ -14,6 +14,14 @@
     <PackageReference Include="Inferno" Version="1.6.4" />
   </ItemGroup>
 
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net4.6.2' ">
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\H.Formatters\H.Formatters.csproj" />
     <ProjectReference Include="..\H.Pipes\H.Pipes.csproj" />

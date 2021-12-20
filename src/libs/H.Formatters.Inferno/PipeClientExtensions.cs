@@ -32,12 +32,15 @@ public static class PipeClientExtensions
                 var cancellationToken = source.Token;
 
                 var client = new SingleConnectionPipeClient<string>(pipeName);
-                await client.WriteAsync(_keyPair.PublicKey, cancellationToken).ConfigureAwait(false);
+                await using (client.ConfigureAwait(false))
+                {
+                    await client.WriteAsync(_keyPair.PublicKey, cancellationToken).ConfigureAwait(false);
 
-                var response = await client.WaitMessageAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-                var serverPublicKey = KeyPair.ValidatePublicKey(response.Message);
+                    var response = await client.WaitMessageAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                    var serverPublicKey = KeyPair.ValidatePublicKey(response.Message);
 
-                formatter.Key = _keyPair.GenerateSharedKey(serverPublicKey);
+                    formatter.Key = _keyPair.GenerateSharedKey(serverPublicKey);
+                }
             }
             catch (Exception exception)
             {
