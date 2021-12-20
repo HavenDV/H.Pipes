@@ -1,4 +1,5 @@
-﻿using H.Pipes.Args;
+﻿using H.Formatters;
+using H.Pipes.Args;
 
 namespace H.Pipes;
 
@@ -8,6 +9,15 @@ namespace H.Pipes;
 /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
 public interface IPipeConnection<T> : IAsyncDisposable
 {
+    #region Properties
+
+    /// <summary>
+    /// Used formatter
+    /// </summary>
+    public IFormatter Formatter { get; }
+
+    #endregion
+
     #region Events
 
     /// <summary>

@@ -28,11 +28,6 @@ public interface IPipeServer<T> : IPipeConnection<T>
     Action<NamedPipeServerStream>? PipeStreamInitializeAction { get; set; }
 
     /// <summary>
-    /// Used formatter
-    /// </summary>
-    IFormatter Formatter { get; set; }
-
-    /// <summary>
     /// IsStarted
     /// </summary>
     bool IsStarted { get; }

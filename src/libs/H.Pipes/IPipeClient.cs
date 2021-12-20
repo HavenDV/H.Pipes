@@ -34,11 +34,6 @@ public interface IPipeClient<T> : IPipeConnection<T>
     /// </summary>
     bool IsConnecting { get; }
 
-    /// <summary>
-    /// Current formatter
-    /// </summary>
-    public IFormatter Formatter { get; }
-
     #endregion
 
     #region Events
