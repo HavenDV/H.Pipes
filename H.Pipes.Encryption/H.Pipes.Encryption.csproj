@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;netstandard2.1;net4.6.1</TargetFrameworks>
+		<NoWarn>$(NoWarn);CA1003;CA1031</NoWarn>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<PropertyGroup Label="NuGet">
+		<Description>This package adds Encryption extensions for H.Pipes</Description>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Inferno" Version="1.6.4" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\src\libs\H.Pipes\H.Pipes.csproj" />
+	</ItemGroup>
+
+	<PropertyGroup>
+		<LangVersion>preview</LangVersion>
+	</PropertyGroup>
+</Project>
