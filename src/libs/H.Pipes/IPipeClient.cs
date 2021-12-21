@@ -47,7 +47,7 @@ public interface IPipeClient<T> : IPipeConnection<T>
     /// <summary>
     /// Active connection.
     /// </summary>
-    public PipeConnection<T>? Connection { get; set; }
+    public PipeConnection<T>? Connection { get; }
 
     #endregion
 

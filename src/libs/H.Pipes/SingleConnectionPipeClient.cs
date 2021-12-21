@@ -45,7 +45,7 @@ public sealed class SingleConnectionPipeClient<T> : IPipeClient<T>
     public string ServerName { get; }
 
     /// <inheritdoc/>
-    public PipeConnection<T>? Connection { get; set; }
+    public PipeConnection<T>? Connection { get; private set; }
 
     private System.Timers.Timer ReconnectionTimer { get; }
 
