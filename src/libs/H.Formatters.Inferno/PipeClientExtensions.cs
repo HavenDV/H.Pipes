@@ -46,6 +46,8 @@ public static class PipeClientExtensions
             catch (Exception exception)
             {
                 Debug.WriteLine($"{nameof(EnableEncryption)} returns exception: {exception}");
+
+                await client.DisconnectAsync().ConfigureAwait(false);
             }
         };
         client.Disconnected += (o, args) =>

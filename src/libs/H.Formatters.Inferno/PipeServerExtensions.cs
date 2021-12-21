@@ -48,6 +48,8 @@ public static class PipeServerExtensions
             catch (Exception exception)
             {
                 Debug.WriteLine($"{nameof(EnableEncryption)} returns exception: {exception}");
+
+                await args.Connection.StopAsync().ConfigureAwait(false);
             }
         };
     }
