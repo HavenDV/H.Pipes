@@ -34,7 +34,6 @@ public static class PipeServerExtensions
 
                     var response = await server.WaitMessageAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
                     var clientPublicKey = response.Message;
-                    KeyPair.ValidatePublicKey(clientPublicKey);
 
                     using var keyPair = new KeyPair();
 
