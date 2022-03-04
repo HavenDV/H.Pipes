@@ -75,9 +75,6 @@ await server.StartAsync();
 
 await Task.Delay(Timeout.InfiniteTimeSpan);
 ```
-
-P.S. To use the server inside the WinForms application, use Task.Run(). This creates a new thread for it.
-
 Client:
 
 ```csharp
@@ -96,6 +93,11 @@ await client.WriteAsync(new MyMessage
 
 await Task.Delay(Timeout.InfiniteTimeSpan);
 ```
+
+Notes:
+- To use the server inside the WinForms/WPF/Other UI application, use Task.Run() or any alternative.
+- Be careful and call `Dispose` before closing the program/after the end of use. 
+Pipes are system resources and you might have problems restarting the server if you don't properly clean up the resources.
 
 ### Custom Formatters
 Since BinaryFormatter is used by default, you should check out this article:
