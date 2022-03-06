@@ -42,6 +42,13 @@ public static class PipeServerFactory
     /// <returns></returns>
     public static NamedPipeServerStream Create(string pipeName)
     {
-        return new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough, 0, 0);
+        return new NamedPipeServerStream(
+            pipeName: pipeName,
+            direction: PipeDirection.InOut,
+            maxNumberOfServerInstances: 1,
+            transmissionMode: PipeTransmissionMode.Byte,
+            options: PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+            inBufferSize: 0,
+            outBufferSize: 0);
     }
 }
