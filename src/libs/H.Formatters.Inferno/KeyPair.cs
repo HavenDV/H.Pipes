@@ -32,12 +32,19 @@ internal class KeyPair : IDisposable
 
     public byte[] GenerateSharedKey(byte[] recipientPublicKey)
     {
+        ValidatePublicKey(recipientPublicKey);
+
         using var key = CngKey.Import(recipientPublicKey, CngKeyBlobFormat.EccPublicBlob);
 
         return PrivateKey.GetSharedDhmSecret(key);
     }
 
-    public static void ValidatePublicKey(byte[] bytes)
+    public void Dispose()
+    {
+        PrivateKey.Dispose();
+    }
+
+    private static void ValidatePublicKey(byte[] bytes)
     {
         bytes = bytes ?? throw new ArgumentNullException(nameof(bytes));
 
@@ -45,11 +52,14 @@ internal class KeyPair : IDisposable
         {
             throw new ArgumentException("bytes.Lenght is not 104.");
         }
-    }
-
-    public void Dispose()
-    {
-        PrivateKey.Dispose();
+        try
+        {
+            using var tempKey = CngKey.Import(bytes, CngKeyBlobFormat.EccPublicBlob);
+        }
+        catch (Exception)
+        {
+            throw new ArgumentException("Public key is not valid.");
+        }
     }
 
     #endregion
