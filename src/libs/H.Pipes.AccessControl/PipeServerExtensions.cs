@@ -24,7 +24,7 @@ public static class PipeServerExtensions
 
 #if NET461_OR_GREATER
         server.CreatePipeStreamFunc = pipeName => new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough, 0, 0, pipeSecurity);
-#elif NETSTANDARD2_0_OR_GREATER
+#elif NETSTANDARD2_0_OR_GREATER || NET5_0_OR_GREATER
         server.CreatePipeStreamFunc = pipeName => NamedPipeServerStreamConstructors.New(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough, 0, 0, pipeSecurity);
 #else
 #error Target Framework is not supported
@@ -38,6 +38,12 @@ public static class PipeServerExtensions
     /// <param name="rules"></param>
     /// <exception cref="ArgumentNullException"></exception>
     /// <returns></returns>
+#if NET5_0_OR_GREATER
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+#elif NETSTANDARD2_0_OR_GREATER || NET461_OR_GREATER
+#else
+#error Target Framework is not supported
+#endif
     public static void AddAccessRules<T>(this IPipeServer<T> server, params PipeAccessRule[] rules)
     {
         server = server ?? throw new ArgumentNullException(nameof(server));
@@ -58,6 +64,12 @@ public static class PipeServerExtensions
     /// <param name="server"></param>
     /// <exception cref="ArgumentNullException"></exception>
     /// <returns></returns>
+#if NET5_0_OR_GREATER
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+#elif NETSTANDARD2_0_OR_GREATER || NET461_OR_GREATER
+#else
+#error Target Framework is not supported
+#endif
     public static void AllowUsersReadWrite<T>(this IPipeServer<T> server)
     {
         server = server ?? throw new ArgumentNullException(nameof(server));
