@@ -10,19 +10,19 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="NamedPipeServerStream.NetFrameworkVersion" Version="1.1.7" />
+    <PackageReference Include="NamedPipeServerStream.NetFrameworkVersion" Version="1.1.8" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
-    <PackageReference Include="NamedPipeServerStream.NetFrameworkVersion" Version="1.1.7" />
+    <PackageReference Include="NamedPipeServerStream.NetFrameworkVersion" Version="1.1.8" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
-    <PackageReference Include="NamedPipeServerStream.NetFrameworkVersion" Version="1.1.7" />
+    <PackageReference Include="NamedPipeServerStream.NetFrameworkVersion" Version="1.1.8" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-    <PackageReference Include="NamedPipeServerStream.NetFrameworkVersion" Version="1.1.7" />
+    <PackageReference Include="NamedPipeServerStream.NetFrameworkVersion" Version="1.1.8" />
   </ItemGroup>
 
   <ItemGroup>
