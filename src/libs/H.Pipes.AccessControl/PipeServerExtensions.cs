@@ -22,10 +22,12 @@ public static class PipeServerExtensions
         server = server ?? throw new ArgumentNullException(nameof(server));
         pipeSecurity = pipeSecurity ?? throw new ArgumentNullException(nameof(pipeSecurity));
 
-#if NET45 || NET46
-            server.CreatePipeStreamFunc = pipeName => new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough, 0, 0, pipeSecurity);
-#else
+#if NET461_OR_GREATER
+        server.CreatePipeStreamFunc = pipeName => new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough, 0, 0, pipeSecurity);
+#elif NETSTANDARD2_0_OR_GREATER
         server.CreatePipeStreamFunc = pipeName => NamedPipeServerStreamConstructors.New(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough, 0, 0, pipeSecurity);
+#else
+#error Target Framework is not supported
 #endif
     }
 
