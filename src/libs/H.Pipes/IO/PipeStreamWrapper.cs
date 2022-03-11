@@ -8,6 +8,9 @@ namespace H.Pipes.IO;
 public sealed class PipeStreamWrapper : IDisposable
 #if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
         , IAsyncDisposable
+#elif NET461_OR_GREATER || NETSTANDARD2_0
+#else
+#error Target Framework is not supported
 #endif
 {
     #region Properties
@@ -81,6 +84,9 @@ public sealed class PipeStreamWrapper : IDisposable
 
 #if NET461_OR_GREATER || NET5_0_OR_GREATER
         Writer.WaitForPipeDrain();
+#elif NETSTANDARD2_0_OR_GREATER
+#else
+#error Target Framework is not supported
 #endif
     }
 
@@ -91,10 +97,12 @@ public sealed class PipeStreamWrapper : IDisposable
     {
 #if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
         await DisposeAsync().ConfigureAwait(false);
-#else
+#elif NET461_OR_GREATER || NETSTANDARD2_0
         Dispose();
 
         await Task.CompletedTask.ConfigureAwait(false);
+#else
+#error Target Framework is not supported
 #endif
     }
 
@@ -126,6 +134,9 @@ public sealed class PipeStreamWrapper : IDisposable
         await Reader.DisposeAsync().ConfigureAwait(false);
         await Writer.DisposeAsync().ConfigureAwait(false);
     }
+#elif NET461_OR_GREATER || NETSTANDARD2_0
+#else
+#error Target Framework is not supported
 #endif
 
     #endregion

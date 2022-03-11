@@ -279,8 +279,10 @@ public sealed class PipeClient<T> : IPipeClient<T>
         var handshake = await PipeClientFactory.ConnectAsync(PipeName, ServerName, cancellationToken).ConfigureAwait(false);
 #pragma warning restore CA2000 // Dispose objects before losing scope
         await using (handshake.ConfigureAwait(false))
-#else
+#elif NET461_OR_GREATER || NETSTANDARD2_0
         using (var handshake = await PipeClientFactory.ConnectAsync(PipeName, ServerName, cancellationToken).ConfigureAwait(false))
+#else
+#error Target Framework is not supported
 #endif
         {
             var bytes = await handshake.ReadAsync(cancellationToken).ConfigureAwait(false);

@@ -35,8 +35,10 @@ public static class PipeClientFactory
         {
 #if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
             await pipe.DisposeAsync().ConfigureAwait(false);
-#else
+#elif NET461_OR_GREATER || NETSTANDARD2_0
             pipe.Dispose();
+#else
+#error Target Framework is not supported
 #endif
 
             throw;

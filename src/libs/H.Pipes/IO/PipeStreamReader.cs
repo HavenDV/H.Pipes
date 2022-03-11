@@ -9,6 +9,9 @@ namespace H.Pipes.IO;
 public sealed class PipeStreamReader : IDisposable
 #if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
         , IAsyncDisposable
+#elif NET461_OR_GREATER || NETSTANDARD2_0
+#else
+#error Target Framework is not supported
 #endif
 {
     #region Properties
@@ -49,8 +52,10 @@ public sealed class PipeStreamReader : IDisposable
         var buffer = new byte[sizeof(int)];
 #if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
         var read = await BaseStream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
+#elif NET461_OR_GREATER || NETSTANDARD2_0
+        var read = await BaseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
 #else
-            var read = await BaseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
+#error Target Framework is not supported
 #endif
         if (read == 0)
         {
@@ -71,8 +76,10 @@ public sealed class PipeStreamReader : IDisposable
         var buffer = new byte[length];
 #if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
         await BaseStream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
+#elif NET461_OR_GREATER || NETSTANDARD2_0
+        await BaseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
 #else
-            await BaseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
+#error Target Framework is not supported
 #endif
 
         return buffer;
@@ -112,6 +119,9 @@ public sealed class PipeStreamReader : IDisposable
     {
         await BaseStream.DisposeAsync().ConfigureAwait(false);
     }
+#elif NET461_OR_GREATER || NETSTANDARD2_0
+#else
+#error Target Framework is not supported
 #endif
 
     #endregion

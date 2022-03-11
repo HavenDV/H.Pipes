@@ -9,6 +9,9 @@ namespace H.Pipes.IO;
 public sealed class PipeStreamWriter : IDisposable
 #if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
         , IAsyncDisposable
+#elif NET461_OR_GREATER || NETSTANDARD2_0
+#else
+#error Target Framework is not supported
 #endif
 {
     #region Properties
@@ -42,8 +45,10 @@ public sealed class PipeStreamWriter : IDisposable
 
 #if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
         await BaseStream.WriteAsync(buffer, cancellationToken).ConfigureAwait(false);
-#else
+#elif NET461_OR_GREATER || NETSTANDARD2_0
         await BaseStream.WriteAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
+#else
+#error Target Framework is not supported
 #endif
     }
 
@@ -64,8 +69,10 @@ public sealed class PipeStreamWriter : IDisposable
 
 #if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
             await BaseStream.WriteAsync(buffer, cancellationToken).ConfigureAwait(false);
-#else
+#elif NET461_OR_GREATER || NETSTANDARD2_0
             await BaseStream.WriteAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
+#else
+#error Target Framework is not supported
 #endif
 
             await BaseStream.FlushAsync(cancellationToken).ConfigureAwait(false);
@@ -128,6 +135,9 @@ public sealed class PipeStreamWriter : IDisposable
 
         SemaphoreSlim.Dispose();
     }
+#elif NET461_OR_GREATER || NETSTANDARD2_0
+#else
+#error Target Framework is not supported
 #endif
 
     #endregion

@@ -158,8 +158,10 @@ public sealed class PipeServer<T> : IPipeServer<T>
 #if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
                         var serverStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName);
                         await using (serverStream.ConfigureAwait(false))
-#else
+#elif NET461_OR_GREATER || NETSTANDARD2_0
                         using (var serverStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName))
+#else
+#error Target Framework is not supported
 #endif
                         {
                             PipeStreamInitializeAction?.Invoke(serverStream);
@@ -171,8 +173,10 @@ public sealed class PipeServer<T> : IPipeServer<T>
 #if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
                             using var handshakeWrapper = new PipeStreamWrapper(serverStream);
                             await using (handshakeWrapper.ConfigureAwait(false))
-#else
+#elif NET461_OR_GREATER || NETSTANDARD2_0
                             using (var handshakeWrapper = new PipeStreamWrapper(serverStream))
+#else
+#error Target Framework is not supported
 #endif
                             {
                                 await handshakeWrapper.WriteAsync(Encoding.UTF8.GetBytes(connectionPipeName), token)
@@ -204,8 +208,10 @@ public sealed class PipeServer<T> : IPipeServer<T>
                     {
 #if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
                         await connectionStream.DisposeAsync().ConfigureAwait(false);
-#else
+#elif NET461_OR_GREATER || NETSTANDARD2_0
                         connectionStream.Dispose();
+#else
+#error Target Framework is not supported
 #endif
 
                         throw;
