@@ -36,7 +36,6 @@ public static class PipeClientExtensions
 
                     var response = await client.WaitMessageAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
                     var serverPublicKey = response.Message;
-                    KeyPair.ValidatePublicKey(serverPublicKey);
 
                     args.Connection.Formatter = new InfernoFormatter(
                         args.Connection.Formatter,
