@@ -7,7 +7,7 @@ namespace H.Pipes.IO;
 /// Wraps a <see cref="PipeStream"/> object and reads from it.
 /// </summary>
 public sealed class PipeStreamReader : IDisposable
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
         , IAsyncDisposable
 #endif
 {
@@ -47,7 +47,7 @@ public sealed class PipeStreamReader : IDisposable
     private async Task<int> ReadLengthAsync(CancellationToken cancellationToken = default)
     {
         var buffer = new byte[sizeof(int)];
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
         var read = await BaseStream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
 #else
             var read = await BaseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
@@ -69,7 +69,7 @@ public sealed class PipeStreamReader : IDisposable
     private async Task<byte[]> ReadAsync(int length, CancellationToken cancellationToken = default)
     {
         var buffer = new byte[length];
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
         await BaseStream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
 #else
             await BaseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
@@ -104,7 +104,7 @@ public sealed class PipeStreamReader : IDisposable
         BaseStream.Dispose();
     }
 
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
     /// <summary>
     /// Dispose internal <see cref="PipeStream"/>
     /// </summary>

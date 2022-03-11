@@ -6,7 +6,7 @@ namespace H.Pipes.IO;
 /// Wraps a <see cref="PipeStream"/> object to read and write .NET CLR objects.
 /// </summary>
 public sealed class PipeStreamWrapper : IDisposable
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
         , IAsyncDisposable
 #endif
 {
@@ -87,12 +87,12 @@ public sealed class PipeStreamWrapper : IDisposable
     /// </summary>
     public async Task StopAsync()
     {
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
         await DisposeAsync().ConfigureAwait(false);
 #else
-            Dispose();
+        Dispose();
 
-            await Task.CompletedTask.ConfigureAwait(false);
+        await Task.CompletedTask.ConfigureAwait(false);
 #endif
     }
 
@@ -112,7 +112,7 @@ public sealed class PipeStreamWrapper : IDisposable
         Writer.Dispose();
     }
 
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
     /// <summary>
     /// Dispose internal <see cref="PipeStream"/>
     /// </summary>

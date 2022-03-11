@@ -165,13 +165,13 @@ public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
                     }
                     catch
                     {
-#if NETSTANDARD2_1
-                            await connectionStream.DisposeAsync().ConfigureAwait(false);
+#if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
+                        await connectionStream.DisposeAsync().ConfigureAwait(false);
 #else
-                            connectionStream.Dispose();
+                        connectionStream.Dispose();
 #endif
 
-                            throw;
+                        throw;
                     }
 
                     var connection = new PipeConnection<T>(connectionStream, PipeName, Formatter);

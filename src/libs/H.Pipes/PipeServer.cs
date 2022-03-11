@@ -155,7 +155,7 @@ public sealed class PipeServer<T> : IPipeServer<T>
                     // Send the client the name of the data pipe to use
                     try
                     {
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
                         var serverStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName);
                         await using (serverStream.ConfigureAwait(false))
 #else
@@ -168,7 +168,7 @@ public sealed class PipeServer<T> : IPipeServer<T>
 
                             await serverStream.WaitForConnectionAsync(token).ConfigureAwait(false);
 
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
                             using var handshakeWrapper = new PipeStreamWrapper(serverStream);
                             await using (handshakeWrapper.ConfigureAwait(false))
 #else
@@ -202,7 +202,7 @@ public sealed class PipeServer<T> : IPipeServer<T>
                     }
                     catch
                     {
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
                         await connectionStream.DisposeAsync().ConfigureAwait(false);
 #else
                         connectionStream.Dispose();

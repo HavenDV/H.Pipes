@@ -7,7 +7,7 @@ namespace H.Pipes.IO;
 /// Wraps a <see cref="PipeStream"/> object and writes to it.
 /// </summary>
 public sealed class PipeStreamWriter : IDisposable
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
         , IAsyncDisposable
 #endif
 {
@@ -40,10 +40,10 @@ public sealed class PipeStreamWriter : IDisposable
     {
         var buffer = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(length));
 
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
         await BaseStream.WriteAsync(buffer, cancellationToken).ConfigureAwait(false);
 #else
-            await BaseStream.WriteAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
+        await BaseStream.WriteAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
 #endif
     }
 
@@ -62,10 +62,10 @@ public sealed class PipeStreamWriter : IDisposable
 
             await WriteLengthAsync(buffer.Length, cancellationToken).ConfigureAwait(false);
 
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
             await BaseStream.WriteAsync(buffer, cancellationToken).ConfigureAwait(false);
 #else
-                await BaseStream.WriteAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
+            await BaseStream.WriteAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
 #endif
 
             await BaseStream.FlushAsync(cancellationToken).ConfigureAwait(false);
@@ -100,7 +100,7 @@ public sealed class PipeStreamWriter : IDisposable
         SemaphoreSlim.Dispose();
     }
 
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
     /// <summary>
     /// Dispose internal <see cref="PipeStream"/>
     /// </summary>

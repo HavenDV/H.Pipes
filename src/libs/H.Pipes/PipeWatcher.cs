@@ -76,7 +76,7 @@ public sealed class PipeWatcher : IDisposable
 
     #region Event Handlers
 
-    private void OnElapsed(object sender, ElapsedEventArgs args)
+    private void OnElapsed(object? sender, ElapsedEventArgs args)
     {
         try
         {

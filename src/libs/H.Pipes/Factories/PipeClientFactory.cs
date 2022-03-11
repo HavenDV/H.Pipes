@@ -33,7 +33,7 @@ public static class PipeClientFactory
         }
         catch
         {
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
             await pipe.DisposeAsync().ConfigureAwait(false);
 #else
             pipe.Dispose();

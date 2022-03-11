@@ -274,7 +274,7 @@ public sealed class PipeClient<T> : IPipeClient<T>
     /// <returns></returns>
     private async Task<string> GetConnectionPipeName(CancellationToken cancellationToken = default)
     {
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
 #pragma warning disable CA2000 // Dispose objects before losing scope
         var handshake = await PipeClientFactory.ConnectAsync(PipeName, ServerName, cancellationToken).ConfigureAwait(false);
 #pragma warning restore CA2000 // Dispose objects before losing scope
