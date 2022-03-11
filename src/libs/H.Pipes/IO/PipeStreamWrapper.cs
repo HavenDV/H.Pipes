@@ -79,7 +79,9 @@ public sealed class PipeStreamWrapper : IDisposable
     {
         await Writer.WriteAsync(buffer, cancellationToken).ConfigureAwait(false);
 
+#if NET461_OR_GREATER || NET5_0_OR_GREATER
         Writer.WaitForPipeDrain();
+#endif
     }
 
     /// <summary>
