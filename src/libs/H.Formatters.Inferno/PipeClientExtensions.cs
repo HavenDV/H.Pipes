@@ -14,9 +14,11 @@ public static class PipeClientExtensions
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="client"></param>
+    /// <param name="exceptionAction"></param>
     /// <exception cref="ArgumentNullException"></exception>
     public static void EnableEncryption<T>(
-        this IPipeClient<T> client)
+        this IPipeClient<T> client,
+        Action<Exception>? exceptionAction = null)
     {
         client = client ?? throw new ArgumentNullException(nameof(client));
         client.Connected += async (o, args) =>
@@ -29,6 +31,12 @@ public static class PipeClientExtensions
                 var cancellationToken = source.Token;
 
                 var client = new SingleConnectionPipeClient<byte[]>(pipeName, args.Connection.ServerName, formatter: args.Connection.Formatter);
+                client.ExceptionOccurred += (_, args) =>
+                {
+                    Debug.WriteLine($"{nameof(EnableEncryption)} client returns exception: {args.Exception}");
+
+                    exceptionAction?.Invoke(args.Exception);
+                };
                 await using (client.ConfigureAwait(false))
                 {
                     using var _keyPair = new KeyPair();
@@ -47,6 +55,8 @@ public static class PipeClientExtensions
                 Debug.WriteLine($"{nameof(EnableEncryption)} returns exception: {exception}");
 
                 await client.DisconnectAsync().ConfigureAwait(false);
+
+                exceptionAction?.Invoke(exception);
             }
         };
         client.Disconnected += (o, args) =>
