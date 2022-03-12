@@ -133,12 +133,6 @@ public sealed class PipeApplication : IAsyncDisposable
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-#if NET5_0_OR_GREATER
-    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-#elif NETSTANDARD2_0_OR_GREATER || NET461_OR_GREATER
-#else
-#error Target Framework is not supported
-#endif
     public Task StartAsync(CancellationToken cancellationToken = default)
     {
         return Task.Run(async () =>
@@ -148,7 +142,17 @@ public sealed class PipeApplication : IAsyncDisposable
             {
                 OnExceptionOccurred(args.Exception);
             };
+#if NET5_0_OR_GREATER
+            if (OperatingSystem.IsWindows())
+            {
+                PipeServer.AllowUsersReadWrite();
+            }
+#elif NET461_OR_GREATER
             PipeServer.AllowUsersReadWrite();
+#elif NETSTANDARD2_0_OR_GREATER
+#else
+#error Target Framework is not supported
+#endif
 
             await PipeServer.StartAsync(cancellationToken).ConfigureAwait(false);
 
