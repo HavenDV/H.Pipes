@@ -36,6 +36,6 @@ internal static class Encryption
 
     private static bool ValidateHash(byte[] hash, byte[] message, byte[] key)
     {
-        return hash.SequenceEqual((byte[]?)CalculateHash(message, key));
+        return hash.SequenceEqual(CalculateHash(message, key));
     }
 }

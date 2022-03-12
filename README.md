@@ -116,7 +116,7 @@ await using var client = new PipeClient<MyMessage>(pipeName, formatter: new Newt
 ```
 
 ### Access Control
-Please note that this is only available for the Windows platform.
+> :warning: **Note**: this is only available for the Windows platform
 ```
 Install-Package H.Pipes.AccessControl
 ```
@@ -141,6 +141,7 @@ server.AllowUsersReadWrite();
 ```
 
 ### Encryption
+> :warning: **Note**: this is only available for the Windows platform
 ```
 Install-Package H.Formatters.Inferno
 ```

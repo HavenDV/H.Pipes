@@ -3,6 +3,12 @@ using SecurityDriven.Inferno.Extensions;
 
 namespace H.Formatters;
 
+#if NET5_0_OR_GREATER
+[System.Runtime.Versioning.SupportedOSPlatform("windows")]
+#elif NETSTANDARD2_0_OR_GREATER || NET461_OR_GREATER
+#else
+#error Target Framework is not supported
+#endif
 internal class KeyPair : IDisposable
 {
     #region Properties
