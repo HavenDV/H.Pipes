@@ -182,9 +182,8 @@ server.ClientConnected += async (o, args) =>
 ```
 
 ### Inter-process communication
-I recommend that you take a look at [my other library](https://github.com/HavenDV/H.ProxyFactory) if you plan on doing IPC.
-It is based on this library, but provides an IPC implementation based on C# interfaces.
-It supports remote method invocation, asynchronous methods, cancellation via `CancellationToken`, events, and so on.
+I recommend that you take a look at [my other library](https://github.com/HavenDV/H.Ipc) if you plan on doing IPC.
+This is a SourceGenerator that will generate client and server code based on the presented interface.
 
 ### Contacts
 * [mail](mailto:havendv@gmail.com)
