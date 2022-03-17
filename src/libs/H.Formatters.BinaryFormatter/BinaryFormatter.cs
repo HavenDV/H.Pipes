@@ -5,7 +5,7 @@
 /// </summary>
 public class BinaryFormatter : FormatterBase
 {
-    private System.Runtime.Serialization.Formatters.Binary.BinaryFormatter InternalFormatter { get; } = new();
+    public System.Runtime.Serialization.Formatters.Binary.BinaryFormatter InternalFormatter { get; } = new();
 
     protected override byte[] SerializeInternal(object obj)
     {
