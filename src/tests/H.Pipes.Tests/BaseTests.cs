@@ -26,8 +26,8 @@ public static class BaseTests
             Trace.WriteLine("Client disconnected");
             clientDisconnected = true;
 
-                // ReSharper disable once AccessToModifiedClosure
-                completionSource.TrySetResult(true);
+            // ReSharper disable once AccessToModifiedClosure
+            completionSource.TrySetResult(true);
         };
         server.MessageReceived += (_, args) =>
         {
@@ -35,15 +35,15 @@ public static class BaseTests
             actualHash = hashFunc?.Invoke(args.Message);
             Trace.WriteLine($"ActualHash: {actualHash}");
 
-                // ReSharper disable once AccessToModifiedClosure
-                completionSource.TrySetResult(true);
+            // ReSharper disable once AccessToModifiedClosure
+            completionSource.TrySetResult(true);
         };
         server.ExceptionOccurred += (_, args) =>
         {
             Trace.WriteLine($"Server exception occurred: {args.Exception}");
 
-                // ReSharper disable once AccessToModifiedClosure
-                completionSource.TrySetException(args.Exception);
+            // ReSharper disable once AccessToModifiedClosure
+            completionSource.TrySetException(args.Exception);
         };
         client.Connected += (_, _) => Trace.WriteLine("Client_OnConnected");
         client.Disconnected += (_, _) => Trace.WriteLine("Client_OnDisconnected");
@@ -52,15 +52,15 @@ public static class BaseTests
         {
             Trace.WriteLine($"Client exception occurred: {args.Exception}");
 
-                // ReSharper disable once AccessToModifiedClosure
-                completionSource.TrySetException(args.Exception);
+            // ReSharper disable once AccessToModifiedClosure
+            completionSource.TrySetException(args.Exception);
         };
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
         {
             if (args.ExceptionObject is Exception exception)
             {
-                    // ReSharper disable once AccessToModifiedClosure
-                    completionSource.TrySetException(exception);
+                // ReSharper disable once AccessToModifiedClosure
+                completionSource.TrySetException(exception);
             }
         };
 
@@ -142,7 +142,7 @@ public static class BaseTests
         await DataSingleTestAsync(GenerateData(numBytes, count), Hash, formatter, timeout);
     }
 
-#region Helper methods
+    #region Helper methods
 
     public static List<byte[]> GenerateData(int numBytes, int count = 1)
     {
@@ -182,5 +182,5 @@ public static class BaseTests
         return sb.ToString();
     }
 
-#endregion
+    #endregion
 }

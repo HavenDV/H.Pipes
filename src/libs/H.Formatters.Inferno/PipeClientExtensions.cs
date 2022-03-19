@@ -1,6 +1,6 @@
-﻿using H.Pipes;
+﻿using System.Diagnostics;
+using H.Pipes;
 using H.Pipes.Extensions;
-using System.Diagnostics;
 
 namespace H.Formatters;
 

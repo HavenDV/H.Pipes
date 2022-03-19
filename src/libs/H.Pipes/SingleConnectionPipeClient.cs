@@ -1,7 +1,7 @@
 ﻿using System.IO.Pipes;
+using H.Formatters;
 using H.Pipes.Args;
 using H.Pipes.Factories;
-using H.Formatters;
 
 namespace H.Pipes;
 

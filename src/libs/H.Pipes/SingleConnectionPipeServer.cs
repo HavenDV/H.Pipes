@@ -152,8 +152,8 @@ public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
                         await Connection.StopAsync().ConfigureAwait(false);
                     }
 
-                        // Wait for the client to connect to the data pipe
-                        var connectionStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName);
+                    // Wait for the client to connect to the data pipe
+                    var connectionStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName);
 
                     try
                     {
@@ -205,8 +205,8 @@ public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
                     }
                     throw;
                 }
-                    // Catch the IOException that is raised if the pipe is broken or disconnected.
-                    catch (IOException exception)
+                // Catch the IOException that is raised if the pipe is broken or disconnected.
+                catch (IOException exception)
                 {
                     if (!WaitFreePipe)
                     {

@@ -26,8 +26,8 @@ public class PipeClientTests
             using var source = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             source.CancelAfter(TimeSpan.FromSeconds(1));
 
-                // ReSharper disable once AccessToDisposedClosure
-                await client.WriteAsync(string.Empty, source.Token);
+            // ReSharper disable once AccessToDisposedClosure
+            await client.WriteAsync(string.Empty, source.Token);
         }, cancellationToken);
 
         await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
