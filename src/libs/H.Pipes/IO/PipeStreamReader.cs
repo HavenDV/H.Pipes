@@ -39,7 +39,7 @@ public sealed class PipeStreamReader : IDisposable
 
     #endregion
 
-    #region Private stream readers
+    #region Methods
 
     /// <summary>
     /// Reads the length of the next message (in bytes) from the client.
@@ -49,38 +49,38 @@ public sealed class PipeStreamReader : IDisposable
     /// <exception cref="IOException">Any I/O error occurred.</exception>
     private async Task<int> ReadLengthAsync(CancellationToken cancellationToken = default)
     {
-        var buffer = new byte[sizeof(int)];
+        var bytes = await ReadAsync(
+            length: sizeof(int),
+            throwIfReadLessThanLength: false,
+            cancellationToken: cancellationToken).ConfigureAwait(false);
+        if (!bytes.Any())
+        {
+            IsConnected = false;
+            return 0;
+        }
+
+        return IPAddress.NetworkToHostOrder(BitConverter.ToInt32(bytes, 0));
+    }
+
+    private async Task<byte[]> ReadAsync(
+        int length,
+        bool throwIfReadLessThanLength = true,
+        CancellationToken cancellationToken = default)
+    {
+        var buffer = new byte[length];
 #if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
         var read = await BaseStream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
 #elif NET461_OR_GREATER || NETSTANDARD2_0
         var read = await BaseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
 #else
 #error Target Framework is not supported
-#endif
-        if (read == 0)
-        {
-            IsConnected = false;
-            return 0;
-        }
-
+# endif
         if (read != buffer.Length)
         {
-            throw new IOException($"Expected {buffer.Length} bytes but read {read}");
+            return throwIfReadLessThanLength
+                ? throw new IOException($"Expected {buffer.Length} bytes but read {read}")
+                : Array.Empty<byte>();
         }
-
-        return IPAddress.NetworkToHostOrder(BitConverter.ToInt32(buffer, 0));
-    }
-
-    private async Task<byte[]> ReadAsync(int length, CancellationToken cancellationToken = default)
-    {
-        var buffer = new byte[length];
-#if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
-        await BaseStream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
-#elif NET461_OR_GREATER || NETSTANDARD2_0
-        await BaseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
-#else
-#error Target Framework is not supported
-#endif
 
         return buffer;
     }
@@ -96,7 +96,10 @@ public sealed class PipeStreamReader : IDisposable
 
         return length == 0
             ? default
-            : await ReadAsync(length, cancellationToken).ConfigureAwait(false);
+            : await ReadAsync(
+                length: length,
+                throwIfReadLessThanLength: true,
+                cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
     #endregion
