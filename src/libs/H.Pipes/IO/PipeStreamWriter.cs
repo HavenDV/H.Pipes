@@ -1,4 +1,4 @@
-using System.IO.Pipes;
+﻿using System.IO.Pipes;
 using System.Net;
 
 namespace H.Pipes.IO;
@@ -83,18 +83,24 @@ public sealed class PipeStreamWriter : IDisposable
         }
     }
 
+#if NET461_OR_GREATER
     /// <summary>
     /// Waits for the other end of the pipe to read all sent bytes.
     /// </summary>
     /// <exception cref="ObjectDisposedException">The pipe is closed.</exception>
     /// <exception cref="NotSupportedException">The pipe does not support write operations.</exception>
     /// <exception cref="IOException">The pipe is broken or another I/O error occurred.</exception>
-#if NET461_OR_GREATER
     public void WaitForPipeDrain()
     {
         BaseStream.WaitForPipeDrain();
     }
 #elif NET5_0_OR_GREATER
+    /// <summary>
+    /// Waits for the other end of the pipe to read all sent bytes.
+    /// </summary>
+    /// <exception cref="ObjectDisposedException">The pipe is closed.</exception>
+    /// <exception cref="NotSupportedException">The pipe does not support write operations.</exception>
+    /// <exception cref="IOException">The pipe is broken or another I/O error occurred.</exception>
     public void WaitForPipeDrain()
     {
         if (OperatingSystem.IsWindows())
@@ -103,11 +109,6 @@ public sealed class PipeStreamWriter : IDisposable
         }
     }
 #elif NETSTANDARD2_0_OR_GREATER
-    private static void WaitForPipeDrain()
-    {
-        // Empty because it is only supported for Windows platforms.
-        // There are explicit implementations for this for .Net Framework 4.6.1/.Net 5/.Net 6
-    }
 #else
 #error Target Framework is not supported
 #endif
