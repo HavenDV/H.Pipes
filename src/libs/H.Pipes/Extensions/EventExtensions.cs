@@ -1,4 +1,4 @@
-namespace H.Pipes.Extensions;
+﻿namespace H.Pipes.Extensions;
 
 /// <summary>
 /// Extensions that work with <see langword="event"/> <br/>
@@ -11,9 +11,11 @@ public static class EventExtensions
         public TaskCompletionSource<T>? Source { get; set; }
 
         // ReSharper disable once UnusedParameter.Local
-        public void HandleEvent(object _, T e)
+#pragma warning disable IDE0060 // Remove unused parameter
+        public void HandleEvent(object sender, T e)
+#pragma warning restore IDE0060 // Remove unused parameter
         {
-            Source?.TrySetResult(e);
+            _ = Source?.TrySetResult(e);
         }
     }
 
@@ -130,7 +132,7 @@ public static class EventExtensions
         {
             await func(cancellationToken).ConfigureAwait(false);
 
-            await Task.WhenAll(tasks).ConfigureAwait(false);
+            _ = await Task.WhenAll(tasks).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
@@ -184,7 +186,7 @@ public static class EventExtensions
         {
             await func(cancellationToken).ConfigureAwait(false);
 
-            await Task.WhenAny(tasks).ConfigureAwait(false);
+            _ = await Task.WhenAny(tasks).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {

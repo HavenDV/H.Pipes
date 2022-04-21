@@ -159,7 +159,7 @@ public sealed class PipeServer<T> : IPipeServer<T>
                         var serverStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName);
                         await using (serverStream.ConfigureAwait(false))
 #elif NET461_OR_GREATER || NETSTANDARD2_0
-                        using (var serverStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName))
+                        using var serverStream = CreatePipeStreamFunc?.Invoke(PipeName) ?? PipeServerFactory.Create(PipeName);
 #else
 #error Target Framework is not supported
 #endif
@@ -174,7 +174,7 @@ public sealed class PipeServer<T> : IPipeServer<T>
                             using var handshakeWrapper = new PipeStreamWrapper(serverStream);
                             await using (handshakeWrapper.ConfigureAwait(false))
 #elif NET461_OR_GREATER || NETSTANDARD2_0
-                            using (var handshakeWrapper = new PipeStreamWrapper(serverStream))
+                            using var handshakeWrapper = new PipeStreamWrapper(serverStream);
 #else
 #error Target Framework is not supported
 #endif

@@ -1,5 +1,4 @@
 ﻿using System.IO.Pipes;
-using H.Formatters;
 using H.Pipes.Args;
 
 namespace H.Pipes;
