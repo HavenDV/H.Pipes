@@ -8,9 +8,73 @@ namespace H.Pipes;
 
 /// <summary>
 /// Wraps a <see cref="NamedPipeClientStream"/>.
+/// Specialized version of <see cref="PipeClient"/> for communications based on a single type.
+/// Implements the <see cref="H.Pipes.PipeClient" />
+/// Implements the <see cref="H.Pipes.IPipeClient{T}" />
 /// </summary>
 /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
-public sealed class PipeClient<T> : IPipeClient<T>
+/// <seealso cref="H.Pipes.PipeClient" />
+/// <seealso cref="H.Pipes.IPipeClient{T}" />
+public class PipeClient<T> : PipeClient, IPipeClient<T>
+{
+    #region Constructors
+    
+    /// <inheritdoc />
+    public PipeClient(string pipeName, string serverName = ".", TimeSpan? reconnectionInterval = default, IFormatter? formatter = default) : base(pipeName, serverName, reconnectionInterval, formatter) { }
+
+    #endregion
+
+    #region Events
+
+    /// <inheritdoc />
+    public new event EventHandler<ConnectionMessageEventArgs<T?>>? MessageReceived;
+
+    /// <summary>
+    /// Calls the <see cref="MessageReceived"/> event.
+    /// </summary>
+    /// <param name="args">The arguments.</param>
+    protected void OnMessageReceived(ConnectionMessageEventArgs<T?> args)
+    {
+        MessageReceived?.Invoke(this, args);
+    }
+
+    #endregion
+
+    #region Public methods
+
+    /// <inheritdoc />
+    public Task WriteAsync(T value, CancellationToken cancellationToken = default)
+    {
+        return base.WriteAsync(value, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    protected override PipeConnection SetupPipeConnection(
+        PipeStream dataPipe, string connectionPipeName, IFormatter formatter, string serverName)
+    {
+        var connection = new PipeConnection<T>(dataPipe, connectionPipeName, formatter, serverName);
+
+        connection.Disconnected += async (_, args) =>
+        {
+            await DisconnectInternalAsync().ConfigureAwait(false);
+
+            OnDisconnected(args);
+        };
+        connection.MessageReceived   += (_, args) => OnMessageReceived(args);
+        connection.ExceptionOccurred += (_, args) => OnExceptionOccurred(args.Exception);
+
+        return connection;
+    }
+
+    #endregion
+}
+
+/// <summary>
+/// Wraps a <see cref="NamedPipeClientStream"/>.
+/// Implements the <see cref="H.Pipes.IPipeClient" />
+/// </summary>
+/// <seealso cref="H.Pipes.IPipeClient" />
+public class PipeClient : IPipeClient
 {
     #region Fields
 
@@ -33,7 +97,7 @@ public sealed class PipeClient<T> : IPipeClient<T>
     public bool IsConnecting
     {
         get => _isConnecting;
-        private set => _isConnecting = value;
+        protected set => _isConnecting = value;
     }
 
     /// <inheritdoc/>
@@ -46,9 +110,13 @@ public sealed class PipeClient<T> : IPipeClient<T>
     public string ServerName { get; }
 
     /// <inheritdoc/>
-    public PipeConnection<T>? Connection { get; private set; }
+    public PipeConnection? Connection { get; protected set; }
 
-    private System.Timers.Timer ReconnectionTimer { get; }
+    /// <summary>
+    /// Gets the reconnection timer.
+    /// </summary>
+    /// <value>The reconnection timer.</value>
+    protected System.Timers.Timer ReconnectionTimer { get; }
 
     #endregion
 
@@ -57,39 +125,55 @@ public sealed class PipeClient<T> : IPipeClient<T>
     /// <summary>
     /// Invoked whenever a message is received from the server.
     /// </summary>
-    public event EventHandler<ConnectionMessageEventArgs<T?>>? MessageReceived;
+    public event EventHandler<ConnectionMessageEventArgs<byte[]?>>? MessageReceived;
 
     /// <summary>
     /// Invoked when the client disconnects from the server (e.g., the pipe is closed or broken).
     /// </summary>
-    public event EventHandler<ConnectionEventArgs<T>>? Disconnected;
+    public event EventHandler<ConnectionEventArgs>? Disconnected;
 
     /// <summary>
     /// Invoked after each the client connect to the server (include reconnects).
     /// </summary>
-    public event EventHandler<ConnectionEventArgs<T>>? Connected;
+    public event EventHandler<ConnectionEventArgs>? Connected;
 
     /// <summary>
     /// Invoked whenever an exception is thrown during a read or write operation on the named pipe.
     /// </summary>
     public event EventHandler<ExceptionEventArgs>? ExceptionOccurred;
 
-    private void OnMessageReceived(ConnectionMessageEventArgs<T?> args)
-    {
-        MessageReceived?.Invoke(this, args);
-    }
-
-    private void OnDisconnected(ConnectionEventArgs<T> args)
+    /// <summary>
+    /// Calls the <see cref="Disconnected"/> event.
+    /// </summary>
+    /// <param name="args">The <see cref="ConnectionEventArgs"/> instance containing the event data.</param>
+    protected void OnDisconnected(ConnectionEventArgs args)
     {
         Disconnected?.Invoke(this, args);
     }
 
-    private void OnConnected(ConnectionEventArgs<T> args)
+    /// <summary>
+    /// Calls the <see cref="Connected"/> event.
+    /// </summary>
+    /// <param name="args">The <see cref="ConnectionEventArgs"/> instance containing the event data.</param>
+    protected void OnConnected(ConnectionEventArgs args)
     {
         Connected?.Invoke(this, args);
     }
+    
+    /// <summary>
+    /// Calls the <see cref="MessageReceived"/> event.
+    /// </summary>
+    /// <param name="args">The instance containing the event data.</param>
+    protected void OnMessageReceived(ConnectionMessageEventArgs<byte[]?> args)
+    {
+        MessageReceived?.Invoke(this, args);
+    }
 
-    private void OnExceptionOccurred(Exception exception)
+    /// <summary>
+    /// Calls the <see cref="ExceptionOccurred"/> event.
+    /// </summary>
+    /// <param name="exception">The exception.</param>
+    protected void OnExceptionOccurred(Exception exception)
     {
         ExceptionOccurred?.Invoke(this, new ExceptionEventArgs(exception));
     }
@@ -179,18 +263,10 @@ public sealed class PipeClient<T> : IPipeClient<T>
 #pragma warning restore CA2000 // Dispose objects before losing scope
                     .ConfigureAwait(false);
 
-            Connection = new PipeConnection<T>(dataPipe, connectionPipeName, Formatter, ServerName);
-            Connection.Disconnected += async (_, args) =>
-            {
-                await DisconnectInternalAsync().ConfigureAwait(false);
-
-                OnDisconnected(args);
-            };
-            Connection.MessageReceived += (_, args) => OnMessageReceived(args);
-            Connection.ExceptionOccurred += (_, args) => OnExceptionOccurred(args.Exception);
+            Connection = SetupPipeConnection(dataPipe, connectionPipeName, Formatter, ServerName);
             Connection.Start();
 
-            OnConnected(new ConnectionEventArgs<T>(Connection));
+            OnConnected(new ConnectionEventArgs(Connection));
         }
         catch (Exception)
         {
@@ -216,7 +292,11 @@ public sealed class PipeClient<T> : IPipeClient<T>
         await DisconnectInternalAsync().ConfigureAwait(false);
     }
 
-    private async Task DisconnectInternalAsync()
+    /// <summary>
+    /// Disconnects from the server. Does not stop <see cref="ReconnectionTimer"/>.
+    /// </summary>
+    /// <returns>A Task representing the asynchronous operation.</returns>
+    protected async Task DisconnectInternalAsync()
     {
         if (Connection == null)
         {
@@ -229,24 +309,74 @@ public sealed class PipeClient<T> : IPipeClient<T>
     }
 
     /// <summary>
+    /// Instantiates and sets up the pipe connection (event handlers, etc.).
+    /// </summary>
+    /// <param name="dataPipe">The pipe stream.</param>
+    /// <param name="connectionPipeName">Name of the connection pipe.</param>
+    /// <param name="formatter">The formatter.</param>
+    /// <param name="serverName"></param>
+    /// <returns>PipeConnection.</returns>
+    protected virtual PipeConnection SetupPipeConnection(
+        PipeStream dataPipe, string connectionPipeName, IFormatter formatter, string serverName)
+    {
+        var connection = new PipeConnection(dataPipe, connectionPipeName, formatter, serverName);
+
+        connection.Disconnected += async (_, args) =>
+        {
+            await DisconnectInternalAsync().ConfigureAwait(false);
+
+            OnDisconnected(args);
+        };
+        connection.MessageReceived   += (_, args) => OnMessageReceived(args);
+        connection.ExceptionOccurred += (_, args) => OnExceptionOccurred(args.Exception);
+
+        return connection;
+    }
+
+    /// <summary>
     /// Sends a message to the server over a named pipe. <br/>
     /// If client is not connected, <see cref="InvalidOperationException"/> is occurred
     /// </summary>
     /// <param name="value">Message to send to the server.</param>
     /// <param name="cancellationToken"></param>
     /// <exception cref="InvalidOperationException"></exception>
-    public async Task WriteAsync(T value, CancellationToken cancellationToken = default)
+    public async Task WriteAsync(byte[] value, CancellationToken cancellationToken = default)
+    {
+        await ReconnectOrThrow(cancellationToken).ConfigureAwait(false);
+
+        await Connection!.WriteAsync(value, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Sends a message to the server over a named pipe. <br/>
+    /// If client is not connected, <see cref="InvalidOperationException"/> is occurred
+    /// </summary>
+    /// <param name="value">Message to send to the server.</param>
+    /// <param name="cancellationToken"></param>
+    /// <exception cref="InvalidOperationException"></exception>
+    public async Task WriteAsync<T>(T value, CancellationToken cancellationToken = default)
+    {
+        await ReconnectOrThrow(cancellationToken).ConfigureAwait(false);
+
+        await Connection!.WriteAsync(value, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Reconnects the client if needed and throws an exception when failed.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+    /// <exception cref="System.InvalidOperationException">Client is not connected</exception>
+    protected async Task ReconnectOrThrow(CancellationToken cancellationToken = default)
     {
         if (!IsConnected && AutoReconnect)
         {
             await ConnectAsync(cancellationToken).ConfigureAwait(false);
         }
+
         if (Connection == null)
         {
             throw new InvalidOperationException("Client is not connected");
         }
-
-        await Connection.WriteAsync(value, cancellationToken).ConfigureAwait(false);
     }
 
     #endregion
@@ -261,6 +391,8 @@ public sealed class PipeClient<T> : IPipeClient<T>
         ReconnectionTimer.Dispose();
 
         await DisconnectInternalAsync().ConfigureAwait(false);
+
+        GC.SuppressFinalize(this);
     }
 
     #endregion
@@ -286,6 +418,7 @@ public sealed class PipeClient<T> : IPipeClient<T>
 #endif
         {
             var bytes = await handshake.ReadAsync(cancellationToken).ConfigureAwait(false);
+
             if (bytes == null)
             {
                 throw new InvalidOperationException("Connection failed: Returned by server pipeName is null");

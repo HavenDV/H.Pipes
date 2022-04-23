@@ -3,19 +3,18 @@
 /// <summary>
 /// Handles new connections.
 /// </summary>
-/// <typeparam name="T">Reference type</typeparam>
-public class ConnectionEventArgs<T> : EventArgs
+public class ConnectionEventArgs : EventArgs
 {
     /// <summary>
     /// Connection
     /// </summary>
-    public PipeConnection<T> Connection { get; }
+    public PipeConnection Connection { get; }
 
     /// <summary>
     /// 
     /// </summary>
     /// <param name="connection"></param>
-    public ConnectionEventArgs(PipeConnection<T> connection)
+    public ConnectionEventArgs(PipeConnection connection)
     {
         Connection = connection ?? throw new ArgumentNullException(nameof(connection));
     }

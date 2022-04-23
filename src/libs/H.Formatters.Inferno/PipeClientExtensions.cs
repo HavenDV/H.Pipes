@@ -27,33 +27,35 @@ public static class PipeClientExtensions
         Action<Exception>? exceptionAction = null)
     {
         client = client ?? throw new ArgumentNullException(nameof(client));
-        client.Connected += async (o, args) =>
+        client.Connected += async (_, connArgs) =>
         {
             try
             {
-                var pipeName = $"{args.Connection.PipeName}_Inferno";
+                var pipeName = $"{connArgs.Connection.PipeName}_Inferno";
 
                 using var source = new CancellationTokenSource(TimeSpan.FromSeconds(10));
                 var cancellationToken = source.Token;
 
-                var client = new SingleConnectionPipeClient<byte[]>(pipeName, args.Connection.ServerName, formatter: args.Connection.Formatter);
-                client.ExceptionOccurred += (_, args) =>
-                {
-                    Debug.WriteLine($"{nameof(EnableEncryption)} client returns exception: {args.Exception}");
+                var infClient = new SingleConnectionPipeClient(pipeName, connArgs.Connection.ServerName, formatter: connArgs.Connection.Formatter);
 
-                    exceptionAction?.Invoke(args.Exception);
+                infClient.ExceptionOccurred += (_, exArgs) =>
+                {
+                    Debug.WriteLine($"{nameof(EnableEncryption)} client returns exception: {exArgs.Exception}");
+
+                    exceptionAction?.Invoke(exArgs.Exception);
                 };
-                await using (client.ConfigureAwait(false))
-                {
-                    using var _keyPair = new KeyPair();
-                    await client.WriteAsync(_keyPair.PublicKey, cancellationToken).ConfigureAwait(false);
 
-                    var response = await client.WaitMessageAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                await using (infClient.ConfigureAwait(false))
+                {
+                    using var keyPair = new KeyPair();
+                    await infClient.WriteAsync(keyPair.PublicKey, cancellationToken).ConfigureAwait(false);
+
+                    var response = await infClient.WaitMessageAsync<byte[]>(cancellationToken: cancellationToken).ConfigureAwait(false);
                     var serverPublicKey = response.Message;
 
-                    args.Connection.Formatter = new InfernoFormatter(
-                        args.Connection.Formatter,
-                        _keyPair.GenerateSharedKey(serverPublicKey));
+                    connArgs.Connection.Formatter = new InfernoFormatter(
+                        connArgs.Connection.Formatter,
+                        keyPair.GenerateSharedKey(serverPublicKey));
                 }
             }
             catch (Exception exception)
@@ -65,7 +67,7 @@ public static class PipeClientExtensions
                 exceptionAction?.Invoke(exception);
             }
         };
-        client.Disconnected += (o, args) =>
+        client.Disconnected += (_, args) =>
         {
             if (args.Connection.Formatter is not InfernoFormatter infernoFormatter)
             {
