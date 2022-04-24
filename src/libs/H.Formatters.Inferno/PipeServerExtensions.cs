@@ -27,44 +27,44 @@ public static class PipeServerExtensions
         Action<Exception>? exceptionAction = null)
     {
         server = server ?? throw new ArgumentNullException(nameof(server));
-        server.ClientConnected += async (_, connArgs) =>
+        server.ClientConnected += async (_, args) =>
         {
             try
             {
                 using var source = new CancellationTokenSource(TimeSpan.FromSeconds(10));
                 var cancellationToken = source.Token;
 
-                var pipeName = $"{connArgs.Connection.PipeName}_Inferno";
-                var infServer = new SingleConnectionPipeServer(pipeName, connArgs.Connection.Formatter);
+                var pipeName = $"{args.Connection.PipeName}_Inferno";
+                var server = new SingleConnectionPipeServer(pipeName, args.Connection.Formatter);
 
-                infServer.ExceptionOccurred += (_, exArgs) =>
+                server.ExceptionOccurred += (_, args) =>
                 {
-                    Debug.WriteLine($"{nameof(EnableEncryption)} server returns exception: {exArgs.Exception}");
+                    Debug.WriteLine($"{nameof(EnableEncryption)} server returns exception: {args.Exception}");
 
-                    exceptionAction?.Invoke(exArgs.Exception);
+                    exceptionAction?.Invoke(args.Exception);
                 };
 
-                await using (infServer.ConfigureAwait(false))
+                await using (server.ConfigureAwait(false))
                 {
-                    await infServer.StartAsync(cancellationToken).ConfigureAwait(false);
+                    await server.StartAsync(cancellationToken).ConfigureAwait(false);
 
-                    var response = await infServer.WaitMessageAsync<byte[]>(cancellationToken: cancellationToken).ConfigureAwait(false);
+                    var response = await server.WaitMessageAsync<byte[]>(cancellationToken: cancellationToken).ConfigureAwait(false);
                     var clientPublicKey = response.Message;
 
                     using var keyPair = new KeyPair();
 
-                    connArgs.Connection.Formatter = new InfernoFormatter(
-                        connArgs.Connection.Formatter,
+                    args.Connection.Formatter = new InfernoFormatter(
+                        args.Connection.Formatter,
                         keyPair.GenerateSharedKey(clientPublicKey));
 
-                    await infServer.WriteAsync(keyPair.PublicKey, cancellationToken).ConfigureAwait(false);
+                    await server.WriteAsync(keyPair.PublicKey, cancellationToken).ConfigureAwait(false);
                 }
             }
             catch (Exception exception)
             {
                 Debug.WriteLine($"{nameof(EnableEncryption)} returns exception: {exception}");
 
-                await connArgs.Connection.StopAsync().ConfigureAwait(false);
+                await args.Connection.StopAsync().ConfigureAwait(false);
 
                 exceptionAction?.Invoke(exception);
             }
