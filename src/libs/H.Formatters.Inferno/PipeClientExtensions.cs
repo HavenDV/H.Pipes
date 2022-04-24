@@ -27,7 +27,7 @@ public static class PipeClientExtensions
         Action<Exception>? exceptionAction = null)
     {
         client = client ?? throw new ArgumentNullException(nameof(client));
-        client.Connected += async (_, connArgs) =>
+        client.Connected += static async (_, args) =>
         {
             try
             {
