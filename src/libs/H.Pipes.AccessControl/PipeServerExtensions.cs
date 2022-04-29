@@ -11,7 +11,7 @@ public static class PipeServerExtensions
 {
     /// <summary>
     /// Sets <see cref="PipeSecurity"/>'s for each <see cref="NamedPipeServerStream"/> that will be created by <see cref="PipeServer{T}"/> <br/>
-    /// Overrides <see cref="PipeServer{T}.CreatePipeStreamFunc"/>
+    /// Overrides <see cref="PipeServer.CreatePipeStreamFunc"/>
     /// </summary>
     /// <param name="server"></param>
     /// <param name="pipeSecurity"></param>
