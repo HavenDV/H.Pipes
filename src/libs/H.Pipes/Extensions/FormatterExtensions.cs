@@ -22,8 +22,8 @@ public static class FormatterExtensions
     /// </param>
     /// <returns>Serialized object.</returns>
     public static async Task<byte[]> SerializeAsync<T>(
-        this T            value,
-        IFormatter        formatter,
+        this IFormatter   formatter,
+        T                 value,
         CancellationToken cancellationToken)
     {
         if (formatter == null)
@@ -44,8 +44,8 @@ public static class FormatterExtensions
     /// </param>
     /// <returns>System.Nullable&lt;T&gt;.</returns>
     public static async Task<T?> DeserializeAsync<T>(
-        this byte[]       bytes,
-        IFormatter        formatter,
+        this IFormatter   formatter,
+        byte[]            bytes,
         CancellationToken cancellationToken)
     {
         if (formatter == null)

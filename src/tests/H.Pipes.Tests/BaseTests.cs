@@ -22,7 +22,7 @@ public static class BaseTests
             T? value = default;
 
             if (args.Message != null)
-                value = await args.Message.DeserializeAsync<T?>(server.Formatter, cancellationToken);
+                value = await server.Formatter.DeserializeAsync<T?>(args.Message, cancellationToken);
 
             var actualHash = hashFunc?.Invoke(value);
             setActualHashFunc(actualHash);

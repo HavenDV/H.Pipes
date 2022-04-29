@@ -33,7 +33,7 @@ public class PipeConnection<T> : PipeConnection
         T? obj = default;
 
         if (message != null)
-            obj = await message.DeserializeAsync<T>(Formatter, cancellationToken).ConfigureAwait(false);
+            obj = await Formatter.DeserializeAsync<T>(message, cancellationToken).ConfigureAwait(false);
 
         MessageReceived?.Invoke(this, new ConnectionMessageEventArgs<T?>(this, obj));
     }
@@ -190,7 +190,7 @@ public class PipeConnection : IPipeConnection, IAsyncDisposable
             throw new InvalidOperationException("Client is not connected");
         }
 
-        var bytes = await value.SerializeAsync(Formatter, cancellationToken).ConfigureAwait(false);
+        var bytes = await Formatter.SerializeAsync(value, cancellationToken).ConfigureAwait(false);
 
         await PipeStreamWrapper.WriteAsync(bytes, cancellationToken).ConfigureAwait(false);
     }
