@@ -75,7 +75,14 @@ public sealed class PipeStreamWriter : IDisposable
 #error Target Framework is not supported
 #endif
 
-            await BaseStream.FlushAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await BaseStream.FlushAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (IOException)
+            {
+                // ignoring IOException according this issue: https://github.com/HavenDV/H.Pipes/issues/22#issuecomment-1144234017
+            }
         }
         finally
         {
@@ -83,7 +90,7 @@ public sealed class PipeStreamWriter : IDisposable
         }
     }
 
-#if NET461_OR_GREATER
+#if NET461_OR_GREATER || NET5_0_OR_GREATER
     /// <summary>
     /// Waits for the other end of the pipe to read all sent bytes.
     /// </summary>
@@ -92,20 +99,20 @@ public sealed class PipeStreamWriter : IDisposable
     /// <exception cref="IOException">The pipe is broken or another I/O error occurred.</exception>
     public void WaitForPipeDrain()
     {
-        BaseStream.WaitForPipeDrain();
-    }
-#elif NET5_0_OR_GREATER
-    /// <summary>
-    /// Waits for the other end of the pipe to read all sent bytes.
-    /// </summary>
-    /// <exception cref="ObjectDisposedException">The pipe is closed.</exception>
-    /// <exception cref="NotSupportedException">The pipe does not support write operations.</exception>
-    /// <exception cref="IOException">The pipe is broken or another I/O error occurred.</exception>
-    public void WaitForPipeDrain()
-    {
-        if (OperatingSystem.IsWindows())
+#if NET5_0_OR_GREATER
+        if (!OperatingSystem.IsWindows())
+        {
+            return;
+        }
+#endif
+
+        try
         {
             BaseStream.WaitForPipeDrain();
+        }
+        catch (IOException)
+        {
+            // ignoring IOException according this issue: https://github.com/HavenDV/H.Pipes/issues/22#issuecomment-1144234017
         }
     }
 #elif NETSTANDARD2_0_OR_GREATER
