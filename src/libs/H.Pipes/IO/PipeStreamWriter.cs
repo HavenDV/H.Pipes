@@ -61,12 +61,10 @@ public sealed class PipeStreamWriter : IDisposable
     {
         buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
 
-        cancellationToken.ThrowIfCancellationRequested();
+        await SemaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
 
         try
         {
-            await SemaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
-
             await WriteLengthAsync(buffer.Length, cancellationToken).ConfigureAwait(false);
 
 #if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
