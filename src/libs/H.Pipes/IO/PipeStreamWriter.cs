@@ -61,6 +61,8 @@ public sealed class PipeStreamWriter : IDisposable
     {
         buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         try
         {
             await SemaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
