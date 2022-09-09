@@ -9,20 +9,8 @@
     <Description>This package adds AccessControl extensions for PipeServerSetPipeSecurity()</Description>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="NamedPipeServerStream.NetFrameworkVersion" Version="1.1.8" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
-    <PackageReference Include="NamedPipeServerStream.NetFrameworkVersion" Version="1.1.8" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
-    <PackageReference Include="NamedPipeServerStream.NetFrameworkVersion" Version="1.1.8" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-    <PackageReference Include="NamedPipeServerStream.NetFrameworkVersion" Version="1.1.8" />
+  <ItemGroup>
+    <PackageReference Include="NamedPipeServerStream.NetFrameworkVersion" Version="1.1.10" />
   </ItemGroup>
 
   <ItemGroup>
