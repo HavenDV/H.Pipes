@@ -17,11 +17,11 @@ public static class ConnectionExtensions
     /// <param name="cancellationToken"></param>
     /// <exception cref="OperationCanceledException"></exception>
     /// <returns></returns>
-    public static async Task<ConnectionMessageEventArgs<T>> WaitMessageAsync<T>(this IPipeConnection<T> connection, Func<CancellationToken, Task>? func = null, CancellationToken cancellationToken = default)
+    public static async Task<ConnectionMessageEventArgs<T>> WaitMessageAsync<T>(this IPipe connection, Func<CancellationToken, Task>? func = null, CancellationToken cancellationToken = default)
     {
         return await connection.WaitEventAsync<ConnectionMessageEventArgs<T>>(
-            func ?? (token => Task.Delay(TimeSpan.Zero, cancellationToken)),
-            nameof(connection.MessageReceived),
+            func ?? (_ => Task.Delay(TimeSpan.Zero, cancellationToken)),
+            nameof(IPipe.MessageReceived),
             cancellationToken).ConfigureAwait(false);
     }
 
@@ -35,10 +35,10 @@ public static class ConnectionExtensions
     /// <param name="func"></param>
     /// <exception cref="OperationCanceledException"></exception>
     /// <returns></returns>
-    public static async Task<ConnectionMessageEventArgs<T>> WaitMessageAsync<T>(this IPipeConnection<T> connection, TimeSpan timeout, Func<CancellationToken, Task>? func = null)
+    public static async Task<ConnectionMessageEventArgs<T>> WaitMessageAsync<T>(this IPipe connection, TimeSpan timeout, Func<CancellationToken, Task>? func = null)
     {
         using var tokenSource = new CancellationTokenSource(timeout);
 
-        return await connection.WaitMessageAsync(func, tokenSource.Token).ConfigureAwait(false);
+        return await connection.WaitMessageAsync<T>(func, tokenSource.Token).ConfigureAwait(false);
     }
 }

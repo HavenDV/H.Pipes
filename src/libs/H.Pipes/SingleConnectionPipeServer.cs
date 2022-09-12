@@ -6,11 +6,68 @@ using H.Pipes.Utilities;
 
 namespace H.Pipes;
 
+
+/// <summary>
+/// Wraps a <see cref="NamedPipeServerStream"/> and optimized for one connection.
+/// Specialized version of <see cref="SingleConnectionPipeServer"/> for communications based on a single type.
+/// </summary>
+/// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
+/// <seealso cref="H.Pipes.SingleConnectionPipeServer" />
+/// <seealso cref="H.Pipes.IPipeServer{T}" />
+public class SingleConnectionPipeServer<T> : SingleConnectionPipeServer, IPipeServer<T>
+{
+    #region Constructors
+
+    /// <inheritdoc />
+    public SingleConnectionPipeServer(string pipeName, IFormatter? formatter = default)
+        : base(pipeName, formatter) { }
+
+    #endregion
+
+    #region Events
+
+    /// <inheritdoc />
+    public new event EventHandler<ConnectionMessageEventArgs<T?>>? MessageReceived;
+
+    /// <summary>
+    /// Calls the <see cref="MessageReceived"/> event.
+    /// </summary>
+    /// <param name="args">The arguments.</param>
+    protected void OnMessageReceived(ConnectionMessageEventArgs<T?> args)
+    {
+        MessageReceived?.Invoke(this, args);
+    }
+
+    #endregion
+
+    #region Public methods
+
+    /// <inheritdoc />
+    public Task WriteAsync(T value, CancellationToken cancellationToken = default)
+    {
+        return base.WriteAsync(value, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    protected override PipeConnection SetupPipeConnection(NamedPipeServerStream connectionStream, string connectionPipeName, IFormatter formatter)
+    {
+        var connection = new PipeConnection<T>(connectionStream, connectionPipeName, Formatter);
+
+        connection.MessageReceived   += (_, args) => OnMessageReceived(args);
+        connection.Disconnected      += (_, args) => OnClientDisconnected(args);
+        connection.ExceptionOccurred += (_, args) => OnExceptionOccurred(args.Exception);
+
+        return connection;
+    }
+
+    #endregion
+}
+
+
 /// <summary>
 /// Wraps a <see cref="NamedPipeServerStream"/> and optimized for one connection.
 /// </summary>
-/// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
-public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
+public class SingleConnectionPipeServer : IPipeServer
 {
     #region Properties
 
@@ -42,7 +99,7 @@ public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
     /// <summary>
     /// Connection
     /// </summary>
-    public PipeConnection<T>? Connection { get; private set; }
+    public PipeConnection? Connection { get; private set; }
 
     /// <summary>
     /// IsStarted
@@ -61,39 +118,55 @@ public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
     /// <summary>
     /// Invoked whenever a client connects to the server.
     /// </summary>
-    public event EventHandler<ConnectionEventArgs<T>>? ClientConnected;
+    public event EventHandler<ConnectionEventArgs>? ClientConnected;
 
     /// <summary>
     /// Invoked whenever a client disconnects from the server.
     /// </summary>
-    public event EventHandler<ConnectionEventArgs<T>>? ClientDisconnected;
+    public event EventHandler<ConnectionEventArgs>? ClientDisconnected;
 
     /// <summary>
     /// Invoked whenever a client sends a message to the server.
     /// </summary>
-    public event EventHandler<ConnectionMessageEventArgs<T?>>? MessageReceived;
+    public event EventHandler<ConnectionMessageEventArgs<byte[]?>>? MessageReceived;
 
     /// <summary>
     /// Invoked whenever an exception is thrown during a read or write operation.
     /// </summary>
     public event EventHandler<ExceptionEventArgs>? ExceptionOccurred;
 
-    private void OnClientConnected(ConnectionEventArgs<T> args)
+    /// <summary>
+    /// Calls the <see cref="ClientConnected"/> event.
+    /// </summary>
+    /// <param name="args">The <see cref="ConnectionEventArgs"/> instance containing the event data.</param>
+    protected virtual void OnClientConnected(ConnectionEventArgs args)
     {
         ClientConnected?.Invoke(this, args);
     }
 
-    private void OnClientDisconnected(ConnectionEventArgs<T> args)
+    /// <summary>
+    /// Calls the <see cref="ClientDisconnected"/> event.
+    /// </summary>
+    /// <param name="args">The <see cref="ConnectionEventArgs"/> instance containing the event data.</param>
+    protected virtual void OnClientDisconnected(ConnectionEventArgs args)
     {
         ClientDisconnected?.Invoke(this, args);
     }
 
-    private void OnMessageReceived(ConnectionMessageEventArgs<T?> args)
+    /// <summary>
+    /// Calls the <see cref="MessageReceived"/> event.
+    /// </summary>
+    /// <param name="args">The instance containing the event data.</param>
+    protected virtual void OnMessageReceived(ConnectionMessageEventArgs<byte[]?> args)
     {
         MessageReceived?.Invoke(this, args);
     }
 
-    private void OnExceptionOccurred(Exception exception)
+    /// <summary>
+    /// Calls the <see cref="ExceptionOccurred"/> event.
+    /// </summary>
+    /// <param name="exception">The exception.</param>
+    protected virtual void OnExceptionOccurred(Exception exception)
     {
         ExceptionOccurred?.Invoke(this, new ExceptionEventArgs(exception));
     }
@@ -141,7 +214,7 @@ public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
             {
                 try
                 {
-                    if (Connection != null && Connection.IsConnected)
+                    if (Connection is { IsConnected: true })
                     {
                         await Task.Delay(TimeSpan.FromMilliseconds(1), cancellationToken).ConfigureAwait(false);
                         continue;
@@ -176,12 +249,10 @@ public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
                         throw;
                     }
 
-                    var connection = new PipeConnection<T>(connectionStream, PipeName, Formatter);
+                    var connection = SetupPipeConnection(connectionStream, PipeName, Formatter);
+
                     try
                     {
-                        connection.MessageReceived += (sender, args) => OnMessageReceived(args);
-                        connection.Disconnected += (sender, args) => OnClientDisconnected(args);
-                        connection.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
                         connection.Start();
                     }
                     catch
@@ -193,7 +264,7 @@ public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
 
                     Connection = connection;
 
-                    OnClientConnected(new ConnectionEventArgs<T>(connection));
+                    OnClientConnected(new ConnectionEventArgs(connection));
                 }
                 catch (OperationCanceledException)
                 {
@@ -237,18 +308,76 @@ public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
     }
 
     /// <summary>
-    /// Sends a message to all connected clients asynchronously.
+    /// Instantiates and sets up the pipe connection (event handlers, etc.).
     /// </summary>
-    /// <param name="value"></param>
-    /// <param name="cancellationToken"></param>
-    public async Task WriteAsync(T value, CancellationToken cancellationToken = default)
+    /// <param name="connectionStream">The connection stream.</param>
+    /// <param name="connectionPipeName">Name of the connection pipe.</param>
+    /// <param name="formatter">The formatter.</param>
+    /// <returns>PipeConnection.</returns>
+    protected virtual PipeConnection SetupPipeConnection(
+        NamedPipeServerStream connectionStream, string connectionPipeName, IFormatter formatter)
     {
-        if (Connection == null || !Connection.IsConnected)
+        var connection = new PipeConnection(connectionStream, connectionPipeName, Formatter);
+
+        connection.MessageReceived   += (_, args) => OnMessageReceived(args);
+        connection.Disconnected      += (_, args) => OnClientDisconnected(args);
+        connection.ExceptionOccurred += (_, args) => OnExceptionOccurred(args.Exception);
+
+        return connection;
+    }
+
+    /// <inheritdoc />
+    public async Task WriteAsync(byte[] value, CancellationToken cancellationToken = default)
+    {
+        if (Connection is not { IsConnected: true })
         {
             return;
         }
 
         await Connection.WriteAsync(value, cancellationToken).ConfigureAwait(false);
+    }
+    
+    /// <inheritdoc />
+    /// <exception cref="InvalidOperationException"></exception>
+    [Obsolete("Cannot filter connections on a single connection server.", true)]
+    public Task WriteAsync(byte[] value, string pipeName, CancellationToken cancellationToken = default)
+    {
+        throw new InvalidOperationException("Cannot filter connections on a single connection server.");
+    }
+    
+    /// <inheritdoc />
+    /// <exception cref="InvalidOperationException"></exception>
+    [Obsolete("Cannot filter connections on a single connection server.", true)]
+    public Task WriteAsync(byte[] value, Predicate<IPipeConnection>? predicate, CancellationToken cancellationToken = default)
+    {
+        throw new InvalidOperationException("Cannot filter connections on a single connection server.");
+    }
+    
+    /// <inheritdoc />
+    public async Task WriteAsync<T>(T value, CancellationToken cancellationToken = default)
+    {
+        if (Connection is not { IsConnected: true })
+        {
+            return;
+        }
+
+        await Connection.WriteAsync(value, cancellationToken).ConfigureAwait(false);
+    }
+    
+    /// <inheritdoc />
+    /// <exception cref="InvalidOperationException"></exception>
+    [Obsolete("Cannot filter connections on a single connection server.", true)]
+    public Task WriteAsync<T>(T value, string pipeName, CancellationToken cancellationToken = default)
+    {
+        throw new InvalidOperationException("Cannot filter connections on a single connection server.");
+    }
+    
+    /// <inheritdoc />
+    /// <exception cref="InvalidOperationException"></exception>
+    [Obsolete("Cannot filter connections on a single connection server.", true)]
+    public Task WriteAsync<T>(T value, Predicate<IPipeConnection>? predicate, CancellationToken cancellationToken = default)
+    {
+        throw new InvalidOperationException("Cannot filter connections on a single connection server.");
     }
 
     /// <summary>
@@ -288,6 +417,8 @@ public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
         _isDisposed = true;
 
         await StopAsync().ConfigureAwait(false);
+
+        GC.SuppressFinalize(this);
     }
 
     #endregion

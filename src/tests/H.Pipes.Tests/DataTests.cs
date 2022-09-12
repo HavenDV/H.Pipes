@@ -6,38 +6,44 @@ namespace H.Pipes.Tests;
 public class DataTests
 {
     [TestMethod]
-    public async Task NullTest()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task NullTest(bool useGeneric)
     {
         var values = new List<string?> { null };
         static string HashFunc(string? value) => value ?? "null";
 
-        await BaseTests.DataSingleTestAsync(values, HashFunc);
-        await BaseTests.DataSingleTestAsync(values, HashFunc, new NewtonsoftJsonFormatter());
-        await BaseTests.DataSingleTestAsync(values, HashFunc, new SystemTextJsonFormatter());
-        await BaseTests.DataSingleTestAsync(values, HashFunc, new CerasFormatter());
+        await BaseTests.DataSingleTestAsync(values, HashFunc, useGeneric: useGeneric);
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new NewtonsoftJsonFormatter(), useGeneric: useGeneric);
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new SystemTextJsonFormatter(), useGeneric: useGeneric);
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new CerasFormatter(), useGeneric: useGeneric);
     }
 
     [TestMethod]
-    public async Task EmptyArrayTest()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task EmptyArrayTest(bool useGeneric)
     {
         var values = new List<byte[]?> { Array.Empty<byte>() };
         static string HashFunc(byte[]? value) => value?.Length.ToString() ?? "null";
 
-        await BaseTests.DataSingleTestAsync(values, HashFunc);
-        await BaseTests.DataSingleTestAsync(values, HashFunc, new NewtonsoftJsonFormatter());
-        await BaseTests.DataSingleTestAsync(values, HashFunc, new SystemTextJsonFormatter());
-        await BaseTests.DataSingleTestAsync(values, HashFunc, new CerasFormatter());
+        await BaseTests.DataSingleTestAsync(values, HashFunc, useGeneric: useGeneric);
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new NewtonsoftJsonFormatter(), useGeneric: useGeneric);
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new SystemTextJsonFormatter(), useGeneric: useGeneric);
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new CerasFormatter(), useGeneric: useGeneric);
 
         values = new List<byte[]?> { null };
 
-        await BaseTests.DataSingleTestAsync(values, HashFunc);
-        await BaseTests.DataSingleTestAsync(values, HashFunc, new NewtonsoftJsonFormatter());
-        await BaseTests.DataSingleTestAsync(values, HashFunc, new SystemTextJsonFormatter());
-        await BaseTests.DataSingleTestAsync(values, HashFunc, new CerasFormatter());
+        await BaseTests.DataSingleTestAsync(values, HashFunc, useGeneric: useGeneric);
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new NewtonsoftJsonFormatter(), useGeneric: useGeneric);
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new SystemTextJsonFormatter(), useGeneric: useGeneric);
+        await BaseTests.DataSingleTestAsync(values, HashFunc, new CerasFormatter(), useGeneric: useGeneric);
     }
 
     [TestMethod]
-    public async Task EmptyArrayParallelTest()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task EmptyArrayParallelTest(bool useGeneric)
     {
         using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1));
         var cancellationToken = cancellationTokenSource.Token;
@@ -61,105 +67,139 @@ public class DataTests
     }
 
     [TestMethod]
-    public async Task TestEmptyMessageDoesNotDisconnectClient()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task TestEmptyMessageDoesNotDisconnectClient(bool useGeneric)
     {
-        await BaseTests.BinaryDataTestAsync(0);
+        await BaseTests.BinaryDataTestAsync(0, useGeneric: useGeneric);
     }
 
     [TestMethod]
-    public async Task TestMessageSize1B()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task TestMessageSize1B(bool useGeneric)
     {
-        await BaseTests.BinaryDataTestAsync(1);
+        await BaseTests.BinaryDataTestAsync(1, useGeneric: useGeneric);
     }
 
     [TestMethod]
-    public async Task TestMessageSize2B()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task TestMessageSize2B(bool useGeneric)
     {
-        await BaseTests.BinaryDataTestAsync(2);
+        await BaseTests.BinaryDataTestAsync(2, useGeneric: useGeneric);
     }
 
     [TestMethod]
-    public async Task TestMessageSize3B()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task TestMessageSize3B(bool useGeneric)
     {
-        await BaseTests.BinaryDataTestAsync(3);
+        await BaseTests.BinaryDataTestAsync(3, useGeneric: useGeneric);
     }
 
     [TestMethod]
-    public async Task TestMessageSize9B()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task TestMessageSize9B(bool useGeneric)
     {
-        await BaseTests.BinaryDataTestAsync(9);
+        await BaseTests.BinaryDataTestAsync(9, useGeneric: useGeneric);
     }
 
     [TestMethod]
-    public async Task TestMessageSize33B()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task TestMessageSize33B(bool useGeneric)
     {
-        await BaseTests.BinaryDataTestAsync(33);
+        await BaseTests.BinaryDataTestAsync(33, useGeneric: useGeneric);
     }
 
     [TestMethod]
-    public async Task TestMessageSize1Kx3_NewtonsoftJson()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task TestMessageSize1Kx3_NewtonsoftJson(bool useGeneric)
     {
-        await BaseTests.BinaryDataTestAsync(1025, 3, new NewtonsoftJsonFormatter());
+        await BaseTests.BinaryDataTestAsync(1025, 3, new NewtonsoftJsonFormatter(), useGeneric: useGeneric);
     }
 
     [TestMethod]
-    public async Task TestMessageSize1Kx3_SystemTextJson()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task TestMessageSize1Kx3_SystemTextJson(bool useGeneric)
     {
-        await BaseTests.BinaryDataTestAsync(1025, 3, new SystemTextJsonFormatter());
+        await BaseTests.BinaryDataTestAsync(1025, 3, new SystemTextJsonFormatter(), useGeneric: useGeneric);
     }
 
     //[TestMethod]
-    //public async Task TestMessageSize1Kx3_Ceras()
+    //[DataRow(true)]
+    //[DataRow(false)]
+    //public async Task TestMessageSize1Kx3_Ceras(bool useGeneric)
     //{
-    //    await BaseTests.BinaryDataTestAsync(1025, 3, new CerasFormatter());
+    //    await BaseTests.BinaryDataTestAsync(1025, 3, new CerasFormatter(), useGeneric: useGeneric);
     //}
 
     [TestMethod]
-    public async Task TestMessageSize129B()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task TestMessageSize129B(bool useGeneric)
     {
-        await BaseTests.BinaryDataTestAsync(129);
+        await BaseTests.BinaryDataTestAsync(129, useGeneric: useGeneric);
     }
 
     [TestMethod]
-    public async Task TestMessageSize1K()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task TestMessageSize1K(bool useGeneric)
     {
-        await BaseTests.BinaryDataTestAsync(1025);
+        await BaseTests.BinaryDataTestAsync(1025, useGeneric: useGeneric);
     }
 
     [TestMethod]
-    public async Task TestMessageSize1M()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task TestMessageSize1M(bool useGeneric)
     {
-        await BaseTests.BinaryDataTestAsync(1024 * 1024 + 1);
+        await BaseTests.BinaryDataTestAsync(1024 * 1024 + 1, useGeneric: useGeneric);
     }
 
     [TestMethod]
-    public async Task Single_TestEmptyMessageDoesNotDisconnectClient()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task Single_TestEmptyMessageDoesNotDisconnectClient(bool useGeneric)
     {
-        await BaseTests.BinaryDataSingleTestAsync(0);
+        await BaseTests.BinaryDataSingleTestAsync(0, useGeneric: useGeneric);
     }
 
     [TestMethod]
-    public async Task Single_TestMessageSize1B()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task Single_TestMessageSize1B(bool useGeneric)
     {
-        await BaseTests.BinaryDataSingleTestAsync(1);
+        await BaseTests.BinaryDataSingleTestAsync(1, useGeneric: useGeneric);
     }
 
     [TestMethod]
-    public async Task Single_TestMessageSize1Kx3_NewtonsoftJson()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task Single_TestMessageSize1Kx3_NewtonsoftJson(bool useGeneric)
     {
-        await BaseTests.BinaryDataSingleTestAsync(1025, 3, new NewtonsoftJsonFormatter());
+        await BaseTests.BinaryDataSingleTestAsync(1025, 3, new NewtonsoftJsonFormatter(), useGeneric: useGeneric);
     }
 
     [TestMethod]
-    public async Task Single_TestMessageSize1Kx3_SystemTextJson()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task Single_TestMessageSize1Kx3_SystemTextJson(bool useGeneric)
     {
-        await BaseTests.BinaryDataSingleTestAsync(1025, 3, new SystemTextJsonFormatter());
+        await BaseTests.BinaryDataSingleTestAsync(1025, 3, new SystemTextJsonFormatter(), useGeneric: useGeneric);
     }
 
     //[TestMethod]
-    //public async Task Single_TestMessageSize1Kx3_Ceras()
+    //[DataRow(true)]
+    //[DataRow(false)]
+    //public async Task Single_TestMessageSize1Kx3_Ceras(bool useGeneric)
     //{
-    //    await BaseTests.BinaryDataSingleTestAsync(1025, 3, new CerasFormatter());
+    //    await BaseTests.BinaryDataSingleTestAsync(1025, 3, new CerasFormatter(), useGeneric: useGeneric);
     //}
 
     [TestMethod]

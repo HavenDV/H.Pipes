@@ -27,7 +27,7 @@ public static class PipeClientExtensions
         Action<Exception>? exceptionAction = null)
     {
         client = client ?? throw new ArgumentNullException(nameof(client));
-        client.Connected += async (o, args) =>
+        client.Connected += async (_, args) =>
         {
             try
             {
@@ -36,24 +36,26 @@ public static class PipeClientExtensions
                 using var source = new CancellationTokenSource(TimeSpan.FromSeconds(10));
                 var cancellationToken = source.Token;
 
-                var client = new SingleConnectionPipeClient<byte[]>(pipeName, args.Connection.ServerName, formatter: args.Connection.Formatter);
+                var client = new SingleConnectionPipeClient(pipeName, args.Connection.ServerName, formatter: args.Connection.Formatter);
+
                 client.ExceptionOccurred += (_, args) =>
                 {
                     Debug.WriteLine($"{nameof(EnableEncryption)} client returns exception: {args.Exception}");
 
                     exceptionAction?.Invoke(args.Exception);
                 };
+
                 await using (client.ConfigureAwait(false))
                 {
-                    using var _keyPair = new KeyPair();
-                    await client.WriteAsync(_keyPair.PublicKey, cancellationToken).ConfigureAwait(false);
+                    using var keyPair = new KeyPair();
+                    await client.WriteAsync(keyPair.PublicKey, cancellationToken).ConfigureAwait(false);
 
-                    var response = await client.WaitMessageAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                    var response = await client.WaitMessageAsync<byte[]>(cancellationToken: cancellationToken).ConfigureAwait(false);
                     var serverPublicKey = response.Message;
 
                     args.Connection.Formatter = new InfernoFormatter(
                         args.Connection.Formatter,
-                        _keyPair.GenerateSharedKey(serverPublicKey));
+                        keyPair.GenerateSharedKey(serverPublicKey));
                 }
             }
             catch (Exception exception)
@@ -65,7 +67,7 @@ public static class PipeClientExtensions
                 exceptionAction?.Invoke(exception);
             }
         };
-        client.Disconnected += (o, args) =>
+        client.Disconnected += (_, args) =>
         {
             if (args.Connection.Formatter is not InfernoFormatter infernoFormatter)
             {

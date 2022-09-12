@@ -3,8 +3,7 @@
 /// <summary>
 /// Handles exceptions thrown during read/write operations.
 /// </summary>
-/// <typeparam name="T">Reference type</typeparam>
-public class ConnectionExceptionEventArgs<T> : ConnectionEventArgs<T>
+public class ConnectionExceptionEventArgs : ConnectionEventArgs
 {
     /// <summary>
     /// The exception that was thrown
@@ -16,7 +15,7 @@ public class ConnectionExceptionEventArgs<T> : ConnectionEventArgs<T>
     /// </summary>
     /// <param name="connection"></param>
     /// <param name="exception"></param>
-    public ConnectionExceptionEventArgs(PipeConnection<T> connection, Exception exception) : base(connection)
+    public ConnectionExceptionEventArgs(PipeConnection connection, Exception exception) : base(connection)
     {
         Exception = exception ?? throw new ArgumentNullException(nameof(exception));
     }

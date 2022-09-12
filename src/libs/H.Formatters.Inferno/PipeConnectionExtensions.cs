@@ -10,12 +10,11 @@ public static class PipeConnectionExtensions
     /// <summary>
     /// Waits key exchange.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     /// <param name="connection"></param>
     /// <param name="cancellationToken"></param>
     /// <exception cref="ArgumentNullException"></exception>
-    public static async Task WaitExchangeAsync<T>(
-        this PipeConnection<T> connection,
+    public static async Task WaitExchangeAsync(
+        this IPipeConnection connection,
         CancellationToken cancellationToken = default)
     {
         connection = connection ?? throw new ArgumentNullException(nameof(connection));

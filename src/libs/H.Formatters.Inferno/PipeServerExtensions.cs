@@ -35,18 +35,20 @@ public static class PipeServerExtensions
                 var cancellationToken = source.Token;
 
                 var pipeName = $"{args.Connection.PipeName}_Inferno";
-                var server = new SingleConnectionPipeServer<byte[]>(pipeName, args.Connection.Formatter);
+                var server = new SingleConnectionPipeServer(pipeName, args.Connection.Formatter);
+
                 server.ExceptionOccurred += (_, args) =>
                 {
                     Debug.WriteLine($"{nameof(EnableEncryption)} server returns exception: {args.Exception}");
 
                     exceptionAction?.Invoke(args.Exception);
                 };
+
                 await using (server.ConfigureAwait(false))
                 {
                     await server.StartAsync(cancellationToken).ConfigureAwait(false);
 
-                    var response = await server.WaitMessageAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                    var response = await server.WaitMessageAsync<byte[]>(cancellationToken: cancellationToken).ConfigureAwait(false);
                     var clientPublicKey = response.Message;
 
                     using var keyPair = new KeyPair();

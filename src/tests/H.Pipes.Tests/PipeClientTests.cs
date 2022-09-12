@@ -4,17 +4,17 @@
 public class PipeClientTests
 {
     [TestMethod]
-    public async Task ConnectTest()
+    public async Task ConnectCancellationTest()
     {
-        using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1));
-        await using var client = new PipeClient<string>("this_pipe_100%_is_not_exists");
+        using var       cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+        await using var client                  = new PipeClient("this_pipe_100%_is_not_exists");
 
         await Assert.ThrowsExceptionAsync<OperationCanceledException>(
             async () => await client.ConnectAsync(cancellationTokenSource.Token));
     }
 
     [TestMethod]
-    public async Task WriteAsyncTest()
+    public async Task WriteAsyncCancellationTest()
     {
         using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(15));
         var cancellationToken = cancellationTokenSource.Token;

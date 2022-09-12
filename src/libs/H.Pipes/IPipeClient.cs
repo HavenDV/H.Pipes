@@ -4,10 +4,40 @@ using H.Pipes.Args;
 namespace H.Pipes;
 
 /// <summary>
-/// Wraps a <see cref="NamedPipeClientStream"/>.
+/// Specialized version of <see cref="IPipeClient"/> for communications based
+/// on a single type
 /// </summary>
 /// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
-public interface IPipeClient<T> : IPipeConnection<T>
+/// <seealso cref="H.Pipes.IPipeClient" />
+public interface IPipeClient<T> : IPipeClient
+{
+
+    #region Events
+
+    /// <summary>
+    /// Invoked whenever a message is received.
+    /// </summary>
+    new event EventHandler<ConnectionMessageEventArgs<T?>>? MessageReceived;
+
+    #endregion
+
+    #region Methods
+
+    /// <summary>
+    /// Sends a message over a named pipe. <br/>
+    /// </summary>
+    /// <param name="value">Message to send</param>
+    /// <param name="cancellationToken"></param>
+    /// <exception cref="InvalidOperationException"></exception>
+    Task WriteAsync(T value, CancellationToken cancellationToken = default);
+
+    #endregion
+}
+
+/// <summary>
+/// Wraps a <see cref="NamedPipeClientStream"/>.
+/// </summary>
+public interface IPipeClient : IPipe
 {
     #region Properties
 
@@ -46,7 +76,7 @@ public interface IPipeClient<T> : IPipeConnection<T>
     /// <summary>
     /// Active connection.
     /// </summary>
-    public PipeConnection<T>? Connection { get; }
+    public PipeConnection? Connection { get; }
 
     #endregion
 
@@ -55,12 +85,12 @@ public interface IPipeClient<T> : IPipeConnection<T>
     /// <summary>
     /// Invoked after each the client connect to the server (include reconnects).
     /// </summary>
-    event EventHandler<ConnectionEventArgs<T>>? Connected;
+    event EventHandler<ConnectionEventArgs>? Connected;
 
     /// <summary>
     /// Invoked when the client disconnects from the server (e.g., the pipe is closed or broken).
     /// </summary>
-    event EventHandler<ConnectionEventArgs<T>>? Disconnected;
+    event EventHandler<ConnectionEventArgs>? Disconnected;
 
     #endregion
 
