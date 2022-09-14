@@ -182,7 +182,14 @@ public sealed class PipeClient<T> : IPipeClient<T>
             Connection = new PipeConnection<T>(dataPipe, connectionPipeName, Formatter, ServerName);
             Connection.Disconnected += async (_, args) =>
             {
-                await DisconnectInternalAsync().ConfigureAwait(false);
+                try
+                {
+                    await DisconnectInternalAsync().ConfigureAwait(false);
+                }
+                catch(Exception exception)
+                {
+                    OnExceptionOccurred(exception);
+                }
 
                 OnDisconnected(args);
             };

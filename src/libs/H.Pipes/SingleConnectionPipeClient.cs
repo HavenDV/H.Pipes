@@ -171,9 +171,16 @@ public sealed class SingleConnectionPipeClient<T> : IPipeClient<T>
                     .ConfigureAwait(false);
 
             Connection = new PipeConnection<T>(dataPipe, PipeName, Formatter, ServerName);
-            Connection.Disconnected += async (sender, args) =>
+            Connection.Disconnected += async (_, args) =>
             {
-                await DisconnectInternalAsync().ConfigureAwait(false);
+                try
+                {
+                    await DisconnectInternalAsync().ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    OnExceptionOccurred(exception);
+                }
 
                 OnDisconnected(args);
             };
@@ -209,7 +216,7 @@ public sealed class SingleConnectionPipeClient<T> : IPipeClient<T>
 
     private async Task DisconnectInternalAsync()
     {
-        if (Connection == null) // nullable detection system is not very smart
+        if (Connection == null)
         {
             return;
         }
