@@ -6,7 +6,7 @@
 /// </summary>
 public static class EventExtensions
 {
-    private class WaitObject<T>
+    private sealed class WaitObject<T>
     {
         public TaskCompletionSource<T>? Source { get; set; }
 

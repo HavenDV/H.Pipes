@@ -15,7 +15,7 @@ public static class ArrayUtilities
     {
 #if NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2 || NET451 || NET452
         return new T[0];
-#elif NETSTANDARD1_3_OR_GREATER
+#elif NETSTANDARD1_3_OR_GREATER || NET5_0_OR_GREATER
         return System.Array.Empty<T>();
 #else
 #error Target Framework is not supported

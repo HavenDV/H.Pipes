@@ -9,7 +9,7 @@ namespace H.Formatters;
 #else
 #error Target Framework is not supported
 #endif
-internal class KeyPair : IDisposable
+internal sealed class KeyPair : IDisposable
 {
     #region Properties
 

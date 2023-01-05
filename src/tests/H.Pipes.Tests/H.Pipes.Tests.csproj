@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net4.8</TargetFrameworks>
+    <TargetFrameworks>net7.0;net4.8</TargetFrameworks>
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   
@@ -10,6 +10,13 @@
     <ProjectReference Include="..\..\libs\H.Formatters.Newtonsoft.Json\H.Formatters.Newtonsoft.Json.csproj" />
     <ProjectReference Include="..\..\libs\H.Formatters.System.Text.Json\H.Formatters.System.Text.Json.csproj" />
     <ProjectReference Include="..\..\libs\H.Formatters.Ceras\H.Formatters.Ceras.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="6.8.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.0.2" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.0.2" />
   </ItemGroup>
   
 </Project>

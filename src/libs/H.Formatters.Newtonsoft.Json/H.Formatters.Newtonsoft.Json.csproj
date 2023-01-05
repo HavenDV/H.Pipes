@@ -1,18 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net4.5.1</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net4.5.1;net6.0;net7.0</TargetFrameworks>
     <RootNamespace>H.Formatters</RootNamespace>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">
-    <Version>12.0.$(BUILD_NUMBER)</Version>
+    <Version>13.0.$(BUILD_NUMBER)</Version>
     <Description>This package adds NewtonsoftJsonFormatter(based on Newtonsoft.Json)</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
   </ItemGroup>
 
   <ItemGroup>

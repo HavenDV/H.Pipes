@@ -1,6 +1,6 @@
 ﻿namespace H.Formatters;
 
-internal class InfernoFormatter : FormatterBase
+internal sealed class InfernoFormatter : FormatterBase
 {
     public IFormatter Formatter { get; }
 

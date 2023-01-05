@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MessagePackAnalyzer" Version="2.3.85" PrivateAssets="all" />
+    <PackageReference Include="MessagePackAnalyzer" Version="2.4.59" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

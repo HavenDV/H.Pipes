@@ -24,7 +24,9 @@ public class NewtonsoftJsonFormatter : FormatterBase
     protected override T DeserializeInternal<T>(byte[] bytes)
     {
         var json = Encoding.GetString(bytes);
-        var obj = JsonConvert.DeserializeObject<T>(json);
+        var obj =
+            JsonConvert.DeserializeObject<T>(json) ??
+            throw new InvalidOperationException("Deserialized object is null.");
 
         return obj;
     }

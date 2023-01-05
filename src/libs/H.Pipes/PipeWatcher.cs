@@ -154,7 +154,11 @@ public sealed class PipeWatcher : IDisposable
     {
         return Directory
             .EnumerateFiles(@"\\.\pipe\")
-            .Select(path => path.Replace(@"\\.\pipe\", string.Empty))
+#if NET5_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
+            .Select(static path => path.Replace(@"\\.\pipe\", string.Empty, StringComparison.Ordinal))
+#else
+            .Select(static path => path.Replace(@"\\.\pipe\", string.Empty))
+#endif
             .ToList();
     }
 
@@ -172,5 +176,5 @@ public sealed class PipeWatcher : IDisposable
         return watcher;
     }
 
-    #endregion
+#endregion
 }

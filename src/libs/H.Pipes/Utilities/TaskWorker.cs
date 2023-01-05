@@ -7,7 +7,7 @@ namespace H.Pipes.Utilities;
 /// and supporting automatic cancellation after <see cref="DisposeAsync"/> <br/>
 /// <![CDATA[Version: 1.0.0.6]]> <br/>
 /// </summary>
-internal class TaskWorker : IAsyncDisposable
+internal sealed class TaskWorker : IAsyncDisposable
 {
     #region Fields
 

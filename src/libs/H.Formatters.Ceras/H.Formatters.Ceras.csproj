@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net4.5.1;net4.7.2</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net4.5.1;net4.7.2;net6.0;net7.0</TargetFrameworks>
     <RootNamespace>H.Formatters</RootNamespace>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <SignAssembly>false</SignAssembly>

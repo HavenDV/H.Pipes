@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Linq;
 
 namespace H.Pipes.AccessControl.Utilities;
 
@@ -16,7 +17,11 @@ public static class ProcessUtilities
     {
         name = name ?? throw new ArgumentNullException(nameof(name));
 
+#if NET5_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
+        return name.Contains('.', StringComparison.Ordinal)
+#else
         return name.Contains('.')
+#endif
             ? name.Substring(0, name.IndexOf(".", StringComparison.Ordinal))
             : name;
     }

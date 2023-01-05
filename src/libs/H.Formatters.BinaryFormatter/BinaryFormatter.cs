@@ -1,5 +1,8 @@
 ﻿namespace H.Formatters;
 
+// A note about BinaryFormatter is in the README
+#pragma warning disable SYSLIB0011
+
 /// <summary>
 /// A formatter that uses <see cref="System.Runtime.Serialization.Formatters.Binary.BinaryFormatter"/> inside for serialization/deserialization
 /// </summary>
