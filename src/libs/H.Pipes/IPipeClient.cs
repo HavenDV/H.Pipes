@@ -12,6 +12,16 @@ public interface IPipeClient<T> : IPipeConnection<T>
     #region Properties
 
     /// <summary>
+    /// Used pipe name.
+    /// </summary>
+    public string PipeName { get; }
+
+    /// <summary>
+    /// First argument: pipeName, Second argument: serverName.
+    /// </summary>
+    Func<string, string, NamedPipeClientStream>? CreatePipeStreamFunc { get; set; }
+
+    /// <summary>
     /// Gets or sets whether the client should attempt to reconnect when the pipe breaks
     /// due to an error or the other end terminating the connection. <br/>
     /// Default value is <see langword="true"/>.
@@ -32,11 +42,6 @@ public interface IPipeClient<T> : IPipeConnection<T>
     /// <see langword="true"/> if <see cref="ConnectAsync"/> in process.
     /// </summary>
     bool IsConnecting { get; }
-
-    /// <summary>
-    /// Used pipe name.
-    /// </summary>
-    public string PipeName { get; }
 
     /// <summary>
     /// Used server name.

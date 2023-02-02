@@ -38,6 +38,9 @@ public sealed class PipeClient<T> : IPipeClient<T>
 
     /// <inheritdoc/>
     public IFormatter Formatter { get; }
+    
+    /// <inheritdoc/>
+    public Func<string, string, NamedPipeClientStream>? CreatePipeStreamFunc { get; set; }
 
     /// <inheritdoc/>
     public string PipeName { get; }
@@ -175,7 +178,7 @@ public sealed class PipeClient<T> : IPipeClient<T>
             // Connect to the actual data pipe
 #pragma warning disable CA2000 // Dispose objects before losing scope
             var dataPipe = await PipeClientFactory
-                .CreateAndConnectAsync(connectionPipeName, ServerName, cancellationToken)
+                .CreateAndConnectAsync(connectionPipeName, ServerName, CreatePipeStreamFunc, cancellationToken)
 #pragma warning restore CA2000 // Dispose objects before losing scope
                     .ConfigureAwait(false);
 
@@ -283,11 +286,11 @@ public sealed class PipeClient<T> : IPipeClient<T>
     {
 #if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
 #pragma warning disable CA2000 // Dispose objects before losing scope
-        var handshake = await PipeClientFactory.ConnectAsync(PipeName, ServerName, cancellationToken).ConfigureAwait(false);
+        var handshake = await PipeClientFactory.ConnectAsync(PipeName, ServerName, CreatePipeStreamFunc, cancellationToken).ConfigureAwait(false);
 #pragma warning restore CA2000 // Dispose objects before losing scope
         await using (handshake.ConfigureAwait(false))
 #elif NET461_OR_GREATER || NETSTANDARD2_0
-        using var handshake = await PipeClientFactory.ConnectAsync(PipeName, ServerName, cancellationToken).ConfigureAwait(false);
+        using var handshake = await PipeClientFactory.ConnectAsync(PipeName, ServerName, CreatePipeStreamFunc, cancellationToken).ConfigureAwait(false);
 #else
 #error Target Framework is not supported
 #endif

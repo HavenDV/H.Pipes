@@ -37,6 +37,9 @@ public sealed class SingleConnectionPipeClient<T> : IPipeClient<T>
 
     /// <inheritdoc/>
     public IFormatter Formatter { get; }
+    
+    /// <inheritdoc/>
+    public Func<string, string, NamedPipeClientStream>? CreatePipeStreamFunc { get; set; }
 
     /// <inheritdoc/>
     public string PipeName { get; }
@@ -166,7 +169,7 @@ public sealed class SingleConnectionPipeClient<T> : IPipeClient<T>
 
 #pragma warning disable CA2000 // Dispose objects before losing scope
             var dataPipe = await PipeClientFactory
-                .CreateAndConnectAsync(PipeName, ServerName, cancellationToken)
+                .CreateAndConnectAsync(PipeName, ServerName, CreatePipeStreamFunc, cancellationToken)
 #pragma warning restore CA2000 // Dispose objects before losing scope
                     .ConfigureAwait(false);
 
