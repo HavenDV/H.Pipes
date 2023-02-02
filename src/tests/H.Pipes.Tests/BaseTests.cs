@@ -105,7 +105,7 @@ public static class BaseTests
     {
         using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromMinutes(1));
 
-        const string pipeName = "data_test_pipe";
+        const string pipeName = "pipe";
         await using var server = new PipeServer<T>(pipeName, formatter ?? new BinaryFormatter())
         {
 #if NET48
@@ -122,7 +122,7 @@ public static class BaseTests
     {
         using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromMinutes(1));
 
-        const string pipeName = "data_test_pipe";
+        const string pipeName = "pipe";
         await using var server = new SingleConnectionPipeServer<T>(pipeName, formatter ?? new BinaryFormatter())
         {
             WaitFreePipe = true

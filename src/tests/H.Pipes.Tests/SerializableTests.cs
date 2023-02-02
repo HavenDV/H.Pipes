@@ -7,7 +7,7 @@ namespace H.Pipes.Tests;
 [TestClass]
 public class SerializableTests
 {
-    private const string PipeName = "data_test_pipe";
+    private const string PipeName = "pipe";
 
     private PipeServer<TestCollection>? _server;
     private PipeClient<TestCollection>? _client;
