@@ -7,6 +7,7 @@ namespace H.Formatters;
 /// </summary>
 public class CerasFormatter : FormatterBase
 {
+    [CLSCompliant(false)]
     public CerasSerializer InternalFormatter { get; } = new();
 
     protected override byte[] SerializeInternal(object obj)

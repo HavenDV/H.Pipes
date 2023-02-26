@@ -4,7 +4,7 @@
 /// Extensions that work with <see langword="event"/> <br/>
 /// <![CDATA[Version: 1.0.0.2]]> <br/>
 /// </summary>
-public static class EventExtensions
+internal static class EventExtensions
 {
     private sealed class WaitObject<T>
     {
