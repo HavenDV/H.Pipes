@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using EventGenerator;
 using H.Pipes.AccessControl.Utilities;
 
 namespace H.Pipes.AccessControl;
@@ -7,7 +8,11 @@ namespace H.Pipes.AccessControl;
 /// <summary>
 /// This class will save only one running application and passing arguments if it is already running.
 /// </summary>
-public sealed class PipeApplication : IAsyncDisposable
+[Event<Exception>("ExceptionOccurred", PropertyNames = new[] { "Exception" },
+    Description = "Occurs when new exception.")]
+[Event<IReadOnlyCollection<string>>("ArgumentsReceived", PropertyNames = new[] { "Arguments" },
+    Description = "Occurs when new arguments received.")]
+public sealed partial class PipeApplication : IAsyncDisposable
 {
     #region Properties
 
@@ -18,30 +23,6 @@ public sealed class PipeApplication : IAsyncDisposable
     /// Maximum timeout for sending data to the server
     /// </summary>
     public TimeSpan ClientTimeout { get; set; } = TimeSpan.FromSeconds(5);
-
-    #endregion
-
-    #region Events
-
-    /// <summary>
-    /// Occurs when new exception
-    /// </summary>
-    public event EventHandler<Exception>? ExceptionOccurred;
-
-    /// <summary>
-    /// Occurs when new arguments received
-    /// </summary>
-    public event EventHandler<IList<string>>? ArgumentsReceived;
-
-    private void OnExceptionOccurred(Exception value)
-    {
-        ExceptionOccurred?.Invoke(this, value);
-    }
-
-    private void OnArgumentsReceived(IList<string> value)
-    {
-        ArgumentsReceived?.Invoke(this, value);
-    }
 
     #endregion
 
@@ -88,9 +69,9 @@ public sealed class PipeApplication : IAsyncDisposable
 #pragma warning restore CA2000 // Dispose objects before losing scope
             await using (client.ConfigureAwait(false))
             {
-                client.ExceptionOccurred += (_, args) =>
+                client.ExceptionOccurred += (sender, args) =>
                 {
-                    OnExceptionOccurred(args.Exception);
+                    _ = OnExceptionOccurred(args.Exception);
                 };
 
                 await client.WriteAsync(arguments, source.Token).ConfigureAwait(false);
@@ -103,7 +84,7 @@ public sealed class PipeApplication : IAsyncDisposable
         }
         catch (Exception exception)
         {
-            OnExceptionOccurred(exception);
+            _ = OnExceptionOccurred(exception);
         }
 
         try
@@ -138,7 +119,7 @@ public sealed class PipeApplication : IAsyncDisposable
         return Task.Run(async () =>
         {
             PipeServer = new PipeServer<string[]>(ApplicationName);
-            PipeServer.ExceptionOccurred += (sender, args) =>
+            PipeServer.ExceptionOccurred += (_, args) =>
             {
                 OnExceptionOccurred(args.Exception);
             };

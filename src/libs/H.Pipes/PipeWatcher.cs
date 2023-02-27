@@ -1,5 +1,5 @@
 ﻿using System.Timers;
-using H.Pipes.Args;
+using EventGenerator;
 using Timer = System.Timers.Timer;
 
 // ReSharper disable UnusedMember.Global
@@ -10,7 +10,13 @@ namespace H.Pipes;
 /// Watches the directory "\\.\pipe\" and reports on new events
 /// <![CDATA[!!! WARNING: Use it carefully, it is very slow !!!]]>
 /// </summary>
-public sealed class PipeWatcher : IDisposable
+[Event<string>("Created", PropertyNames = new[] { "Name" },
+    Description = "When any pipe created.")]
+[Event<string>("Deleted", PropertyNames = new[] { "Name" },
+    Description = "When any pipe deleted.")]
+[Event<Exception>("ExceptionOccurred", PropertyNames = new[] { "Exception" },
+    Description = "When any exception is thrown.")]
+public sealed partial class PipeWatcher : IDisposable
 {
     #region Properties
 
@@ -22,40 +28,6 @@ public sealed class PipeWatcher : IDisposable
     private Timer Timer { get; }
 
     private IReadOnlyCollection<string> LastPipes { get; set; } = new List<string>();
-
-    #endregion
-
-    #region Events
-
-    /// <summary>
-    /// When any pipe created.
-    /// </summary>
-    public event EventHandler<NameEventArgs>? Created;
-
-    /// <summary>
-    /// When any pipe deleted.
-    /// </summary>
-    public event EventHandler<NameEventArgs>? Deleted;
-
-    /// <summary>
-    /// When any exception is thrown.
-    /// </summary>
-    public event EventHandler<ExceptionEventArgs>? ExceptionOccurred;
-
-    private void OnCreated(string name)
-    {
-        Created?.Invoke(this, new NameEventArgs(name));
-    }
-
-    private void OnDeleted(string name)
-    {
-        Deleted?.Invoke(this, new NameEventArgs(name));
-    }
-
-    private void OnExceptionOccurred(Exception exception)
-    {
-        ExceptionOccurred?.Invoke(this, new ExceptionEventArgs(exception));
-    }
 
     #endregion
 
@@ -84,18 +56,18 @@ public sealed class PipeWatcher : IDisposable
 
             foreach (var name in pipes.Except(LastPipes))
             {
-                OnCreated(name);
+                _ = OnCreated(name);
             }
             foreach (var name in LastPipes.Except(pipes))
             {
-                OnDeleted(name);
+                _ = OnDeleted(name);
             }
 
             LastPipes = pipes;
         }
         catch (Exception exception)
         {
-            OnExceptionOccurred(exception);
+            _ = OnExceptionOccurred(exception);
         }
     }
 
