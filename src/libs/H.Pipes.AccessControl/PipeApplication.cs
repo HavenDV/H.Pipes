@@ -145,6 +145,19 @@ public sealed partial class PipeApplication : IAsyncDisposable
     }
 
     /// <summary>
+    /// Create new task with PipeServer. Will raise ArgumentsReceived event before start.
+    /// </summary>
+    /// <param name="arguments"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public Task StartAsync(IReadOnlyCollection<string> arguments, CancellationToken cancellationToken = default)
+    {
+        _ = OnArgumentsReceived(arguments);
+        
+        return StartAsync(cancellationToken);
+    }
+
+    /// <summary>
     /// Disposes pipe server
     /// </summary>
     /// <returns></returns>
