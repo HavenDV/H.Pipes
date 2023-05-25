@@ -8,12 +8,15 @@ jobs:
       matrix:
         include:
             - os: windows-latest
-              nuget-key: ${{ secrets.NUGET_KEY }}
+              publish: true
             - os: macos-latest
+              publish: false
             - os: ubuntu-latest
+              publish: false
               
     uses: HavenDV/workflows/.github/workflows/dotnet_build-test-publish.yml@main
     with:
       os: ${{ matrix.os }}
+      publish: ${{ matrix.publish }}
     secrets:
-      nuget-key: ${{ matrix.nuget-key }}
+      nuget-key: ${{ secrets.NUGET_KEY }}
