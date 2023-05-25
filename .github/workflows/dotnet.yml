@@ -4,8 +4,16 @@ on: [ push ]
 jobs:
   build-test-publish:
     name: Build, test and publish
+    strategy:
+      matrix:
+        include:
+            - os: windows-latest
+              nuget-key: ${{ secrets.NUGET_KEY }}
+            - os: macos-latest
+            - os: ubuntu-latest
+              
     uses: HavenDV/workflows/.github/workflows/dotnet_build-test-publish.yml@main
     with:
-      os: windows-latest
+      os: ${{ matrix.os }}
     secrets:
-      nuget-key: ${{ secrets.NUGET_KEY }}
+      nuget-key: ${{ matrix.nuget-key }}
