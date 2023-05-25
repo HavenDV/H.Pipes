@@ -68,19 +68,25 @@ public sealed class PipeStreamReader : IDisposable
         CancellationToken cancellationToken = default)
     {
         var buffer = new byte[length];
+        var offset = 0;
+        do
+        {
 #if NETSTANDARD2_1 || NETCOREAPP3_1_OR_GREATER
-        var read = await BaseStream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
+            var read = await BaseStream.ReadAsync(buffer.AsMemory(start: offset, buffer.Length - offset), cancellationToken).ConfigureAwait(false);
 #elif NET461_OR_GREATER || NETSTANDARD2_0
-        var read = await BaseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
+            var read = await BaseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false);
 #else
 #error Target Framework is not supported
 # endif
-        if (read != buffer.Length)
-        {
-            return throwIfReadLessThanLength
-                ? throw new IOException($"Expected {buffer.Length} bytes but read {read}")
-                : Array.Empty<byte>();
-        }
+            if (read == 0)
+            {
+                return throwIfReadLessThanLength
+                    ? throw new IOException("Unable to read data. Returned 0 bytes.")
+                    : Array.Empty<byte>();
+            }
+            
+            offset += read;
+        } while (offset != buffer.Length);
 
         return buffer;
     }
