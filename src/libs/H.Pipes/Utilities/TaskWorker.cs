@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-namespace H.Pipes.Utilities;
+﻿namespace H.Pipes.Utilities;
 
 /// <summary>
 /// A class designed to run code using <see cref="Task"/> with <see cref="TaskCreationOptions.LongRunning"/> <br/>
@@ -25,7 +23,7 @@ internal sealed class TaskWorker : IAsyncDisposable
     /// <summary>
     /// Internal task CancellationTokenSource
     /// </summary>
-    public CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
+    public CancellationTokenSource CancellationTokenSource { get; } = new();
 
     #endregion
 
