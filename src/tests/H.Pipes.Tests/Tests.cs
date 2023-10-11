@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿#if NET6_0_OR_GREATER
+using System.Collections.Concurrent;
 using System.IO.Pipes;
 using System.Net;
 
@@ -124,3 +125,4 @@ public class Tests
         isConnected.Should().BeTrue();
     }
 }
+#endif
