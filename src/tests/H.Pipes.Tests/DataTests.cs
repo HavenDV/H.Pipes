@@ -161,7 +161,8 @@ public class DataTests
     //{
     //    await BaseTests.BinaryDataSingleTestAsync(1025, 3, new CerasFormatter());
     //}
-
+    
+#if !NET8_0_OR_GREATER
     [TestMethod]
     public async Task TypeTest()
     {
@@ -170,7 +171,7 @@ public class DataTests
         using var registration = cancellationTokenSource.Token.Register(() => completionSource.TrySetCanceled());
 
         const string pipeName = "pipe";
-        var formatter = new BinaryFormatter();
+        var formatter = new DefaultFormatter();
         await using var server = new PipeServer<object>(pipeName, formatter);
         await using var client = new PipeClient<object>(pipeName, formatter: formatter);
 
@@ -191,4 +192,5 @@ public class DataTests
 
         Assert.IsTrue(await completionSource.Task);
     }
+#endif
 }

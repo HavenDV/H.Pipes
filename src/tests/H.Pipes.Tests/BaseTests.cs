@@ -106,14 +106,14 @@ public static class BaseTests
         using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromMinutes(1));
 
         const string pipeName = "pipe";
-        await using var server = new PipeServer<T>(pipeName, formatter ?? new BinaryFormatter())
+        await using var server = new PipeServer<T>(pipeName, formatter ?? new DefaultFormatter())
         {
 #if NET48
             // https://github.com/HavenDV/H.Pipes/issues/6
             WaitFreePipe = true,
 #endif
         };
-        await using var client = new PipeClient<T>(pipeName, formatter: formatter ?? new BinaryFormatter());
+        await using var client = new PipeClient<T>(pipeName, formatter: formatter ?? new DefaultFormatter());
 
         await DataTestAsync(server, client, values, hashFunc, cancellationTokenSource.Token);
     }
@@ -123,11 +123,11 @@ public static class BaseTests
         using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromMinutes(1));
 
         const string pipeName = "pipe";
-        await using var server = new SingleConnectionPipeServer<T>(pipeName, formatter ?? new BinaryFormatter())
+        await using var server = new SingleConnectionPipeServer<T>(pipeName, formatter ?? new DefaultFormatter())
         {
             WaitFreePipe = true
         };
-        await using var client = new SingleConnectionPipeClient<T>(pipeName, formatter: formatter ?? new BinaryFormatter());
+        await using var client = new SingleConnectionPipeClient<T>(pipeName, formatter: formatter ?? new DefaultFormatter());
 
         await DataTestAsync(server, client, values, hashFunc, cancellationTokenSource.Token);
     }

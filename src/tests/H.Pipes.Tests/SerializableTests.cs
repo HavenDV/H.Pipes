@@ -12,8 +12,6 @@ public class SerializableTests
     private PipeServer<TestCollection>? _server;
     private PipeClient<TestCollection>? _client;
 
-    private TestCollection? _expectedData;
-    private int _expectedHash;
     private TestCollection? _actualData;
     private int _actualHash;
 
@@ -36,8 +34,6 @@ public class SerializableTests
         _server = new PipeServer<TestCollection>(PipeName);
         _client = new PipeClient<TestCollection>(PipeName);
 
-        _expectedData = null;
-        _expectedHash = 0;
         _actualData = null;
         _actualHash = 0;
 
@@ -97,16 +93,17 @@ public class SerializableTests
 
     #region Tests
 
+#if !NET8_0_OR_GREATER
     [TestMethod]
     public async Task TestCircularReferences()
     {
-        _expectedData = new TestCollection();
+        var _expectedData = new TestCollection();
         for (var i = 0; i < 10; i++)
         {
             var item = new TestItem(i, _expectedData, RandomEnum());
             _expectedData.Add(item);
         }
-        _expectedHash = _expectedData.GetHashCode();
+        var _expectedHash = _expectedData.GetHashCode();
 
         if (_client != null)
         {
@@ -135,7 +132,8 @@ public class SerializableTests
                 $"Item at index {i}'s Parent property should reference the item's parent collection");
         }
     }
-
+#endif
+    
     private TestEnum RandomEnum()
     {
         var rand = new Random().NextDouble();

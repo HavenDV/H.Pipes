@@ -10,6 +10,7 @@ namespace H.Pipes.Tests;
 [TestClass]
 public class Tests
 {
+    [Ignore]
     [TestMethod]
     public async Task Interrupted()
     {

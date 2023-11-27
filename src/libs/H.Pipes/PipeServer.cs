@@ -115,11 +115,11 @@ public sealed class PipeServer<T> : IPipeServer<T>
     /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName"/>.
     /// </summary>
     /// <param name="pipeName">Name of the pipe to listen on</param>
-    /// <param name="formatter">Default formatter - <see cref="BinaryFormatter"/></param>
+    /// <param name="formatter">Default formatter - <see cref="DefaultFormatter"/></param>
     public PipeServer(string pipeName, IFormatter? formatter = default)
     {
         PipeName = pipeName;
-        Formatter = formatter ?? new BinaryFormatter();
+        Formatter = formatter ?? new DefaultFormatter();
     }
 
     #endregion

@@ -21,6 +21,11 @@
 - Supports `PipeAccessRule`'s(see `H.Pipes.AccessControl` nuget package) or more complex code to access using the `PipeServer.PipeStreamInitializeAction` property
     </Description>
   </PropertyGroup>
+  
+  <ItemGroup Label="Usings">
+    <Using Include="H.Formatters.BinaryFormatter" Alias="DefaultFormatter" Condition=" '$(TargetFramework)' != 'net8.0' " />
+    <Using Include="H.Formatters.MessagePackFormatter" Alias="DefaultFormatter" Condition=" '$(TargetFramework)' == 'net8.0' " />
+  </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
@@ -30,8 +35,12 @@
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' != 'net8.0' ">
     <ProjectReference Include="..\H.Formatters.BinaryFormatter\H.Formatters.BinaryFormatter.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
+    <ProjectReference Include="..\H.Formatters.MessagePack\H.Formatters.MessagePack.csproj" />
   </ItemGroup>
 
   <ItemGroup>
