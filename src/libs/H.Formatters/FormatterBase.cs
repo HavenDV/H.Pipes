@@ -31,7 +31,7 @@ public abstract class FormatterBase : IFormatter
     /// <inheritdoc/>
     public T? Deserialize<T>(byte[]? bytes)
     {
-        if (bytes == null || !bytes.Any())
+        if (bytes == null || bytes.Length == 0)
         {
             return default;
         }

@@ -25,7 +25,7 @@ public abstract class AsyncFormatterBase : FormatterBase, IAsyncFormatter
     /// <inheritdoc/>
     public async Task<T?> DeserializeAsync<T>(byte[]? bytes, CancellationToken cancellationToken = default)
     {
-        if (bytes == null || !bytes.Any())
+        if (bytes == null || bytes.Length == 0)
         {
             return default;
         }

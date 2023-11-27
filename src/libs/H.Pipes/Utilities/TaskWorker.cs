@@ -68,7 +68,11 @@ internal sealed class TaskWorker : IAsyncDisposable
 
         _isDisposed = true;
 
+#if NET8_0_OR_GREATER
+        await CancellationTokenSource.CancelAsync().ConfigureAwait(false);
+#else
         CancellationTokenSource.Cancel();
+#endif
 
         try
         {

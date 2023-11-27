@@ -50,6 +50,8 @@ public sealed partial class PipeApplication : IAsyncDisposable
     /// <returns></returns>
     public async Task<bool> TrySendAsync(string[] arguments)
     {
+        arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
+        
         if (ProcessUtilities.IsFirstProcess(ApplicationName))
         {
             return false;
@@ -57,7 +59,7 @@ public sealed partial class PipeApplication : IAsyncDisposable
 
         try
         {
-            if (!arguments.Any())
+            if (arguments.Length == 0)
             {
                 return true;
             }

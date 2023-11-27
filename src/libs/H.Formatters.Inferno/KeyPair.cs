@@ -56,7 +56,7 @@ internal sealed class KeyPair : IDisposable
 
         if (bytes.Length != 104)
         {
-            throw new ArgumentException("bytes.Lenght is not 104.");
+            throw new ArgumentException("Lenght is not 104.", nameof(bytes));
         }
         try
         {

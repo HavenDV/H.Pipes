@@ -22,7 +22,11 @@ public static class ProcessUtilities
 #else
         return name.Contains('.')
 #endif
+#if NET5_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
+            ? name[..name.IndexOf('.', StringComparison.Ordinal)]
+#else
             ? name.Substring(0, name.IndexOf(".", StringComparison.Ordinal))
+#endif
             : name;
     }
 

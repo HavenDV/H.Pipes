@@ -53,7 +53,7 @@ public sealed class PipeStreamReader : IDisposable
             length: sizeof(int),
             throwIfReadLessThanLength: false,
             cancellationToken: cancellationToken).ConfigureAwait(false);
-        if (!bytes.Any())
+        if (bytes.Length == 0)
         {
             IsConnected = false;
             return 0;
