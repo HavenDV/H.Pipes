@@ -27,6 +27,11 @@ public sealed class PipeServer<T> : IPipeServer<T>
     public Func<string, NamedPipeServerStream>? CreatePipeStreamFunc { get; set; }
 
     /// <summary>
+    /// If set, used instead of CreatePipeStreamFunc for connections
+    /// </summary>
+    public Func<string, NamedPipeServerStream>? CreatePipeStreamForConnectionFunc { get; set; }
+
+    /// <summary>
     /// PipeStreamInitializeAction
     /// </summary>
     public Action<NamedPipeServerStream>? PipeStreamInitializeAction { get; set; }
@@ -196,7 +201,7 @@ public sealed class PipeServer<T> : IPipeServer<T>
                     }
 
                     // Wait for the client to connect to the data pipe
-                    var connectionStream = CreatePipeStreamFunc?.Invoke(connectionPipeName) ?? PipeServerFactory.Create(connectionPipeName);
+                    var connectionStream = (CreatePipeStreamForConnectionFunc ?? CreatePipeStreamFunc)?.Invoke(connectionPipeName) ?? PipeServerFactory.Create(connectionPipeName);
 
                     PipeStreamInitializeAction?.Invoke(connectionStream);
 
