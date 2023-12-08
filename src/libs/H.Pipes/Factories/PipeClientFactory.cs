@@ -63,8 +63,8 @@ public static class PipeClientFactory
     public static NamedPipeClientStream Create(string pipeName, string serverName)
     {
         return new NamedPipeClientStream(
-            serverName,
-            pipeName,
+            serverName: serverName,
+            pipeName: pipeName,
             direction: PipeDirection.InOut,
             options: PipeOptions.Asynchronous | PipeOptions.WriteThrough);
     }

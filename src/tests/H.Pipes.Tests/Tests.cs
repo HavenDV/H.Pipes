@@ -143,37 +143,14 @@ public class Tests
             Console.WriteLine($"PipeName: {pipeName}");
 
             await using var server = new PipeServer<byte[]>(pipeName);
-            if (OperatingSystem.IsWindows())
-            {
-                var pipeSecurity = new PipeSecurity();
-                pipeSecurity.AddAccessRule(new PipeAccessRule(
-                    new SecurityIdentifier(WellKnownSidType.WorldSid, null),
-                    PipeAccessRights.ReadWrite,
-                    AccessControlType.Allow));                
-
-#pragma warning disable CA1416
-                server.CreatePipeStreamFunc = name => NamedPipeServerStreamAcl.Create(
-                    pipeName: name,
-                    direction: PipeDirection.Out,
-                    maxNumberOfServerInstances: 1,
-                    transmissionMode: PipeTransmissionMode.Byte,
-                    options: PipeOptions.Asynchronous | PipeOptions.WriteThrough,
-                    inBufferSize: 0,
-                    outBufferSize: 0,
-                    pipeSecurity: pipeSecurity);
-#pragma warning restore CA1416
-            }
-            else
-            {
-                server.CreatePipeStreamFunc = static pipeName => new NamedPipeServerStream(
-                    pipeName: pipeName,
-                    direction: PipeDirection.Out,
-                    maxNumberOfServerInstances: 1,
-                    transmissionMode: PipeTransmissionMode.Byte,
-                    options: PipeOptions.Asynchronous | PipeOptions.WriteThrough,
-                    inBufferSize: 0,
-                    outBufferSize: 0);
-            }
+            server.CreatePipeStreamFunc = static pipeName => new NamedPipeServerStream(
+                pipeName: pipeName,
+                direction: PipeDirection.Out,
+                maxNumberOfServerInstances: 1,
+                transmissionMode: PipeTransmissionMode.Byte,
+                options: PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+                inBufferSize: 0,
+                outBufferSize: 0);
             
             server.ClientConnected += async (_, args) =>
             {
@@ -237,6 +214,12 @@ public class Tests
 
             var isClientReceivedMessage = new TaskCompletionSource<bool>();
             await using var client = new PipeClient<byte[]>(pipeName);
+            client.CreatePipeStreamForConnectionFunc = static (pipeName, serverName) => new NamedPipeClientStream(
+                serverName: serverName,
+                pipeName: pipeName,
+                direction: PipeDirection.In,
+                options: PipeOptions.Asynchronous | PipeOptions.WriteThrough);
+            
             client.MessageReceived += (_, _) =>
             {
                 _ = isClientReceivedMessage.TrySetResult(true);

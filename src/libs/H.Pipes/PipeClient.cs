@@ -41,6 +41,11 @@ public sealed class PipeClient<T> : IPipeClient<T>
     
     /// <inheritdoc/>
     public Func<string, string, NamedPipeClientStream>? CreatePipeStreamFunc { get; set; }
+    
+    /// <summary>
+    /// If set, used instead of CreatePipeStreamFunc for connections
+    /// </summary>
+    public Func<string, string, NamedPipeClientStream>? CreatePipeStreamForConnectionFunc { get; set; }
 
     /// <inheritdoc/>
     public string PipeName { get; }
@@ -177,8 +182,11 @@ public sealed class PipeClient<T> : IPipeClient<T>
 
             // Connect to the actual data pipe
 #pragma warning disable CA2000 // Dispose objects before losing scope
-            var dataPipe = await PipeClientFactory
-                .CreateAndConnectAsync(connectionPipeName, ServerName, CreatePipeStreamFunc, cancellationToken)
+            var dataPipe = await PipeClientFactory.CreateAndConnectAsync(
+                pipeName: connectionPipeName,
+                serverName: ServerName,
+                func: CreatePipeStreamForConnectionFunc ?? CreatePipeStreamFunc,
+                cancellationToken: cancellationToken)
 #pragma warning restore CA2000 // Dispose objects before losing scope
                     .ConfigureAwait(false);
 
