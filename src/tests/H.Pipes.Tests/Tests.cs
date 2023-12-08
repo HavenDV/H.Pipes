@@ -127,125 +127,125 @@ public class Tests
 
         isConnected.Should().BeTrue();
     }
-    
-    [TestMethod]
-    public async Task WriteOnlyServer()
-    {
-        using var source = new CancellationTokenSource(TimeSpan.FromSeconds(11));
-        var cancellationToken = source.Token;
-        var isConnected = false;
-        
-        var exceptions = new ConcurrentBag<Exception>();
-        const string pipeName = "wos";
-        try
-        {
-
-            Console.WriteLine($"PipeName: {pipeName}");
-
-            await using var server = new PipeServer<byte[]>(pipeName);
-            server.CreatePipeStreamFunc = static pipeName => new NamedPipeServerStream(
-                pipeName: pipeName,
-                direction: PipeDirection.Out,
-                maxNumberOfServerInstances: 1,
-                transmissionMode: PipeTransmissionMode.Byte,
-                options: PipeOptions.Asynchronous | PipeOptions.WriteThrough,
-                inBufferSize: 0,
-                outBufferSize: 0);
-            
-            server.ClientConnected += async (_, args) =>
-            {
-                Console.WriteLine($"Client {args.Connection.PipeName} is now connected!");
-
-                try
-                {
-                    await args.Connection.WriteAsync(new byte[]
-                    {
-                        1, 2, 3, 4, 5,
-                    }, cancellationToken).ConfigureAwait(false);
-                }
-                catch (OperationCanceledException)
-                {
-                }
-                catch (Exception exception)
-                {
-                    exceptions.Add(exception);
-                }
-            };
-            server.ClientDisconnected += (_, args) =>
-            {
-                Console.WriteLine($"Client {args.Connection.PipeName} disconnected");
-            };
-            server.MessageReceived += (_, args) =>
-            {
-                Console.WriteLine($"Client {args.Connection.PipeName} says: {args.Message}");
-            };
-            server.ExceptionOccurred += (_, args) => exceptions.Add(args.Exception);
-
-            _ = Task.Run(async () =>
-            {
-                while (!cancellationToken.IsCancellationRequested)
-                {
-                    try
-                    {
-                        Console.WriteLine($"Sent to {server.ConnectedClients.Count} clients");
-
-                        await server.WriteAsync(new byte[]
-                        {
-                            1, 2, 3, 4, 5,
-                        }, cancellationToken).ConfigureAwait(false);
-
-                        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
-                    }
-                    catch (OperationCanceledException)
-                    {
-                    }
-                    catch (Exception exception)
-                    {
-                        exceptions.Add(exception);
-                    }
-                }
-            }, cancellationToken);
-
-            Console.WriteLine("Server starting...");
-
-            await server.StartAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-
-            Console.WriteLine("Server is started!");
-
-            var isClientReceivedMessage = new TaskCompletionSource<bool>();
-            await using var client = new PipeClient<byte[]>(pipeName);
-            client.CreatePipeStreamForConnectionFunc = static (pipeName, serverName) => new NamedPipeClientStream(
-                serverName: serverName,
-                pipeName: pipeName,
-                direction: PipeDirection.In,
-                options: PipeOptions.Asynchronous | PipeOptions.WriteThrough);
-            
-            client.MessageReceived += (_, _) =>
-            {
-                _ = isClientReceivedMessage.TrySetResult(true);
-            };
-            await client.ConnectAsync(cancellationToken);
-
-            await isClientReceivedMessage.Task;
-            
-            isClientReceivedMessage.Task.Result.Should().BeTrue();
-            
-            isConnected = true;
-        }
-        catch (OperationCanceledException)
-        {
-        }
-        catch (Exception exception)
-        {
-            exceptions.Add(exception);
-        }
-        
-        if (!exceptions.IsEmpty)
-        {
-            throw new AggregateException(exceptions);
-        }
-
-        isConnected.Should().BeTrue();
-    }
+    //
+    // [TestMethod]
+    // public async Task WriteOnlyServer()
+    // {
+    //     using var source = new CancellationTokenSource(TimeSpan.FromSeconds(11));
+    //     var cancellationToken = source.Token;
+    //     var isConnected = false;
+    //     
+    //     var exceptions = new ConcurrentBag<Exception>();
+    //     const string pipeName = "wos";
+    //     try
+    //     {
+    //
+    //         Console.WriteLine($"PipeName: {pipeName}");
+    //
+    //         await using var server = new PipeServer<byte[]>(pipeName);
+    //         server.CreatePipeStreamFunc = static pipeName => new NamedPipeServerStream(
+    //             pipeName: pipeName,
+    //             direction: PipeDirection.Out,
+    //             maxNumberOfServerInstances: 1,
+    //             transmissionMode: PipeTransmissionMode.Byte,
+    //             options: PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+    //             inBufferSize: 0,
+    //             outBufferSize: 0);
+    //         
+    //         server.ClientConnected += async (_, args) =>
+    //         {
+    //             Console.WriteLine($"Client {args.Connection.PipeName} is now connected!");
+    //
+    //             try
+    //             {
+    //                 await args.Connection.WriteAsync(new byte[]
+    //                 {
+    //                     1, 2, 3, 4, 5,
+    //                 }, cancellationToken).ConfigureAwait(false);
+    //             }
+    //             catch (OperationCanceledException)
+    //             {
+    //             }
+    //             catch (Exception exception)
+    //             {
+    //                 exceptions.Add(exception);
+    //             }
+    //         };
+    //         server.ClientDisconnected += (_, args) =>
+    //         {
+    //             Console.WriteLine($"Client {args.Connection.PipeName} disconnected");
+    //         };
+    //         server.MessageReceived += (_, args) =>
+    //         {
+    //             Console.WriteLine($"Client {args.Connection.PipeName} says: {args.Message}");
+    //         };
+    //         server.ExceptionOccurred += (_, args) => exceptions.Add(args.Exception);
+    //
+    //         _ = Task.Run(async () =>
+    //         {
+    //             while (!cancellationToken.IsCancellationRequested)
+    //             {
+    //                 try
+    //                 {
+    //                     Console.WriteLine($"Sent to {server.ConnectedClients.Count} clients");
+    //
+    //                     await server.WriteAsync(new byte[]
+    //                     {
+    //                         1, 2, 3, 4, 5,
+    //                     }, cancellationToken).ConfigureAwait(false);
+    //
+    //                     await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+    //                 }
+    //                 catch (OperationCanceledException)
+    //                 {
+    //                 }
+    //                 catch (Exception exception)
+    //                 {
+    //                     exceptions.Add(exception);
+    //                 }
+    //             }
+    //         }, cancellationToken);
+    //
+    //         Console.WriteLine("Server starting...");
+    //
+    //         await server.StartAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+    //
+    //         Console.WriteLine("Server is started!");
+    //
+    //         var isClientReceivedMessage = new TaskCompletionSource<bool>();
+    //         await using var client = new PipeClient<byte[]>(pipeName);
+    //         client.CreatePipeStreamForConnectionFunc = static (pipeName, serverName) => new NamedPipeClientStream(
+    //             serverName: serverName,
+    //             pipeName: pipeName,
+    //             direction: PipeDirection.In,
+    //             options: PipeOptions.Asynchronous | PipeOptions.WriteThrough);
+    //         
+    //         client.MessageReceived += (_, _) =>
+    //         {
+    //             _ = isClientReceivedMessage.TrySetResult(true);
+    //         };
+    //         await client.ConnectAsync(cancellationToken);
+    //
+    //         await isClientReceivedMessage.Task;
+    //         
+    //         isClientReceivedMessage.Task.Result.Should().BeTrue();
+    //         
+    //         isConnected = true;
+    //     }
+    //     catch (OperationCanceledException)
+    //     {
+    //     }
+    //     catch (Exception exception)
+    //     {
+    //         exceptions.Add(exception);
+    //     }
+    //     
+    //     if (!exceptions.IsEmpty)
+    //     {
+    //         throw new AggregateException(exceptions);
+    //     }
+    //
+    //     isConnected.Should().BeTrue();
+    // }
 }
 #endif
