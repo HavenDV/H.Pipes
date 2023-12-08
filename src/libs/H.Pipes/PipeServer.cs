@@ -16,14 +16,10 @@ public sealed class PipeServer<T> : IPipeServer<T>
 {
     #region Properties
 
-    /// <summary>
-    /// Name of pipe
-    /// </summary>
+    /// <inheritdoc />
     public string PipeName { get; }
 
-    /// <summary>
-    /// CreatePipeStreamFunc
-    /// </summary>
+    /// <inheritdoc />
     public Func<string, NamedPipeServerStream>? CreatePipeStreamFunc { get; set; }
 
     /// <summary>
@@ -31,14 +27,10 @@ public sealed class PipeServer<T> : IPipeServer<T>
     /// </summary>
     public Func<string, NamedPipeServerStream>? CreatePipeStreamForConnectionFunc { get; set; }
 
-    /// <summary>
-    /// PipeStreamInitializeAction
-    /// </summary>
+    /// <inheritdoc />
     public Action<NamedPipeServerStream>? PipeStreamInitializeAction { get; set; }
 
-    /// <summary>
-    /// Used formatter
-    /// </summary>
+    /// <inheritdoc />
     public IFormatter Formatter { get; set; }
 
     /// <summary>
@@ -58,11 +50,8 @@ public sealed class PipeServer<T> : IPipeServer<T>
         .Where(connection => connection.IsConnected)
         .ToList();
 
-    /// <summary>
-    /// IsStarted
-    /// </summary>
-    public bool IsStarted => ListenWorker != null && !ListenWorker.Task.IsCompleted && !ListenWorker.Task.IsCanceled && !ListenWorker.Task.IsFaulted;
-
+    /// <inheritdoc />
+    public bool IsStarted => ListenWorker is { Task: { IsCompleted: false, IsCanceled: false, IsFaulted: false } };
 
     private TaskWorker? ListenWorker { get; set; }
 
@@ -72,24 +61,16 @@ public sealed class PipeServer<T> : IPipeServer<T>
 
     #region Events
 
-    /// <summary>
-    /// Invoked whenever a client connects to the server.
-    /// </summary>
+    /// <inheritdoc />
     public event EventHandler<ConnectionEventArgs<T>>? ClientConnected;
 
-    /// <summary>
-    /// Invoked whenever a client disconnects from the server.
-    /// </summary>
+    /// <inheritdoc />
     public event EventHandler<ConnectionEventArgs<T>>? ClientDisconnected;
 
-    /// <summary>
-    /// Invoked whenever a client sends a message to the server.
-    /// </summary>
+    /// <inheritdoc />
     public event EventHandler<ConnectionMessageEventArgs<T?>>? MessageReceived;
 
-    /// <summary>
-    /// Invoked whenever an exception is thrown during a read or write operation.
-    /// </summary>
+    /// <inheritdoc />
     public event EventHandler<ExceptionEventArgs>? ExceptionOccurred;
 
     private void OnClientConnected(ConnectionEventArgs<T> args)
@@ -131,12 +112,7 @@ public sealed class PipeServer<T> : IPipeServer<T>
 
     #region Public methods
 
-    /// <summary>
-    /// Begins listening for client connections in a separate background thread.
-    /// This method waits when pipe will be created(or throws exception).
-    /// </summary>
-    /// <exception cref="InvalidOperationException"></exception>
-    /// <exception cref="IOException"></exception>
+    /// <inheritdoc />
     public async Task StartAsync(CancellationToken cancellationToken = default)
     {
         if (IsStarted)
@@ -300,9 +276,7 @@ public sealed class PipeServer<T> : IPipeServer<T>
         await WriteAsync(value, connection => connection.PipeName == pipeName, cancellationToken).ConfigureAwait(false);
     }
 
-    /// <summary>
-    /// Closes all open client connections and stops listening for new ones.
-    /// </summary>
+    /// <inheritdoc />
     public async Task StopAsync(CancellationToken _ = default)
     {
         if (ListenWorker != null)
@@ -325,9 +299,7 @@ public sealed class PipeServer<T> : IPipeServer<T>
 
     #region IDisposable
 
-    /// <summary>
-    /// Dispose internal resources
-    /// </summary>
+    /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
         if (_isDisposed)
