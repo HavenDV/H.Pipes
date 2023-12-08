@@ -2,6 +2,8 @@
 using System.Collections.Concurrent;
 using System.IO.Pipes;
 using System.Net;
+using System.Security.AccessControl;
+using System.Security.Principal;
 
 namespace H.Pipes.Tests;
 
@@ -141,12 +143,37 @@ public class Tests
             Console.WriteLine($"PipeName: {pipeName}");
 
             await using var server = new PipeServer<byte[]>(pipeName);
-            server.CreatePipeStreamFunc = static pipeName => new NamedPipeServerStream(
-                pipeName,
-                PipeDirection.Out,
-                1,
-                PipeTransmissionMode.Byte,
-                PipeOptions.Asynchronous | PipeOptions.WriteThrough);
+            if (OperatingSystem.IsWindows())
+            {
+                var pipeSecurity = new PipeSecurity();
+                pipeSecurity.AddAccessRule(new PipeAccessRule(
+                    new SecurityIdentifier(WellKnownSidType.WorldSid, null),
+                    PipeAccessRights.ReadWrite,
+                    AccessControlType.Allow));                
+
+#pragma warning disable CA1416
+                server.CreatePipeStreamFunc = name => NamedPipeServerStreamAcl.Create(
+                    pipeName: name,
+                    direction: PipeDirection.Out,
+                    maxNumberOfServerInstances: 1,
+                    transmissionMode: PipeTransmissionMode.Byte,
+                    options: PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+                    inBufferSize: 0,
+                    outBufferSize: 0,
+                    pipeSecurity: pipeSecurity);
+#pragma warning restore CA1416
+            }
+            else
+            {
+                server.CreatePipeStreamFunc = static pipeName => new NamedPipeServerStream(
+                    pipeName: pipeName,
+                    direction: PipeDirection.Out,
+                    maxNumberOfServerInstances: 1,
+                    transmissionMode: PipeTransmissionMode.Byte,
+                    options: PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+                    inBufferSize: 0,
+                    outBufferSize: 0);
+            }
             
             server.ClientConnected += async (_, args) =>
             {

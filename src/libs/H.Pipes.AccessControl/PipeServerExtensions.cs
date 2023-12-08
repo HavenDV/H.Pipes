@@ -28,7 +28,15 @@ public static class PipeServerExtensions
         server = server ?? throw new ArgumentNullException(nameof(server));
         pipeSecurity = pipeSecurity ?? throw new ArgumentNullException(nameof(pipeSecurity));
 
-        server.CreatePipeStreamFunc = pipeName => NamedPipeServerStreamConstructors.New(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough, 0, 0, pipeSecurity);
+        server.CreatePipeStreamFunc = pipeName => NamedPipeServerStreamConstructors.New(
+            pipeName: pipeName,
+            direction: PipeDirection.InOut,
+            maxNumberOfServerInstances: 1,
+            transmissionMode: PipeTransmissionMode.Byte,
+            options: PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+            inBufferSize: 0,
+            outBufferSize: 0,
+            pipeSecurity: pipeSecurity);
     }
 
     /// <summary>

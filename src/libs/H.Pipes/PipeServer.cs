@@ -177,7 +177,8 @@ public sealed class PipeServer<T> : IPipeServer<T>
                     }
 
                     // Wait for the client to connect to the data pipe
-                    var connectionStream = (CreatePipeStreamForConnectionFunc ?? CreatePipeStreamFunc)?.Invoke(connectionPipeName) ?? PipeServerFactory.Create(connectionPipeName);
+                    var connectionStream = (CreatePipeStreamForConnectionFunc ?? CreatePipeStreamFunc)?
+                        .Invoke(connectionPipeName) ?? PipeServerFactory.Create(connectionPipeName);
 
                     PipeStreamInitializeAction?.Invoke(connectionStream);
 
