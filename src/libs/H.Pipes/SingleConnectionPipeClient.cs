@@ -116,7 +116,7 @@ public sealed class SingleConnectionPipeClient<T> : IPipeClient<T>
 
         ReconnectionInterval = reconnectionInterval ?? TimeSpan.FromMilliseconds(100);
         ReconnectionTimer = new System.Timers.Timer(ReconnectionInterval.TotalMilliseconds);
-        ReconnectionTimer.Elapsed += async (sender, args) =>
+        ReconnectionTimer.Elapsed += async (_, _) =>
         {
             try
             {
@@ -148,10 +148,7 @@ public sealed class SingleConnectionPipeClient<T> : IPipeClient<T>
 
     #region Public methods
 
-    /// <summary>
-    /// Connects to the named pipe server asynchronously.
-    /// </summary>
-    /// <exception cref="InvalidOperationException"></exception>
+    /// <inheritdoc/>
     public async Task ConnectAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -187,8 +184,8 @@ public sealed class SingleConnectionPipeClient<T> : IPipeClient<T>
 
                 OnDisconnected(args);
             };
-            Connection.MessageReceived += (sender, args) => OnMessageReceived(args);
-            Connection.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
+            Connection.MessageReceived += (_, args) => OnMessageReceived(args);
+            Connection.ExceptionOccurred += (_, args) => OnExceptionOccurred(args.Exception);
             Connection.Start();
 
             OnConnected(new ConnectionEventArgs<T>(Connection));
@@ -205,11 +202,7 @@ public sealed class SingleConnectionPipeClient<T> : IPipeClient<T>
         }
     }
 
-    /// <summary>
-    /// Disconnects from server
-    /// </summary>
-    /// <param name="_"></param>
-    /// <returns></returns>
+    /// <inheritdoc/>
     public async Task DisconnectAsync(CancellationToken _ = default)
     {
         ReconnectionTimer.Stop();
@@ -258,9 +251,7 @@ public sealed class SingleConnectionPipeClient<T> : IPipeClient<T>
 
     #region IDisposable
 
-    /// <summary>
-    /// Dispose internal resources
-    /// </summary>
+    /// <inheritdoc/>
     public async ValueTask DisposeAsync()
     {
         ReconnectionTimer.Dispose();

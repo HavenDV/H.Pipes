@@ -14,24 +14,16 @@ public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
 {
     #region Properties
 
-    /// <summary>
-    /// Name of pipe
-    /// </summary>
+    /// <inheritdoc/>
     public string PipeName { get; }
 
-    /// <summary>
-    /// CreatePipeStreamFunc
-    /// </summary>
+    /// <inheritdoc/>
     public Func<string, NamedPipeServerStream>? CreatePipeStreamFunc { get; set; }
 
-    /// <summary>
-    /// PipeStreamInitializeAction
-    /// </summary>
+    /// <inheritdoc/>
     public Action<NamedPipeServerStream>? PipeStreamInitializeAction { get; set; }
 
-    /// <summary>
-    /// Used formatter
-    /// </summary>
+    /// <inheritdoc/>
     public IFormatter Formatter { get; set; }
 
     /// <summary>
@@ -44,9 +36,7 @@ public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
     /// </summary>
     public PipeConnection<T>? Connection { get; private set; }
 
-    /// <summary>
-    /// IsStarted
-    /// </summary>
+    /// <inheritdoc/>
     public bool IsStarted => ListenWorker != null && !ListenWorker.Task.IsCompleted && !ListenWorker.Task.IsCanceled && !ListenWorker.Task.IsFaulted;
 
 
@@ -58,24 +48,16 @@ public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
 
     #region Events
 
-    /// <summary>
-    /// Invoked whenever a client connects to the server.
-    /// </summary>
+    /// <inheritdoc/>
     public event EventHandler<ConnectionEventArgs<T>>? ClientConnected;
 
-    /// <summary>
-    /// Invoked whenever a client disconnects from the server.
-    /// </summary>
+    /// <inheritdoc/>
     public event EventHandler<ConnectionEventArgs<T>>? ClientDisconnected;
 
-    /// <summary>
-    /// Invoked whenever a client sends a message to the server.
-    /// </summary>
+    /// <inheritdoc/>
     public event EventHandler<ConnectionMessageEventArgs<T?>>? MessageReceived;
 
-    /// <summary>
-    /// Invoked whenever an exception is thrown during a read or write operation.
-    /// </summary>
+    /// <inheritdoc/>
     public event EventHandler<ExceptionEventArgs>? ExceptionOccurred;
 
     private void OnClientConnected(ConnectionEventArgs<T> args)
@@ -117,12 +99,7 @@ public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
 
     #region Public methods
 
-    /// <summary>
-    /// Begins listening for client connections in a separate background thread.
-    /// This method waits when pipe will be created(or throws exception).
-    /// </summary>
-    /// <exception cref="InvalidOperationException"></exception>
-    /// <exception cref="IOException"></exception>
+    /// <inheritdoc/>
     public async Task StartAsync(CancellationToken cancellationToken = default)
     {
         if (IsStarted)
@@ -179,9 +156,9 @@ public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
                     var connection = new PipeConnection<T>(connectionStream, PipeName, Formatter);
                     try
                     {
-                        connection.MessageReceived += (sender, args) => OnMessageReceived(args);
-                        connection.Disconnected += (sender, args) => OnClientDisconnected(args);
-                        connection.ExceptionOccurred += (sender, args) => OnExceptionOccurred(args.Exception);
+                        connection.MessageReceived += (_, args) => OnMessageReceived(args);
+                        connection.Disconnected += (_, args) => OnClientDisconnected(args);
+                        connection.ExceptionOccurred += (_, args) => OnExceptionOccurred(args.Exception);
                         connection.Start();
                     }
                     catch
@@ -243,7 +220,7 @@ public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
     /// <param name="cancellationToken"></param>
     public async Task WriteAsync(T value, CancellationToken cancellationToken = default)
     {
-        if (Connection == null || !Connection.IsConnected)
+        if (Connection is not { IsConnected: true })
         {
             return;
         }
@@ -275,9 +252,7 @@ public sealed class SingleConnectionPipeServer<T> : IPipeServer<T>
 
     #region IDisposable
 
-    /// <summary>
-    /// Dispose internal resources
-    /// </summary>
+    /// <inheritdoc/>
     public async ValueTask DisposeAsync()
     {
         if (_isDisposed)
