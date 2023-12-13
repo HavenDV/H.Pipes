@@ -111,7 +111,7 @@ public sealed class PipeConnection<T> : IAsyncDisposable
 
         ReadWorker = new TaskWorker(async cancellationToken =>
         {
-            if (!PipeStreamWrapper.BaseStream.CanRead)
+            if (!PipeStreamWrapper.CanRead)
             {
                 return;
             }

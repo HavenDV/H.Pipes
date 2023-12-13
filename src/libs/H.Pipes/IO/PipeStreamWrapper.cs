@@ -39,7 +39,7 @@ public sealed class PipeStreamWrapper : IDisposable
     /// </returns>
     public bool CanWrite => BaseStream.CanWrite;
 
-    internal PipeStream BaseStream { get; }
+    private PipeStream BaseStream { get; }
     private PipeStreamReader Reader { get; }
     private PipeStreamWriter Writer { get; }
 
