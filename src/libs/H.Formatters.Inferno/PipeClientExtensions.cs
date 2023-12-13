@@ -16,12 +16,7 @@ public static class PipeClientExtensions
     /// <param name="client"></param>
     /// <param name="exceptionAction"></param>
     /// <exception cref="ArgumentNullException"></exception>
-#if NET5_0_OR_GREATER
     [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-#elif NETSTANDARD2_0_OR_GREATER || NET461_OR_GREATER
-#else
-#error Target Framework is not supported
-#endif
     public static void EnableEncryption<T>(
         this IPipeClient<T> client,
         Action<Exception>? exceptionAction = null)

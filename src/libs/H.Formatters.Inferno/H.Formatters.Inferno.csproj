@@ -4,6 +4,7 @@
     <TargetFrameworks>netstandard2.0;net4.6.2;net6.0;net7.0;net8.0</TargetFrameworks>
     <RootNamespace>H.Formatters</RootNamespace>
     <NoWarn>$(NoWarn);CA1031;CA1819;CS1591</NoWarn>
+    <PolySharpIncludeRuntimeSupportedAttributes>true</PolySharpIncludeRuntimeSupportedAttributes>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">
@@ -12,6 +13,10 @@
 
   <ItemGroup>
     <PackageReference Include="Inferno" Version="1.6.4" />
+    <PackageReference Include="PolySharp" Version="1.14.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
