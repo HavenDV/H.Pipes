@@ -9,7 +9,7 @@
 
   <ItemGroup Label="Usings">
     <Using Include="H.Formatters.BinaryFormatter" Alias="DefaultFormatter" Condition=" '$(TargetFramework)' != 'net8.0' " />
-    <Using Include="H.Formatters.MessagePackFormatter" Alias="DefaultFormatter" Condition=" '$(TargetFramework)' == 'net8.0' " />
+    <Using Include="H.Formatters.SystemTextJsonFormatter" Alias="DefaultFormatter" Condition=" '$(TargetFramework)' == 'net8.0' " />
   </ItemGroup>
 
 </Project>
