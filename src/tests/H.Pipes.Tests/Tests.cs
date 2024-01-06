@@ -213,6 +213,7 @@ public class Tests
     //         Console.WriteLine("Server is started!");
     //
     //         var isClientReceivedMessage = new TaskCompletionSource<bool>();
+    //         cancellationToken.Register(() => isClientReceivedMessage.TrySetCanceled());
     //         await using var client = new PipeClient<byte[]>(pipeName);
     //         client.CreatePipeStreamForConnectionFunc = static (pipeName, serverName) => new NamedPipeClientStream(
     //             serverName: serverName,
@@ -247,5 +248,113 @@ public class Tests
     //
     //     isConnected.Should().BeTrue();
     // }
+    
+    [TestMethod]
+    public async Task Reconnect()
+    {
+        using var source = new CancellationTokenSource(TimeSpan.FromSeconds(11));
+        var cancellationToken = source.Token;
+        var isConnected = false;
+        
+        var exceptions = new ConcurrentBag<Exception>();
+        const string pipeName = "rcs";
+        try
+        {
+    
+            Console.WriteLine($"PipeName: {pipeName}");
+    
+            await using var server = new PipeServer<byte[]>(pipeName);
+            server.ClientConnected += (_, args) =>
+            {
+                Console.WriteLine($"{DateTime.Now:hh:mm:ss.fff}: Client {args.Connection.PipeName} is now connected!");
+            };
+            server.ClientDisconnected += (_, args) =>
+            {
+                Console.WriteLine($"{DateTime.Now:hh:mm:ss.fff}: Client {args.Connection.PipeName} disconnected");
+            };
+            server.ExceptionOccurred += (_, args) => exceptions.Add(args.Exception);
+    
+            Console.WriteLine("Server starting...");
+    
+            await server.StartAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+    
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    Console.WriteLine($"{DateTime.Now:hh:mm:ss.fff}: Waiting 1 second");
+
+                    await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+
+                    Console.WriteLine($"{DateTime.Now:hh:mm:ss.fff}: Stopping server");
+                    
+                    await server.StopAsync(cancellationToken);
+                    
+                    Console.WriteLine($"{DateTime.Now:hh:mm:ss.fff}: Starting server");
+                    
+                    await server.StartAsync(cancellationToken);
+
+                    Console.WriteLine($"{DateTime.Now:hh:mm:ss.fff}: Waiting 3 seconds");
+                    
+                    await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
+                    
+                    Console.WriteLine($"{DateTime.Now:hh:mm:ss.fff}: Send data to clients");
+                    
+                    try
+                    {
+                        await server.WriteAsync(
+                            [1, 2, 3, 4, 5], cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                    }
+                    catch (Exception exception)
+                    {
+                        exceptions.Add(exception);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                }
+                catch (Exception exception)
+                {
+                    exceptions.Add(exception);
+                }
+            }, cancellationToken);
+            
+            Console.WriteLine("Server is started!");
+    
+            var isClientReceivedMessage = new TaskCompletionSource<bool>();
+            cancellationToken.Register(() => isClientReceivedMessage.TrySetCanceled());
+            
+            await using var client = new PipeClient<byte[]>(pipeName);
+            
+            client.MessageReceived += (_, _) =>
+            {
+                _ = isClientReceivedMessage.TrySetResult(true);
+            };
+            await client.ConnectAsync(cancellationToken);
+    
+            var result = await isClientReceivedMessage.Task;
+            
+            result.Should().BeTrue();
+            
+            isConnected = true;
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception exception)
+        {
+            exceptions.Add(exception);
+        }
+        
+        if (!exceptions.IsEmpty)
+        {
+            throw new AggregateException(exceptions);
+        }
+    
+        isConnected.Should().BeTrue();
+    }
 }
 #endif
