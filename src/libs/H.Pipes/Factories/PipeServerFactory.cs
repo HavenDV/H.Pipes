@@ -1,4 +1,6 @@
 ﻿using System.IO.Pipes;
+using System.Security.AccessControl;
+using System.Security.Principal;
 
 namespace H.Pipes.Factories;
 
@@ -44,7 +46,23 @@ public static class PipeServerFactory
     /// <returns></returns>
     public static NamedPipeServerStream Create(string pipeName)
     {
-        return new NamedPipeServerStream(
+#if NET6_0_OR_GREATER
+ 
+#pragma warning disable CA1416
+        return NamedPipeServerStreamAcl.Create(
+            pipeName: pipeName,
+            direction: PipeDirection.InOut,
+            maxNumberOfServerInstances: 1,
+            transmissionMode: PipeTransmissionMode.Byte,
+            options: PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+            inBufferSize: 0,
+            outBufferSize: 0,
+            null,
+            HandleInheritability.None,
+            (PipeAccessRights)0);
+#pragma warning restore CA1416
+#else
+ return new NamedPipeServerStream(
             pipeName: pipeName,
             direction: PipeDirection.InOut,
             maxNumberOfServerInstances: 1,
@@ -52,5 +70,7 @@ public static class PipeServerFactory
             options: PipeOptions.Asynchronous | PipeOptions.WriteThrough,
             inBufferSize: 0,
             outBufferSize: 0);
+#endif
+
     }
 }
