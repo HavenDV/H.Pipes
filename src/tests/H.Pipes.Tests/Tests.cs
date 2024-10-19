@@ -5,6 +5,8 @@ using System.Net;
 using System.Security.AccessControl;
 using System.Security.Principal;
 
+[assembly: DoNotParallelize]
+
 namespace H.Pipes.Tests;
 
 // ReSharper disable AccessToDisposedClosure
