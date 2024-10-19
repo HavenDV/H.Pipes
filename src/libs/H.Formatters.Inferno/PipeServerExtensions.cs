@@ -17,6 +17,7 @@ public static class PipeServerExtensions
     /// <typeparam name="T"></typeparam>
     /// <param name="server"></param>
     /// <param name="exceptionAction"></param>
+    /// <param name="pipeSecurity"></param>
     /// <exception cref="ArgumentNullException"></exception>
     [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     public static void EnableEncryption<T>(

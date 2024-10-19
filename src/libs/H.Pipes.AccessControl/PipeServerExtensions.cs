@@ -22,21 +22,18 @@ public static class PipeServerExtensions
     {
         server = server ?? throw new ArgumentNullException(nameof(server));
         pipeSecurity = pipeSecurity ?? throw new ArgumentNullException(nameof(pipeSecurity));
-#if NET6_0_OR_GREATER
         server.CreatePipeStreamFunc = pipeName =>
-        NamedPipeServerStreamAcl.Create(
-            pipeName: pipeName,
-            direction: PipeDirection.InOut,
-            maxNumberOfServerInstances: 1,
-            transmissionMode: PipeTransmissionMode.Byte,
-            options: PipeOptions.Asynchronous | PipeOptions.WriteThrough,
-            inBufferSize: 0,
-            outBufferSize: 0,
-            pipeSecurity);
-
-        //server.c
+#if NET6_0_OR_GREATER
+            NamedPipeServerStreamAcl.Create(
+                pipeName: pipeName,
+                direction: PipeDirection.InOut,
+                maxNumberOfServerInstances: 1,
+                transmissionMode: PipeTransmissionMode.Byte,
+                options: PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+                inBufferSize: 0,
+                outBufferSize: 0,
+                pipeSecurity: pipeSecurity);
 #else
-       server.CreatePipeStreamFunc = pipeName =>
            NamedPipeServerStreamConstructors.New(
                 pipeName: pipeName,
                 direction: PipeDirection.InOut,
