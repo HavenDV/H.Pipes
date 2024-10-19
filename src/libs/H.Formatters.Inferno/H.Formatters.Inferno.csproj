@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\H.Formatters\H.Formatters.csproj" />
+    <ProjectReference Include="..\H.Pipes.AccessControl\H.Pipes.AccessControl.csproj" />
     <ProjectReference Include="..\H.Pipes\H.Pipes.csproj" />
   </ItemGroup>
 

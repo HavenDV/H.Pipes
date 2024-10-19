@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
+using System.IO.Pipes;
 using H.Pipes;
+using H.Pipes.AccessControl;
 using H.Pipes.Extensions;
 
 namespace H.Formatters;
@@ -19,7 +21,8 @@ public static class PipeServerExtensions
     [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     public static void EnableEncryption<T>(
         this IPipeServer<T> server,
-        Action<Exception>? exceptionAction = null)
+        Action<Exception>? exceptionAction = null, 
+        PipeSecurity? pipeSecurity = null)
     {
         server = server ?? throw new ArgumentNullException(nameof(server));
         server.ClientConnected += async (_, args) =>
@@ -31,6 +34,11 @@ public static class PipeServerExtensions
 
                 var pipeName = $"{args.Connection.PipeName}_Inferno";
                 var server = new SingleConnectionPipeServer<byte[]>(pipeName, args.Connection.Formatter);
+
+                if (pipeSecurity != null) 
+                {
+                    server.SetPipeSecurity(pipeSecurity);
+                }
                 server.ExceptionOccurred += (_, args) =>
                 {
                     Debug.WriteLine($"{nameof(EnableEncryption)} server returns exception: {args.Exception}");

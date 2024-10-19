@@ -11,7 +11,7 @@ public static class PipeServerExtensions
 {
     /// <summary>
     /// Sets <see cref="PipeSecurity"/>'s for each <see cref="NamedPipeServerStream"/> that will be created by <see cref="PipeServer{T}"/> <br/>
-    /// Overrides <see cref="PipeServer{T}.CreatePipeStreamFunc"/>
+    /// Overrides <see cref="PipeServer{T}.CreatePipeStreamFunc"/> and <see cref="PipeServer{T}.CreatePipeStreamForConnectionFunc"></see>
     /// </summary>
     /// <param name="server"></param>
     /// <param name="pipeSecurity"></param>
@@ -22,8 +22,9 @@ public static class PipeServerExtensions
     {
         server = server ?? throw new ArgumentNullException(nameof(server));
         pipeSecurity = pipeSecurity ?? throw new ArgumentNullException(nameof(pipeSecurity));
-
-        server.CreatePipeStreamFunc = pipeName => NamedPipeServerStreamConstructors.New(
+#if NET6_0_OR_GREATER
+        server.CreatePipeStreamFunc = pipeName =>
+        NamedPipeServerStreamAcl.Create(
             pipeName: pipeName,
             direction: PipeDirection.InOut,
             maxNumberOfServerInstances: 1,
@@ -31,7 +32,21 @@ public static class PipeServerExtensions
             options: PipeOptions.Asynchronous | PipeOptions.WriteThrough,
             inBufferSize: 0,
             outBufferSize: 0,
-            pipeSecurity: pipeSecurity);
+            pipeSecurity);
+
+        //server.c
+#else
+       server.CreatePipeStreamFunc = pipeName =>
+           NamedPipeServerStreamConstructors.New(
+                pipeName: pipeName,
+                direction: PipeDirection.InOut,
+                maxNumberOfServerInstances: 1,
+                transmissionMode: PipeTransmissionMode.Byte,
+                options: PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+                inBufferSize: 0,
+                outBufferSize: 0,
+                pipeSecurity: pipeSecurity);
+#endif
     }
 
     /// <summary>

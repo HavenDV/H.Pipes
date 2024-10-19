@@ -20,7 +20,7 @@ public sealed class PipeStreamWriter : IDisposable
     /// Gets the underlying <c>PipeStream</c> object.
     /// </summary>
     private PipeStream BaseStream { get; }
-    private SemaphoreSlim SemaphoreSlim { get; } = new SemaphoreSlim(1, 1);
+    private SemaphoreSlim SemaphoreSlim { get; } = new(1, 1);
 
     #endregion
 
