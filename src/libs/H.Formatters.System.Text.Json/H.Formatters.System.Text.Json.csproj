@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">
-    <Version>12.1.0</Version>
     <Description>This package adds SystemTextJsonFormatter(based on System.Text.Json)</Description>
   </PropertyGroup>
 
