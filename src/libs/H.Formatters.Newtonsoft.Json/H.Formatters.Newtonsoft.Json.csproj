@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">
-    <Version>13.0.4</Version>
     <Description>This package adds NewtonsoftJsonFormatter(based on Newtonsoft.Json)</Description>
   </PropertyGroup>
 
