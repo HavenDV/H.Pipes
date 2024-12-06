@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net4.6.2;net8.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net4.6.2;net8.0;net9.0</TargetFrameworks>
     <NoWarn>$(NoWarn);CA1031;CS3016</NoWarn>
   </PropertyGroup>
 
@@ -23,8 +23,8 @@
   </PropertyGroup>
   
   <ItemGroup Label="Usings">
-    <Using Include="H.Formatters.BinaryFormatter" Alias="DefaultFormatter" Condition=" '$(TargetFramework)' != 'net8.0' " />
-    <Using Include="H.Formatters.SystemTextJsonFormatter" Alias="DefaultFormatter" Condition=" '$(TargetFramework)' == 'net8.0' " />
+    <Using Include="H.Formatters.BinaryFormatter" Alias="DefaultFormatter" Condition=" '$(TargetFramework)' != 'net8.0' AND '$(TargetFramework)' != 'net9.0' " />
+    <Using Include="H.Formatters.SystemTextJsonFormatter" Alias="DefaultFormatter" Condition=" '$(TargetFramework)' == 'net8.0' OR '$(TargetFramework)' == 'net9.0' " />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
@@ -35,11 +35,11 @@
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.0" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' != 'net8.0' ">
+  <ItemGroup Condition=" '$(TargetFramework)' != 'net8.0' AND '$(TargetFramework)' != 'net9.0' ">
     <ProjectReference Include="..\H.Formatters.BinaryFormatter\H.Formatters.BinaryFormatter.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' OR '$(TargetFramework)' == 'net9.0' ">
     <ProjectReference Include="..\H.Formatters.System.Text.Json\H.Formatters.System.Text.Json.csproj" />
   </ItemGroup>
 

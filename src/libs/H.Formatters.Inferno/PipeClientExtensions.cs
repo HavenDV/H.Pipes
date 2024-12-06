@@ -17,6 +17,7 @@ public static class PipeClientExtensions
     /// <param name="exceptionAction"></param>
     /// <exception cref="ArgumentNullException"></exception>
     [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("This method uses reflection and may not work properly with trimming")]
     public static void EnableEncryption<T>(
         this IPipeClient<T> client,
         Action<Exception>? exceptionAction = null)
@@ -31,7 +32,7 @@ public static class PipeClientExtensions
                 using var source = new CancellationTokenSource(TimeSpan.FromSeconds(10));
                 var cancellationToken = source.Token;
 
-                var client = new SingleConnectionPipeClient<byte[]>(pipeName, args.Connection.ServerName, formatter: args.Connection.Formatter);
+                var client = new SingleConnectionPipeClient<byte[]>(pipeName, formatter: args.Connection.Formatter, args.Connection.ServerName);
                 client.ExceptionOccurred += (_, args) =>
                 {
                     Debug.WriteLine($"{nameof(EnableEncryption)} client returns exception: {args.Exception}");

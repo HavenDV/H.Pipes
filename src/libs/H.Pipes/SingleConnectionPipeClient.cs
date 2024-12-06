@@ -108,7 +108,7 @@ public sealed class SingleConnectionPipeClient<T> : IPipeClient<T>
     /// <param name="serverName">the Name of the server, default is  local machine</param>
     /// <param name="reconnectionInterval">Default reconnection interval - <see langword="100 ms"/></param>
     /// <param name="formatter">Default formatter - <see cref="DefaultFormatter"/></param>
-    public SingleConnectionPipeClient(string pipeName, string serverName = ".", TimeSpan? reconnectionInterval = default, IFormatter? formatter = default)
+    public SingleConnectionPipeClient(string pipeName, IFormatter formatter, string serverName = ".", TimeSpan? reconnectionInterval = default)
     {
         PipeName = pipeName;
         ServerName = serverName;
@@ -141,7 +141,23 @@ public sealed class SingleConnectionPipeClient<T> : IPipeClient<T>
             }
         };
 
-        Formatter = formatter ?? new DefaultFormatter();
+        Formatter = formatter;
+    }
+    
+    /// <summary>
+    /// Constructs a new <see cref="PipeClient{T}"/> to connect to the <see cref="PipeServer{T}"/> specified by <paramref name="pipeName"/>. <br/>
+    /// Default reconnection interval - <see langword="100 ms"/>
+    /// </summary>
+    /// <param name="pipeName">Name of the server's pipe</param>
+    /// <param name="serverName">the Name of the server, default is  local machine</param>
+    /// <param name="reconnectionInterval">Default reconnection interval - <see langword="100 ms"/></param>
+#if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("JSON serialization and deserialization might require types that cannot be statically analyzed. Use the overload that takes a JsonTypeInfo or JsonSerializerContext, or make sure all of the required types are preserved.")]
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("JSON serialization and deserialization might require types that cannot be statically analyzed and might need runtime code generation. Use System.Text.Json source generation for native AOT applications.")]
+#endif
+    public SingleConnectionPipeClient(string pipeName, string serverName = ".", TimeSpan? reconnectionInterval = default)
+        : this(pipeName, new DefaultFormatter(), serverName, reconnectionInterval)
+    {
     }
 
     #endregion

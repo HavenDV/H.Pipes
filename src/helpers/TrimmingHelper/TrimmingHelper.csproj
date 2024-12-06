@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    
+    <PublishTrimmed>true</PublishTrimmed>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\libs\H.Formatters.System.Text.Json\H.Formatters.System.Text.Json.csproj" />
+    <ProjectReference Include="..\..\libs\H.Formatters\H.Formatters.csproj" />
+    <ProjectReference Include="..\..\libs\H.Pipes.AccessControl\H.Pipes.AccessControl.csproj" />
+    <ProjectReference Include="..\..\libs\H.Pipes\H.Pipes.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TrimmerRootAssembly Include="H.Formatters" />
+    <TrimmerRootAssembly Include="H.Formatters.System.Text.Json" />
+    <TrimmerRootAssembly Include="H.Pipes" />
+    <TrimmerRootAssembly Include="H.Pipes.AccessControl" />
+  </ItemGroup>
+
+  <PropertyGroup Label="Publish">
+    <RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform('windows'))">win-x64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="!$([MSBuild]::IsOSPlatform('windows'))">osx-arm64</RuntimeIdentifier>
+
+    <SelfContained>true</SelfContained>
+  </PropertyGroup>
+
+  <Target Name="ProduceTrimmingWarnings" AfterTargets="Build">
+    <CallTarget Targets="Publish"/>
+  </Target>
+
+</Project>

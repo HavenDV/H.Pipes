@@ -6,6 +6,10 @@
 /// <summary>
 /// A formatter that uses <see cref="System.Runtime.Serialization.Formatters.Binary.BinaryFormatter"/> inside for serialization/deserialization
 /// </summary>
+#if NET6_0_OR_GREATER
+[System.Diagnostics.CodeAnalysis.RequiresDynamicCode("BinaryFormatter serialization uses dynamic code generation, the type of objects being processed cannot be statically discovered.")]
+[System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("BinaryFormatter serialization is not trim compatible because the type of objects being processed cannot be statically discovered.")]
+#endif
 public class BinaryFormatter : FormatterBase
 {
     public System.Runtime.Serialization.Formatters.Binary.BinaryFormatter InternalFormatter { get; } = new();

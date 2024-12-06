@@ -33,6 +33,9 @@ internal static class EventExtensions
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="OperationCanceledException"></exception>
     /// <returns></returns>
+#if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("This method uses reflection and may not work properly with trimming")]
+#endif
     public static async Task<T> WaitEventAsync<T>(this object value, string eventName, CancellationToken cancellationToken = default)
     {
         value = value ?? throw new ArgumentNullException(nameof(value));
@@ -81,6 +84,9 @@ internal static class EventExtensions
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="OperationCanceledException"></exception>
     /// <returns></returns>
+#if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("This method uses reflection and may not work properly with trimming")]
+#endif
     public static async Task<T> WaitEventAsync<T>(this object value, Func<CancellationToken, Task> func, string eventName, CancellationToken cancellationToken = default)
     {
         value = value ?? throw new ArgumentNullException(nameof(value));
@@ -109,6 +115,9 @@ internal static class EventExtensions
     /// <exception cref="ArgumentException"></exception>
     /// <exception cref="InvalidOperationException"></exception>
     /// <returns></returns>
+#if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("This method uses reflection and may not work properly with trimming")]
+#endif
     public static async Task<Dictionary<string, T>> WaitAllEventsAsync<T>(this object value, Func<CancellationToken, Task> func, CancellationToken cancellationToken = default, params string[] eventNames)
     {
         value = value ?? throw new ArgumentNullException(nameof(value));
@@ -163,6 +172,9 @@ internal static class EventExtensions
     /// <exception cref="ArgumentException"></exception>
     /// <exception cref="InvalidOperationException"></exception>
     /// <returns></returns>
+#if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("This method uses reflection and may not work properly with trimming")]
+#endif
     public static async Task<Dictionary<string, T>> WaitAnyEventAsync<T>(this object value, Func<CancellationToken, Task> func, CancellationToken cancellationToken = default, params string[] eventNames)
     {
         value = value ?? throw new ArgumentNullException(nameof(value));

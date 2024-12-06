@@ -17,6 +17,9 @@ public static class ConnectionExtensions
     /// <param name="cancellationToken"></param>
     /// <exception cref="OperationCanceledException"></exception>
     /// <returns></returns>
+#if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("This method uses reflection and may not work properly with trimming")]
+#endif
     public static async Task<ConnectionMessageEventArgs<T>> WaitMessageAsync<T>(this IPipeConnection<T> connection, Func<CancellationToken, Task>? func = null, CancellationToken cancellationToken = default)
     {
         return await connection.WaitEventAsync<ConnectionMessageEventArgs<T>>(
@@ -35,6 +38,9 @@ public static class ConnectionExtensions
     /// <param name="func"></param>
     /// <exception cref="OperationCanceledException"></exception>
     /// <returns></returns>
+#if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("This method uses reflection and may not work properly with trimming")]
+#endif
     public static async Task<ConnectionMessageEventArgs<T>> WaitMessageAsync<T>(this IPipeConnection<T> connection, TimeSpan timeout, Func<CancellationToken, Task>? func = null)
     {
         using var tokenSource = new CancellationTokenSource(timeout);

@@ -102,10 +102,22 @@ public sealed class PipeServer<T> : IPipeServer<T>
     /// </summary>
     /// <param name="pipeName">Name of the pipe to listen on</param>
     /// <param name="formatter">Default formatter - <see cref="DefaultFormatter"/></param>
-    public PipeServer(string pipeName, IFormatter? formatter = default)
+    public PipeServer(string pipeName, IFormatter formatter)
     {
         PipeName = pipeName;
-        Formatter = formatter ?? new DefaultFormatter();
+        Formatter = formatter;
+    }
+    
+    /// <summary>
+    /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName"/>.
+    /// </summary>
+    /// <param name="pipeName">Name of the pipe to listen on</param>
+#if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("JSON serialization and deserialization might require types that cannot be statically analyzed. Use the overload that takes a JsonTypeInfo or JsonSerializerContext, or make sure all of the required types are preserved.")]
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("JSON serialization and deserialization might require types that cannot be statically analyzed and might need runtime code generation. Use System.Text.Json source generation for native AOT applications.")]
+#endif
+    public PipeServer(string pipeName) : this(pipeName, new DefaultFormatter())
+    {
     }
 
     #endregion

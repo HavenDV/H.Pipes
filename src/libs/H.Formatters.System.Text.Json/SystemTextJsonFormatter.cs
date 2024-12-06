@@ -6,6 +6,10 @@ namespace H.Formatters;
 /// <summary>
 /// A formatter that uses <see cref="JsonSerializer"/> inside for serialization/deserialization
 /// </summary>
+#if NET6_0_OR_GREATER
+[System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("JSON serialization and deserialization might require types that cannot be statically analyzed. Use the overload that takes a JsonTypeInfo or JsonSerializerContext, or make sure all of the required types are preserved.")]
+[System.Diagnostics.CodeAnalysis.RequiresDynamicCode("JSON serialization and deserialization might require types that cannot be statically analyzed and might need runtime code generation. Use System.Text.Json source generation for native AOT applications.")]
+#endif
 public class SystemTextJsonFormatter : FormatterBase
 {
     /// <summary>

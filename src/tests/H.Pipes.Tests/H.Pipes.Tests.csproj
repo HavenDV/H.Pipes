@@ -1,10 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFrameworks>net9.0</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net4.8</TargetFrameworks>
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
+  
+  <ItemGroup Label="Usings">
+    <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+    <Using Include="FluentAssertions" />
+  </ItemGroup>
+
+  <ItemGroup Label="Usings">
+    <Using Include="H.Formatters.BinaryFormatter" Alias="DefaultFormatter" Condition=" '$(TargetFramework)' != 'net8.0' AND '$(TargetFramework)' != 'net9.0' " />
+    <Using Include="H.Formatters.SystemTextJsonFormatter" Alias="DefaultFormatter" Condition=" '$(TargetFramework)' == 'net8.0' OR '$(TargetFramework)' == 'net9.0' " />
+  </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\..\libs\H.Pipes\H.Pipes.csproj" />
@@ -14,7 +24,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="MSTest" Version="3.6.3" />
+    <PackageReference Include="MSTest" Version="3.6.4" />
     <PackageReference Include="FluentAssertions" Version="7.0.0" />
     <PackageReference Include="GitHubActionsTestLogger" Version="2.4.1">
       <PrivateAssets>all</PrivateAssets>

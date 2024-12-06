@@ -20,6 +20,7 @@ public static class PipeServerExtensions
     /// <param name="pipeSecurity"></param>
     /// <exception cref="ArgumentNullException"></exception>
     [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("This method uses reflection and may not work properly with trimming")]
     public static void EnableEncryption<T>(
         this IPipeServer<T> server,
         Action<Exception>? exceptionAction = null, 

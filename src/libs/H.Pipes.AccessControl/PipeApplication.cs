@@ -12,6 +12,10 @@ namespace H.Pipes.AccessControl;
     Description = "Occurs when new exception.")]
 [Event<IReadOnlyCollection<string>>("ArgumentsReceived", PropertyNames = new[] { "Arguments" },
     Description = "Occurs when new arguments received.")]
+[System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(
+    "JSON serialization and deserialization might require types that cannot be statically analyzed. Use the overload that takes a JsonTypeInfo or JsonSerializerContext, or make sure all of the required types are preserved.")]
+[System.Diagnostics.CodeAnalysis.RequiresDynamicCode(
+    "JSON serialization and deserialization might require types that cannot be statically analyzed and might need runtime code generation. Use System.Text.Json source generation for native AOT applications.")]
 public sealed partial class PipeApplication : IAsyncDisposable
 {
     #region Properties
