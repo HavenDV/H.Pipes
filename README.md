@@ -21,6 +21,7 @@ A simple, easy to use, strongly-typed, async wrapper around .NET named pipes.
 *  Supports variable formatters, default - BinaryFormatter which uses System.Runtime.Serialization.BinaryFormatter inside
 *  Also available ready formatters in separate nuget packages: H.Formatters.Newtonsoft.Json, H.Formatters.System.Text.Json and H.Formatters.Ceras
 *  Supports `PipeAccessRule`'s(see `H.Pipes.AccessControl` nuget package) or more complex code to access using the `PipeServer.PipeStreamInitializeAction` property
+*  Supports Trimming/NativeAOT
 
 ### Nuget
 
