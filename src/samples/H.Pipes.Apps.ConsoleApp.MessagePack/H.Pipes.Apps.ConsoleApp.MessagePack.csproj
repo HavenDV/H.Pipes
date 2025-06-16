@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MessagePackAnalyzer" Version="3.1.3" PrivateAssets="all" />
+    <PackageReference Include="MessagePackAnalyzer" Version="3.1.4" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
