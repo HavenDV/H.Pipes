@@ -26,7 +26,7 @@
   <ItemGroup>
     <PackageReference Include="MSTest" Version="4.1.0" />
     <PackageReference Include="FluentAssertions" Version="8.9.0" />
-    <PackageReference Include="GitHubActionsTestLogger" Version="3.0.1">
+    <PackageReference Include="GitHubActionsTestLogger" Version="3.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
