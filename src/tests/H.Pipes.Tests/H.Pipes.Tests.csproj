@@ -24,7 +24,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="MSTest" Version="4.1.0" />
+    <PackageReference Include="MSTest" Version="4.2.1" />
     <PackageReference Include="FluentAssertions" Version="8.9.0" />
     <PackageReference Include="GitHubActionsTestLogger" Version="3.0.3">
       <PrivateAssets>all</PrivateAssets>
