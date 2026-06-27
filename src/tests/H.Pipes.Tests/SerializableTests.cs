@@ -7,7 +7,7 @@ namespace H.Pipes.Tests;
 [TestClass]
 public class SerializableTests
 {
-    private const string PipeName = "pipe";
+    private readonly string _pipeName = BaseTests.CreatePipeName(nameof(SerializableTests));
 
     private PipeServer<TestCollection>? _server;
     private PipeClient<TestCollection>? _client;
@@ -31,8 +31,8 @@ public class SerializableTests
         _barrier.Reset();
         _exceptions.Clear();
 
-        _server = new PipeServer<TestCollection>(PipeName);
-        _client = new PipeClient<TestCollection>(PipeName);
+        _server = new PipeServer<TestCollection>(_pipeName);
+        _client = new PipeClient<TestCollection>(_pipeName);
 
         _actualData = null;
         _actualHash = 0;

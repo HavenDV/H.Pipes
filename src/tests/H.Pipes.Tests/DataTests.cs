@@ -42,7 +42,7 @@ public class DataTests
         using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1));
         var cancellationToken = cancellationTokenSource.Token;
 
-        const string pipeName = "pipe";
+        var pipeName = BaseTests.CreatePipeName();
         await using var server = new SingleConnectionPipeServer<string?>(pipeName)
         {
             WaitFreePipe = true
@@ -170,7 +170,7 @@ public class DataTests
         var completionSource = new TaskCompletionSource<bool>(false);
         using var registration = cancellationTokenSource.Token.Register(() => completionSource.TrySetCanceled());
 
-        const string pipeName = "pipe";
+        var pipeName = BaseTests.CreatePipeName();
         var formatter = new DefaultFormatter();
         await using var server = new PipeServer<object>(pipeName, formatter);
         await using var client = new PipeClient<object>(pipeName, formatter: formatter);

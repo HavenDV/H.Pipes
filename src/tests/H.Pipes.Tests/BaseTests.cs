@@ -6,6 +6,27 @@ namespace H.Pipes.Tests;
 
 public static class BaseTests
 {
+    public static string CreatePipeName(string prefix = "pipe")
+    {
+        var first = string.IsNullOrWhiteSpace(prefix) ? 'p' : char.ToLowerInvariant(prefix[0]);
+        if (!char.IsLetterOrDigit(first))
+        {
+            first = 'p';
+        }
+
+#if NETFRAMEWORK
+        const char target = '4';
+#elif NET9_0_OR_GREATER
+        const char target = '9';
+#elif NET8_0_OR_GREATER
+        const char target = '8';
+#else
+        const char target = 'n';
+#endif
+
+        return $"{first}{target}";
+    }
+
     public static async Task DataTestAsync<T>(IPipeServer<T> server, IPipeClient<T> client, List<T> values, Func<T?, string>? hashFunc = null, CancellationToken cancellationToken = default)
     {
         Trace.WriteLine("Setting up test...");
@@ -105,7 +126,7 @@ public static class BaseTests
     {
         using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromMinutes(1));
 
-        const string pipeName = "pipe";
+        var pipeName = CreatePipeName();
         await using var server = new PipeServer<T>(pipeName, formatter ?? new DefaultFormatter())
         {
 #if NET48
@@ -122,7 +143,7 @@ public static class BaseTests
     {
         using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromMinutes(1));
 
-        const string pipeName = "pipe";
+        var pipeName = CreatePipeName();
         await using var server = new SingleConnectionPipeServer<T>(pipeName, formatter ?? new DefaultFormatter())
         {
             WaitFreePipe = true
