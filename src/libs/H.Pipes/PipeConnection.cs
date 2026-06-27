@@ -1,4 +1,4 @@
-﻿using System.IO.Pipes;
+using System.IO.Pipes;
 using H.Formatters;
 using H.Pipes.Args;
 using H.Pipes.IO;
@@ -7,10 +7,9 @@ using H.Pipes.Utilities;
 namespace H.Pipes;
 
 /// <summary>
-/// Represents a connection between a named pipe client and server.
+/// Represents a raw byte connection between a named pipe client and server.
 /// </summary>
-/// <typeparam name="T">Reference type to read/write from the named pipe</typeparam>
-public sealed class PipeConnection<T> : IAsyncDisposable
+public class PipeConnection : IPipeConnection
 {
     #region Properties
 
@@ -39,11 +38,6 @@ public sealed class PipeConnection<T> : IAsyncDisposable
     /// </summary>
     public PipeStream PipeStream { get; }
 
-    /// <summary>
-    /// Used formatter.
-    /// </summary>
-    public IFormatter Formatter { get; set; }
-
     private PipeStreamWrapper PipeStreamWrapper { get; }
     private TaskWorker? ReadWorker { get; set; }
 
@@ -54,43 +48,63 @@ public sealed class PipeConnection<T> : IAsyncDisposable
     /// <summary>
     /// Invoked when the named pipe connection terminates.
     /// </summary>
-    public event EventHandler<ConnectionEventArgs<T>>? Disconnected;
+    public event EventHandler<ConnectionEventArgs>? Disconnected;
 
     /// <summary>
     /// Invoked whenever a message is received from the other end of the pipe.
     /// </summary>
-    public event EventHandler<ConnectionMessageEventArgs<T?>>? MessageReceived;
+    public event EventHandler<ConnectionMessageEventArgs>? MessageReceived;
 
     /// <summary>
     /// Invoked when an exception is thrown during any read/write operation over the named pipe.
     /// </summary>
-    public event EventHandler<ConnectionExceptionEventArgs<T>>? ExceptionOccurred;
+    public event EventHandler<ExceptionEventArgs>? ExceptionOccurred;
 
-    private void OnDisconnected()
+    /// <summary>
+    /// Invokes <see cref="Disconnected"/>.
+    /// </summary>
+    protected virtual void OnDisconnected()
     {
-        Disconnected?.Invoke(this, new ConnectionEventArgs<T>(this));
+        Disconnected?.Invoke(this, new ConnectionEventArgs(this));
     }
 
-    private void OnMessageReceived(T? message)
+    /// <summary>
+    /// Invokes <see cref="MessageReceived"/>.
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    protected virtual Task OnMessageReceivedAsync(byte[]? message, CancellationToken cancellationToken = default)
     {
-        MessageReceived?.Invoke(this, new ConnectionMessageEventArgs<T?>(this, message));
+        MessageReceived?.Invoke(this, new ConnectionMessageEventArgs(this, message));
+
+        return Task.CompletedTask;
     }
 
-    private void OnExceptionOccurred(Exception exception)
+    /// <summary>
+    /// Invokes <see cref="ExceptionOccurred"/>.
+    /// </summary>
+    /// <param name="exception"></param>
+    protected virtual void OnExceptionOccurred(Exception exception)
     {
-        ExceptionOccurred?.Invoke(this, new ConnectionExceptionEventArgs<T>(this, exception));
+        ExceptionOccurred?.Invoke(this, new ExceptionEventArgs(exception));
     }
 
     #endregion
 
     #region Constructors
 
-    internal PipeConnection(PipeStream stream, string pipeName, IFormatter formatter, string serverName = "")
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PipeConnection"/> class.
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <param name="pipeName"></param>
+    /// <param name="serverName"></param>
+    public PipeConnection(PipeStream stream, string pipeName, string serverName = "")
     {
         PipeName = pipeName;
         PipeStream = stream;
         PipeStreamWrapper = new PipeStreamWrapper(stream);
-        Formatter = formatter;
         ServerName = serverName;
     }
 
@@ -115,7 +129,7 @@ public sealed class PipeConnection<T> : IAsyncDisposable
             {
                 return;
             }
-            
+
             while (!cancellationToken.IsCancellationRequested && IsConnected)
             {
                 try
@@ -126,11 +140,7 @@ public sealed class PipeConnection<T> : IAsyncDisposable
                         break;
                     }
 
-                    var obj = Formatter is IAsyncFormatter asyncFormatter
-                        ? await asyncFormatter.DeserializeAsync<T>(bytes, cancellationToken).ConfigureAwait(false)
-                        : Formatter.Deserialize<T>(bytes);
-
-                    OnMessageReceived(obj);
+                    await OnMessageReceivedAsync(bytes, cancellationToken).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {
@@ -148,26 +158,22 @@ public sealed class PipeConnection<T> : IAsyncDisposable
     }
 
     /// <summary>
-    /// Writes the specified <paramref name="value"/> and waits other end reading
+    /// Writes the specified <paramref name="value"/> and waits other end reading.
     /// </summary>
     /// <param name="value"></param>
     /// <param name="cancellationToken"></param>
-    public async Task WriteAsync(T value, CancellationToken cancellationToken = default)
+    public async Task WriteAsync(byte[] value, CancellationToken cancellationToken = default)
     {
         if (!IsConnected || !PipeStreamWrapper.CanWrite)
         {
             throw new InvalidOperationException("Client is not connected");
         }
 
-        var bytes = Formatter is IAsyncFormatter asyncFormatter
-            ? await asyncFormatter.SerializeAsync(value, cancellationToken).ConfigureAwait(false)
-            : Formatter.Serialize(value);
-
-        await PipeStreamWrapper.WriteAsync(bytes, cancellationToken).ConfigureAwait(false);
+        await PipeStreamWrapper.WriteAsync(value, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
-    /// Dispose internal resources
+    /// Dispose internal resources.
     /// </summary>
     public async Task StopAsync()
     {
@@ -207,11 +213,103 @@ public sealed class PipeConnection<T> : IAsyncDisposable
     #region IDisposable
 
     /// <summary>
-    /// Dispose internal resources
+    /// Dispose internal resources.
     /// </summary>
     public async ValueTask DisposeAsync()
     {
         await StopAsync().ConfigureAwait(false);
+
+        GC.SuppressFinalize(this);
+    }
+
+    #endregion
+}
+
+/// <summary>
+/// Represents a typed connection between a named pipe client and server.
+/// </summary>
+/// <typeparam name="T">Reference type to read/write from the named pipe.</typeparam>
+public class PipeConnection<T> : PipeConnection, IPipeConnection<T>
+{
+    #region Properties
+
+    /// <summary>
+    /// Used formatter.
+    /// </summary>
+    public IFormatter Formatter { get; set; }
+
+    #endregion
+
+    #region Events
+
+    /// <summary>
+    /// Invoked when the named pipe connection terminates.
+    /// </summary>
+    public new event EventHandler<ConnectionEventArgs<T>>? Disconnected;
+
+    /// <summary>
+    /// Invoked whenever a message is received from the other end of the pipe.
+    /// </summary>
+    public new event EventHandler<ConnectionMessageEventArgs<T?>>? MessageReceived;
+
+    /// <summary>
+    /// Invoked when an exception is thrown during any read/write operation over the named pipe.
+    /// </summary>
+    public new event EventHandler<ConnectionExceptionEventArgs<T>>? ExceptionOccurred;
+
+    /// <inheritdoc />
+    protected override void OnDisconnected()
+    {
+        base.OnDisconnected();
+
+        Disconnected?.Invoke(this, new ConnectionEventArgs<T>(this));
+    }
+
+    /// <inheritdoc />
+    protected override async Task OnMessageReceivedAsync(byte[]? message, CancellationToken cancellationToken = default)
+    {
+        var obj = Formatter is IAsyncFormatter asyncFormatter
+            ? await asyncFormatter.DeserializeAsync<T>(message, cancellationToken).ConfigureAwait(false)
+            : Formatter.Deserialize<T>(message);
+
+        MessageReceived?.Invoke(this, new ConnectionMessageEventArgs<T?>(this, obj));
+
+        await base.OnMessageReceivedAsync(message, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    protected override void OnExceptionOccurred(Exception exception)
+    {
+        base.OnExceptionOccurred(exception);
+
+        ExceptionOccurred?.Invoke(this, new ConnectionExceptionEventArgs<T>(this, exception));
+    }
+
+    #endregion
+
+    #region Constructors
+
+    internal PipeConnection(PipeStream stream, string pipeName, IFormatter formatter, string serverName = "") : base(stream, pipeName, serverName)
+    {
+        Formatter = formatter;
+    }
+
+    #endregion
+
+    #region Public methods
+
+    /// <summary>
+    /// Writes the specified <paramref name="value"/> and waits other end reading.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="cancellationToken"></param>
+    public async Task WriteAsync(T value, CancellationToken cancellationToken = default)
+    {
+        var bytes = Formatter is IAsyncFormatter asyncFormatter
+            ? await asyncFormatter.SerializeAsync(value, cancellationToken).ConfigureAwait(false)
+            : Formatter.Serialize(value);
+
+        await WriteAsync(bytes, cancellationToken).ConfigureAwait(false);
     }
 
     #endregion
