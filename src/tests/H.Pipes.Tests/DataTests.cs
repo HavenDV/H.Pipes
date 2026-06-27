@@ -209,20 +209,24 @@ public class DataTests
 
         var serverCompletionSource = CreateCompletionSource();
         var clientCompletionSource = CreateCompletionSource();
+        var clientConnectedCompletionSource = new TaskCompletionSource<bool>();
 
         using var registration = cancellationToken.Register(() =>
         {
             serverCompletionSource.TrySetCanceled();
             clientCompletionSource.TrySetCanceled();
+            clientConnectedCompletionSource.TrySetCanceled();
         });
 
         server.MessageReceived += (_, args) => serverCompletionSource.TrySetResult(args.Message);
         client.MessageReceived += (_, args) => clientCompletionSource.TrySetResult(args.Message);
+        server.ClientConnected += (_, _) => clientConnectedCompletionSource.TrySetResult(true);
         server.ExceptionOccurred += (_, args) => serverCompletionSource.TrySetException(args.Exception);
         client.ExceptionOccurred += (_, args) => clientCompletionSource.TrySetException(args.Exception);
 
         await server.StartAsync(cancellationToken).ConfigureAwait(false);
         await client.ConnectAsync(cancellationToken).ConfigureAwait(false);
+        await clientConnectedCompletionSource.Task.ConfigureAwait(false);
 
         foreach (var value in serverToClientValues)
         {
