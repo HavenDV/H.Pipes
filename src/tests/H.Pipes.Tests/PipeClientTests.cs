@@ -7,9 +7,9 @@ public class PipeClientTests
     public async Task ConnectTest()
     {
         using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1));
-        await using var client = new PipeClient<string>("this_pipe_100%_is_not_exists");
+        await using var client = new PipeClient<string>(BaseTests.CreatePipeName("missing_pipe"));
 
-        await Assert.ThrowsExceptionAsync<OperationCanceledException>(
+        await Assert.ThrowsExactlyAsync<OperationCanceledException>(
             async () => await client.ConnectAsync(cancellationTokenSource.Token));
     }
 
@@ -19,7 +19,7 @@ public class PipeClientTests
         using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(15));
         var cancellationToken = cancellationTokenSource.Token;
 
-        await using var client = new PipeClient<string>("this_pipe_100%_is_not_exists");
+        await using var client = new PipeClient<string>(BaseTests.CreatePipeName("missing_pipe"));
 
         var firstTask = Task.Run(async () =>
         {
@@ -36,11 +36,11 @@ public class PipeClientTests
             using var source = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             source.CancelAfter(TimeSpan.FromSeconds(1));
 
-            await Assert.ThrowsExceptionAsync<OperationCanceledException>(
+            await Assert.ThrowsExactlyAsync<OperationCanceledException>(
                 async () => await client.WriteAsync(string.Empty, source.Token));
         }
 
-        await Assert.ThrowsExceptionAsync<OperationCanceledException>(
+        await Assert.ThrowsExactlyAsync<OperationCanceledException>(
             async () => await firstTask);
     }
 }
