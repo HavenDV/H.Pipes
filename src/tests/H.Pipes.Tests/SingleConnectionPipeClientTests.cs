@@ -7,17 +7,18 @@ public class SingleConnectionPipeClientTests
     public async Task ClientConnectCancellationTest()
     {
         using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1));
-        await using var client = new SingleConnectionPipeClient<string>("this_pipe_100%_is_not_exists");
+        await using var client = new SingleConnectionPipeClient<string>(BaseTests.CreatePipeName("missing_pipe"));
 
-        await Assert.ThrowsExceptionAsync<OperationCanceledException>(async () => await client.ConnectAsync(cancellationTokenSource.Token));
+        await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () => await client.ConnectAsync(cancellationTokenSource.Token));
     }
 
     [TestMethod]
     public async Task ClientConnectTest()
     {
         using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1));
-        await using var client = new SingleConnectionPipeClient<string>(nameof(ClientConnectTest));
-        await using var server = new SingleConnectionPipeServer<string>(nameof(ClientConnectTest));
+        var pipeName = BaseTests.CreatePipeName(nameof(ClientConnectTest));
+        await using var client = new SingleConnectionPipeClient<string>(pipeName);
+        await using var server = new SingleConnectionPipeServer<string>(pipeName);
 
         await server.StartAsync(cancellationToken: cancellationTokenSource.Token);
 
@@ -28,8 +29,9 @@ public class SingleConnectionPipeClientTests
     public async Task ClientDoubleConnectTest()
     {
         using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        await using var client = new SingleConnectionPipeClient<string>(nameof(ClientDoubleConnectTest));
-        await using var server = new SingleConnectionPipeServer<string>(nameof(ClientDoubleConnectTest));
+        var pipeName = BaseTests.CreatePipeName(nameof(ClientDoubleConnectTest));
+        await using var client = new SingleConnectionPipeClient<string>(pipeName);
+        await using var server = new SingleConnectionPipeServer<string>(pipeName);
 
         await server.StartAsync(cancellationToken: cancellationTokenSource.Token);
 

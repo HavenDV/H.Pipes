@@ -6,6 +6,11 @@ namespace H.Pipes.Tests;
 
 public static class BaseTests
 {
+    public static string CreatePipeName(string prefix = "pipe")
+    {
+        return $"{prefix}_{Guid.NewGuid():N}";
+    }
+
     public static async Task DataTestAsync<T>(IPipeServer<T> server, IPipeClient<T> client, List<T> values, Func<T?, string>? hashFunc = null, CancellationToken cancellationToken = default)
     {
         Trace.WriteLine("Setting up test...");
@@ -105,7 +110,7 @@ public static class BaseTests
     {
         using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromMinutes(1));
 
-        const string pipeName = "pipe";
+        var pipeName = CreatePipeName();
         await using var server = new PipeServer<T>(pipeName, formatter ?? new DefaultFormatter())
         {
 #if NET48
@@ -122,7 +127,7 @@ public static class BaseTests
     {
         using var cancellationTokenSource = new CancellationTokenSource(timeout ?? TimeSpan.FromMinutes(1));
 
-        const string pipeName = "pipe";
+        var pipeName = CreatePipeName();
         await using var server = new SingleConnectionPipeServer<T>(pipeName, formatter ?? new DefaultFormatter())
         {
             WaitFreePipe = true

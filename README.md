@@ -47,6 +47,23 @@ Install-Package H.Formatters.System.Text.Json
 Install-Package H.Formatters.Ceras
 ```
 
+### Samples
+
+The repository contains small runnable samples under `src/samples`:
+
+- `ConsoleApp` shows a basic strongly-typed client/server exchange using the default formatter.
+- `H.Pipes.Apps.ConsoleApp.MessagePack` shows the same client/server pattern with MessagePack serialization.
+- `H.Pipes.Apps.ConsoleApp.Inferno` shows encrypted communication with `H.Formatters.Inferno`.
+- `H.Pipes.Apps.ConsoleApp.Polly` shows reconnect/retry-style usage with Polly.
+- `WindowsFormsApp` shows how to run the server and client from a Windows Forms UI.
+
+Run a sample from the repository root with `dotnet run --project <sample csproj>`. For example:
+
+```shell
+dotnet run --project src/samples/ConsoleApp/ConsoleApp.csproj
+dotnet run --project src/samples/H.Pipes.Apps.ConsoleApp.MessagePack/H.Pipes.Apps.ConsoleApp.MessagePack.csproj
+```
+
 ### Usage
 
 Server:
