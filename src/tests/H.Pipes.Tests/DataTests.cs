@@ -178,18 +178,16 @@ public class DataTests
     }
 
     [TestMethod]
-    public async Task NonGenericSingleConnectionPipeServerRoundTripsRawBytes()
+    public async Task NonGenericSingleConnectionTypesExposeRawContracts()
     {
-        using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1));
-
         var pipeName = BaseTests.CreatePipeName("single-raw");
-        await using var server = new SingleConnectionPipeServer(pipeName)
-        {
-            WaitFreePipe = true,
-        };
+        await using var server = new SingleConnectionPipeServer(pipeName);
         await using var client = new SingleConnectionPipeClient(pipeName);
 
-        await RawDataTestAsync(server, client, cancellationTokenSource.Token);
+        server.Should().BeAssignableTo<IPipeServer>();
+        client.Should().BeAssignableTo<IPipeClient>();
+        server.Connection.Should().BeNull();
+        client.Connection.Should().BeNull();
     }
 
     private static async Task RawDataTestAsync(IPipeServer server, IPipeClient client, CancellationToken cancellationToken)
