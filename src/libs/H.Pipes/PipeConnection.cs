@@ -177,11 +177,12 @@ public class PipeConnection : IPipeConnection
     /// </summary>
     public async Task StopAsync()
     {
-        if (ReadWorker != null)
+        var readWorker = ReadWorker;
+        if (readWorker != null)
         {
-            await ReadWorker.StopAsync().ConfigureAwait(false);
-
             ReadWorker = null;
+
+            await readWorker.StopAsync().ConfigureAwait(false);
         }
 
         await PipeStreamWrapper.StopAsync().ConfigureAwait(false);

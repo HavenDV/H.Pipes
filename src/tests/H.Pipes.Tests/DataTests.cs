@@ -194,10 +194,14 @@ public class DataTests
 
     private static async Task RawDataTestAsync(IPipeServer server, IPipeClient client, CancellationToken cancellationToken)
     {
-        var values = new[]
+        var clientToServerValues = new[]
         {
             Array.Empty<byte>(),
             new byte[] { 1, 2, 3, 4, 5 },
+        };
+        var serverToClientValues = new[]
+        {
+            new byte[] { 6, 7, 8, 9 },
         };
 
         static TaskCompletionSource<byte[]?> CreateCompletionSource()
@@ -222,7 +226,17 @@ public class DataTests
         await server.StartAsync(cancellationToken).ConfigureAwait(false);
         await client.ConnectAsync(cancellationToken).ConfigureAwait(false);
 
-        foreach (var value in values)
+        foreach (var value in serverToClientValues)
+        {
+            clientCompletionSource = CreateCompletionSource();
+
+            await server.WriteAsync(value, cancellationToken).ConfigureAwait(false);
+
+            var clientMessage = await clientCompletionSource.Task.ConfigureAwait(false);
+            clientMessage.Should().Equal(value);
+        }
+
+        foreach (var value in clientToServerValues)
         {
             serverCompletionSource = CreateCompletionSource();
 
@@ -230,13 +244,6 @@ public class DataTests
 
             var serverMessage = await serverCompletionSource.Task.ConfigureAwait(false);
             serverMessage.Should().Equal(value);
-
-            clientCompletionSource = CreateCompletionSource();
-
-            await server.WriteAsync(value, cancellationToken).ConfigureAwait(false);
-
-            var clientMessage = await clientCompletionSource.Task.ConfigureAwait(false);
-            clientMessage.Should().Equal(value);
         }
     }
     
