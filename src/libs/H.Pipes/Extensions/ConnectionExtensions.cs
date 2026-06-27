@@ -23,7 +23,7 @@ public static class ConnectionExtensions
     public static async Task<ConnectionMessageEventArgs<T>> WaitMessageAsync<T>(this IPipeConnection<T> connection, Func<CancellationToken, Task>? func = null, CancellationToken cancellationToken = default)
     {
         return await connection.WaitEventAsync<ConnectionMessageEventArgs<T>>(
-            func ?? (token => Task.Delay(TimeSpan.Zero, cancellationToken)),
+            func ?? (token => Task.Delay(TimeSpan.Zero, token)),
             nameof(connection.MessageReceived),
             cancellationToken).ConfigureAwait(false);
     }

@@ -161,6 +161,84 @@ public class DataTests
     //{
     //    await BaseTests.BinaryDataSingleTestAsync(1025, 3, new CerasFormatter());
     //}
+
+    [TestMethod]
+    public async Task NonGenericPipeServerRoundTripsRawBytes()
+    {
+        using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+
+        var pipeName = BaseTests.CreatePipeName("raw");
+        await using var server = new PipeServer(pipeName)
+        {
+            WaitFreePipe = true,
+        };
+        await using var client = new PipeClient(pipeName);
+
+        await RawDataTestAsync(server, client, cancellationTokenSource.Token);
+    }
+
+    [TestMethod]
+    public async Task NonGenericSingleConnectionPipeServerRoundTripsRawBytes()
+    {
+        using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+
+        var pipeName = BaseTests.CreatePipeName("single-raw");
+        await using var server = new SingleConnectionPipeServer(pipeName)
+        {
+            WaitFreePipe = true,
+        };
+        await using var client = new SingleConnectionPipeClient(pipeName);
+
+        await RawDataTestAsync(server, client, cancellationTokenSource.Token);
+    }
+
+    private static async Task RawDataTestAsync(IPipeServer server, IPipeClient client, CancellationToken cancellationToken)
+    {
+        var values = new[]
+        {
+            Array.Empty<byte>(),
+            new byte[] { 1, 2, 3, 4, 5 },
+        };
+
+        static TaskCompletionSource<byte[]?> CreateCompletionSource()
+        {
+            return new TaskCompletionSource<byte[]?>();
+        }
+
+        var serverCompletionSource = CreateCompletionSource();
+        var clientCompletionSource = CreateCompletionSource();
+
+        using var registration = cancellationToken.Register(() =>
+        {
+            serverCompletionSource.TrySetCanceled();
+            clientCompletionSource.TrySetCanceled();
+        });
+
+        server.MessageReceived += (_, args) => serverCompletionSource.TrySetResult(args.Message);
+        client.MessageReceived += (_, args) => clientCompletionSource.TrySetResult(args.Message);
+        server.ExceptionOccurred += (_, args) => serverCompletionSource.TrySetException(args.Exception);
+        client.ExceptionOccurred += (_, args) => clientCompletionSource.TrySetException(args.Exception);
+
+        await server.StartAsync(cancellationToken).ConfigureAwait(false);
+        await client.ConnectAsync(cancellationToken).ConfigureAwait(false);
+
+        foreach (var value in values)
+        {
+            serverCompletionSource = CreateCompletionSource();
+
+            await client.WriteAsync(value, cancellationToken).ConfigureAwait(false);
+
+            var serverMessage = await serverCompletionSource.Task.ConfigureAwait(false);
+            serverMessage.Should().Equal(value);
+
+            clientCompletionSource = CreateCompletionSource();
+
+            await server.WriteAsync(value, cancellationToken).ConfigureAwait(false);
+
+            var clientMessage = await clientCompletionSource.Task.ConfigureAwait(false);
+            clientMessage.Should().Equal(value);
+        }
+    }
     
 #if !NET8_0_OR_GREATER
     [TestMethod]

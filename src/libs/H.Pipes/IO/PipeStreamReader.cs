@@ -101,7 +101,7 @@ public sealed class PipeStreamReader : IDisposable
         var length = await ReadLengthAsync(cancellationToken).ConfigureAwait(false);
 
         return length == 0
-            ? default
+            ? IsConnected ? Array.Empty<byte>() : default
             : await ReadAsync(
                 length: length,
                 throwIfReadLessThanLength: true,
