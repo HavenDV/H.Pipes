@@ -27,4 +27,40 @@ jobs:
     with:
       os: ${{ matrix.os }}
       publish: ${{ matrix.publish }}
-      nuget-trusted-publishing: true
+
+  publish:
+    name: Publish to NuGet
+    needs: build-test-publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download packages
+        uses: actions/download-artifact@v6
+        with:
+          name: nuget-packages-windows-latest
+          path: packages
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: NuGet login
+        id: nuget_login
+        uses: NuGet/login@v1
+        with:
+          user: havendv
+
+      - name: Publish
+        shell: bash
+        env:
+          NUGET_API_KEY: ${{ steps.nuget_login.outputs.NUGET_API_KEY }}
+        run: |
+          find packages -path "*/EmptyFiles/*" -name "*.nupkg" -delete
+          mapfile -d '' package_files < <(find packages -type f -name "*.nupkg" -print0)
+          if (( ${#package_files[@]} == 0 )); then
+            echo "::error::No NuGet packages were downloaded."
+            exit 1
+          fi
+          for package in "${package_files[@]}"; do
+            dotnet nuget push "$package" --skip-duplicate --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY"
+          done
