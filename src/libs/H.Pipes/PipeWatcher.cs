@@ -1,5 +1,4 @@
 ﻿using System.Timers;
-using EventGenerator;
 using Timer = System.Timers.Timer;
 
 // ReSharper disable UnusedMember.Global
@@ -10,12 +9,6 @@ namespace H.Pipes;
 /// Watches the directory "\\.\pipe\" and reports on new events
 /// <![CDATA[!!! WARNING: Use it carefully, it is very slow !!!]]>
 /// </summary>
-[Event<string>("Created", PropertyNames = new[] { "Name" },
-    Description = "When any pipe created.")]
-[Event<string>("Deleted", PropertyNames = new[] { "Name" },
-    Description = "When any pipe deleted.")]
-[Event<Exception>("ExceptionOccurred", PropertyNames = new[] { "Exception" },
-    Description = "When any exception is thrown.")]
 public sealed partial class PipeWatcher : IDisposable
 {
     #region Properties

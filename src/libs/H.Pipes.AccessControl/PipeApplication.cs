@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
-using EventGenerator;
 using H.Pipes.AccessControl.Utilities;
 
 namespace H.Pipes.AccessControl;
@@ -8,10 +7,6 @@ namespace H.Pipes.AccessControl;
 /// <summary>
 /// This class will save only one running application and passing arguments if it is already running.
 /// </summary>
-[Event<Exception>("ExceptionOccurred", PropertyNames = new[] { "Exception" },
-    Description = "Occurs when new exception.")]
-[Event<IReadOnlyCollection<string>>("ArgumentsReceived", PropertyNames = new[] { "Arguments" },
-    Description = "Occurs when new arguments received.")]
 [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(
     "JSON serialization and deserialization might require types that cannot be statically analyzed. Use the overload that takes a JsonTypeInfo or JsonSerializerContext, or make sure all of the required types are preserved.")]
 [System.Diagnostics.CodeAnalysis.RequiresDynamicCode(

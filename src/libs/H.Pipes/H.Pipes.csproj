@@ -43,11 +43,4 @@
     <ProjectReference Include="..\H.Formatters.System.Text.Json\H.Formatters.System.Text.Json.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="EventGenerator.Generator" Version="0.13.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-  
 </Project>
