@@ -15,10 +15,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="EventGenerator.Generator" Version="0.13.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="NamedPipeServerStream.NetFrameworkVersion" Version="1.1.13" />
   </ItemGroup>
 
