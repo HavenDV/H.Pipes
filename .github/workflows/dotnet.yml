@@ -6,6 +6,10 @@ on:
     tags:
       - v**
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   build-test-publish:
     name: Build, test and publish
@@ -23,5 +27,4 @@ jobs:
     with:
       os: ${{ matrix.os }}
       publish: ${{ matrix.publish }}
-    secrets:
-      nuget-key: ${{ secrets.NUGET_KEY }}
+      nuget-trusted-publishing: true
