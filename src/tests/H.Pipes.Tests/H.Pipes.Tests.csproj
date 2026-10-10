@@ -18,6 +18,7 @@
   
   <ItemGroup>
     <ProjectReference Include="..\..\libs\H.Pipes\H.Pipes.csproj" />
+    <ProjectReference Include="..\..\libs\H.Formatters.Inferno\H.Formatters.Inferno.csproj" />
     <ProjectReference Include="..\..\libs\H.Formatters.Newtonsoft.Json\H.Formatters.Newtonsoft.Json.csproj" />
     <ProjectReference Include="..\..\libs\H.Formatters.System.Text.Json\H.Formatters.System.Text.Json.csproj" />
     <ProjectReference Include="..\..\libs\H.Formatters.Ceras\H.Formatters.Ceras.csproj" />
