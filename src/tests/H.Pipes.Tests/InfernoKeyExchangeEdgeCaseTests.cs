@@ -133,7 +133,7 @@ public sealed class InfernoKeyExchangeEdgeCaseTests
         await using var secondary = new SingleConnectionPipeServer<byte[]>(
             $"{original.PipeName}_Inferno",
             new SystemTextJsonFormatter());
-        var publicKeyConnectionSource = new TaskCompletionSource<PipeConnection<byte[]>>(
+        var publicKeyConnectionSource = new TaskCompletionSource<PipeConnection<byte[]?>>(
             TaskCreationOptions.RunContinuationsAsynchronously);
 
         secondary.MessageReceived += (_, args) =>

@@ -56,7 +56,11 @@ public static class PipeClientExtensions
             {
                 Debug.WriteLine($"{nameof(EnableEncryption)} returns exception: {exception}");
 
-                await client.DisconnectAsync().ConfigureAwait(false);
+                // An earlier handshake must not disconnect a replacement connection.
+                if (ReferenceEquals(client.Connection, args.Connection))
+                {
+                    await client.DisconnectAsync().ConfigureAwait(false);
+                }
 
                 exceptionAction?.Invoke(exception);
             }
