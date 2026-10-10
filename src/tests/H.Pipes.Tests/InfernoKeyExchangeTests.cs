@@ -29,6 +29,9 @@ public sealed class InfernoKeyExchangeTests
         }
     }
 
+#if NET9_0_OR_GREATER
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+#endif
     private static async Task VerifyEncryptedRoundTripAsync(
         int iteration,
         CancellationToken cancellationToken)
@@ -92,11 +95,18 @@ public sealed class InfernoKeyExchangeTests
         var exchangeTask = Task.WhenAll(
             serverConnection.WaitExchangeAsync(cancellationToken),
             clientConnection.WaitExchangeAsync(cancellationToken));
+        var cancellationSource = new TaskCompletionSource<bool>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        using var cancellationRegistration = cancellationToken.Register(() =>
+        {
+            _ = cancellationSource.TrySetResult(true);
+        });
         var observed = await Task.WhenAny(
             exchangeTask,
             encryptionFailure.Task,
-            Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken)).ConfigureAwait(false);
+            cancellationSource.Task).ConfigureAwait(false);
 
+        cancellationToken.ThrowIfCancellationRequested();
         if (ReferenceEquals(observed, encryptionFailure.Task))
         {
             throw new InvalidOperationException(
@@ -124,9 +134,14 @@ public sealed class InfernoKeyExchangeTests
         Task<T> task,
         CancellationToken cancellationToken)
     {
-        _ = await Task.WhenAny(
-            task,
-            Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken)).ConfigureAwait(false);
+        var cancellationSource = new TaskCompletionSource<bool>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        using var cancellationRegistration = cancellationToken.Register(() =>
+        {
+            _ = cancellationSource.TrySetResult(true);
+        });
+
+        _ = await Task.WhenAny(task, cancellationSource.Task).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
         return await task.ConfigureAwait(false);
     }
