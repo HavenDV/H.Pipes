@@ -16,6 +16,8 @@ public static class BaseTests
 
 #if NETFRAMEWORK
         const char target = '4';
+#elif NET10_0_OR_GREATER
+        const char target = 'a';
 #elif NET9_0_OR_GREATER
         const char target = '9';
 #elif NET8_0_OR_GREATER

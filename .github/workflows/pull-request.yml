@@ -17,6 +17,10 @@ jobs:
     uses: HavenDV/workflows/.github/workflows/dotnet_build-test-publish.yml@main
     with:
       os: ${{ matrix.os }}
+      dotnet-version: 10.0.x
+      additional-dotnet-version: |
+        8.0.x
+        9.0.x
       generate-build-number: false
       conventional-commits-publish-conditions: false
       enable-caching: false
