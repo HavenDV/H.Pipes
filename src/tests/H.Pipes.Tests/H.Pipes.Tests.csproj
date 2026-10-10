@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net4.8</TargetFrameworks>
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
@@ -12,8 +12,8 @@
   </ItemGroup>
 
   <ItemGroup Label="Usings">
-    <Using Include="H.Formatters.BinaryFormatter" Alias="DefaultFormatter" Condition=" '$(TargetFramework)' != 'net8.0' AND '$(TargetFramework)' != 'net9.0' " />
-    <Using Include="H.Formatters.SystemTextJsonFormatter" Alias="DefaultFormatter" Condition=" '$(TargetFramework)' == 'net8.0' OR '$(TargetFramework)' == 'net9.0' " />
+    <Using Include="H.Formatters.BinaryFormatter" Alias="DefaultFormatter" Condition=" '$(TargetFramework)' != 'net8.0' AND '$(TargetFramework)' != 'net9.0' AND '$(TargetFramework)' != 'net10.0' " />
+    <Using Include="H.Formatters.SystemTextJsonFormatter" Alias="DefaultFormatter" Condition=" '$(TargetFramework)' == 'net8.0' OR '$(TargetFramework)' == 'net9.0' OR '$(TargetFramework)' == 'net10.0' " />
   </ItemGroup>
   
   <ItemGroup>
