@@ -29,7 +29,7 @@ public sealed class InfernoKeyExchangeTests
         }
     }
 
-#if NET9_0_OR_GREATER
+#if NET8_0_OR_GREATER
     [System.Runtime.Versioning.SupportedOSPlatform("windows")]
 #endif
     private static async Task VerifyEncryptedRoundTripAsync(
@@ -43,7 +43,7 @@ public sealed class InfernoKeyExchangeTests
             TaskCreationOptions.RunContinuationsAsynchronously);
         var receivedByClient = new TaskCompletionSource<string?>(
             TaskCreationOptions.RunContinuationsAsynchronously);
-        var encryptionFailure = new TaskCompletionSource<Exception>(
+        var encryptionFailure = new TaskCompletionSource<(string Endpoint, Exception Error)>(
             TaskCreationOptions.RunContinuationsAsynchronously);
 
         await using var server = new PipeServer<string>(
@@ -55,11 +55,11 @@ public sealed class InfernoKeyExchangeTests
 
         server.EnableEncryption(exception =>
         {
-            _ = encryptionFailure.TrySetResult(exception);
+            _ = encryptionFailure.TrySetResult(("server handshake", exception));
         });
         client.EnableEncryption(exception =>
         {
-            _ = encryptionFailure.TrySetResult(exception);
+            _ = encryptionFailure.TrySetResult(("client handshake", exception));
         });
 
         server.ClientConnected += (_, args) =>
@@ -76,11 +76,11 @@ public sealed class InfernoKeyExchangeTests
         };
         server.ExceptionOccurred += (_, args) =>
         {
-            _ = encryptionFailure.TrySetResult(args.Exception);
+            _ = encryptionFailure.TrySetResult(("server transport", args.Exception));
         };
         client.ExceptionOccurred += (_, args) =>
         {
-            _ = encryptionFailure.TrySetResult(args.Exception);
+            _ = encryptionFailure.TrySetResult(("client transport", args.Exception));
         };
 
         await server.StartAsync(cancellationToken).ConfigureAwait(false);
@@ -92,9 +92,9 @@ public sealed class InfernoKeyExchangeTests
         var clientConnection = client.Connection ??
             throw new InvalidOperationException("The client did not establish a connection.");
 
-        var exchangeTask = Task.WhenAll(
-            serverConnection.WaitExchangeAsync(cancellationToken),
-            clientConnection.WaitExchangeAsync(cancellationToken));
+        var serverExchangeTask = serverConnection.WaitExchangeAsync(cancellationToken);
+        var clientExchangeTask = clientConnection.WaitExchangeAsync(cancellationToken);
+        var exchangeTask = Task.WhenAll(serverExchangeTask, clientExchangeTask);
         var cancellationSource = new TaskCompletionSource<bool>(
             TaskCreationOptions.RunContinuationsAsynchronously);
         using var cancellationRegistration = cancellationToken.Register(() =>
@@ -109,9 +109,12 @@ public sealed class InfernoKeyExchangeTests
         cancellationToken.ThrowIfCancellationRequested();
         if (ReferenceEquals(observed, encryptionFailure.Task))
         {
+            var failure = await encryptionFailure.Task.ConfigureAwait(false);
             throw new InvalidOperationException(
-                "The encrypted key exchange failed.",
-                await encryptionFailure.Task.ConfigureAwait(false));
+                $"The encrypted key exchange failed ({failure.Endpoint}, iteration {iteration}, " +
+                $"serverReady={serverExchangeTask.Status == TaskStatus.RanToCompletion}, " +
+                $"clientReady={clientExchangeTask.Status == TaskStatus.RanToCompletion}).",
+                failure.Error);
         }
 
         cancellationToken.ThrowIfCancellationRequested();
