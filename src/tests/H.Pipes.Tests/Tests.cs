@@ -21,7 +21,7 @@ public class Tests
         var isConnected = false;
         
         var exceptions = new ConcurrentBag<Exception>();
-        const string pipeName = "int";
+        var pipeName = BaseTests.CreatePipeName("interrupted");
         try
         {
 
@@ -257,7 +257,7 @@ public class Tests
         var isConnected = false;
         
         var exceptions = new ConcurrentBag<Exception>();
-        const string pipeName = "rcs";
+        var pipeName = BaseTests.CreatePipeName("reconnect");
         try
         {
     
