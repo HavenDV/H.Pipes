@@ -49,9 +49,9 @@ public static class PipeServerExtensions
                 };
                 await using (server.ConfigureAwait(false))
                 {
-                    await server.StartAsync(cancellationToken).ConfigureAwait(false);
-
-                    var response = await server.WaitMessageAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                    var response = await server.WaitMessageAsync(
+                        func: token => server.StartAsync(token),
+                        cancellationToken: cancellationToken).ConfigureAwait(false);
                     var clientPublicKey = response.Message;
 
                     using var keyPair = new KeyPair();
