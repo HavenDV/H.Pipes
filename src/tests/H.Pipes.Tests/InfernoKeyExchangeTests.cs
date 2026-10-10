@@ -1,4 +1,4 @@
-using H.Formatters;
+﻿using H.Formatters;
 
 namespace H.Pipes.Tests;
 
