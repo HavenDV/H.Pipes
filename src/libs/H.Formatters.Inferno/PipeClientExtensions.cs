@@ -42,9 +42,9 @@ public static class PipeClientExtensions
                 await using (client.ConfigureAwait(false))
                 {
                     using var _keyPair = new KeyPair();
-                    await client.WriteAsync(_keyPair.PublicKey, cancellationToken).ConfigureAwait(false);
-
-                    var response = await client.WaitMessageAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                    var response = await client.WaitMessageAsync(
+                        func: token => client.WriteAsync(_keyPair.PublicKey, token),
+                        cancellationToken: cancellationToken).ConfigureAwait(false);
                     var serverPublicKey = response.Message;
 
                     args.Connection.Formatter = new InfernoFormatter(
