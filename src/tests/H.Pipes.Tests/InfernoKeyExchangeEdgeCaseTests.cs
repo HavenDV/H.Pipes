@@ -18,7 +18,7 @@ public sealed class InfernoKeyExchangeEdgeCaseTests
     {
         using var timeoutSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         var cancellationToken = timeoutSource.Token;
-        var pipeName = $"inferno-reply-{Guid.NewGuid():N}";
+        var pipeName = BaseTests.CreatePipeName("inferno-reply");
 
         await using var server = new SingleConnectionPipeServer<byte[]>(
             pipeName,
