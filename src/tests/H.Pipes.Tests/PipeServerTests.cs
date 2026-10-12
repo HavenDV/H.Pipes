@@ -153,4 +153,41 @@ public class PipeServerTests
         cancellationToken.ThrowIfCancellationRequested();
         await task;
     }
+
+    [TestMethod]
+    public async Task StopAsync_WithIdleConnectedClient_CompletesAndAllowsRestart()
+    {
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+        var pipeName = BaseTests.CreatePipeName("idle");
+        var connected = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var errors = new System.Collections.Concurrent.ConcurrentQueue<Exception>();
+        await using var server = new PipeServer<string>(pipeName);
+        await using var client = new PipeClient<string>(pipeName)
+        {
+            AutoReconnect = false,
+        };
+        server.ClientConnected += (_, _) => connected.TrySetResult(true);
+        server.ExceptionOccurred += (_, args) => errors.Enqueue(args.Exception);
+
+        await server.StartAsync(timeout.Token);
+        await client.ConnectAsync(timeout.Token);
+        await WaitForAsync(connected.Task, timeout.Token);
+
+        var stopTask = server.StopAsync(timeout.Token);
+        try
+        {
+            await WaitForAsync(stopTask, timeout.Token);
+        }
+        finally
+        {
+            // Always unblock the listener if the regression returns, so failure cannot hang the suite.
+            await client.DisconnectAsync();
+            await stopTask;
+        }
+
+        Assert.AreEqual(0, errors.Count, "Normal shutdown must not report interrupted reads as transport errors.");
+        Assert.IsFalse(server.IsStarted);
+        await server.StartAsync(timeout.Token);
+        await server.StopAsync(timeout.Token);
+    }
 }

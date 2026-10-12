@@ -147,6 +147,11 @@ public class PipeConnection : IPipeConnection
                     OnDisconnected();
                     throw;
                 }
+                catch (Exception) when (cancellationToken.IsCancellationRequested)
+                {
+                    // Closing the pipe can interrupt a pending read before it observes cancellation.
+                    break;
+                }
                 catch (Exception exception)
                 {
                     OnExceptionOccurred(exception);
@@ -182,7 +187,18 @@ public class PipeConnection : IPipeConnection
         {
             ReadWorker = null;
 
-            await readWorker.StopAsync().ConfigureAwait(false);
+            var stopTask = readWorker.StopAsync();
+            // .NET Framework requires closing the pipe to interrupt an already pending read.
+            try
+            {
+                await PipeStreamWrapper.StopAsync().ConfigureAwait(false);
+            }
+            finally
+            {
+                await stopTask.ConfigureAwait(false);
+            }
+
+            return;
         }
 
         await PipeStreamWrapper.StopAsync().ConfigureAwait(false);
