@@ -49,9 +49,9 @@ public static class PipeServerExtensions
                 };
                 await using (server.ConfigureAwait(false))
                 {
-                    await server.StartAsync(cancellationToken).ConfigureAwait(false);
-
-                    var response = await server.WaitMessageAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                    var response = await server.WaitMessageAsync(
+                        func: token => server.StartAsync(token),
+                        cancellationToken: cancellationToken).ConfigureAwait(false);
                     var clientPublicKey = response.Message;
 
                     using var keyPair = new KeyPair();
@@ -60,7 +60,9 @@ public static class PipeServerExtensions
                         args.Connection.Formatter,
                         keyPair.GenerateSharedKey(clientPublicKey));
 
-                    await server.WriteAsync(keyPair.PublicKey, cancellationToken).ConfigureAwait(false);
+                    // The receive event may run before the server publishes its Connection property.
+                    // Reply on the connection that delivered the public key to avoid a dropped response.
+                    await response.Connection.WriteAsync(keyPair.PublicKey, cancellationToken).ConfigureAwait(false);
                 }
             }
             catch (Exception exception)
