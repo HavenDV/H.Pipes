@@ -36,6 +36,7 @@ internal sealed class TaskWorker : IAsyncDisposable
     /// <param name="exceptionAction"></param>
     public TaskWorker(Func<CancellationToken, Task> action, Action<Exception>? exceptionAction = null)
     {
+        // Track the async loop itself so disposal waits for its resources to be released.
         Task = Task.Factory.StartNew(async () =>
         {
             try
@@ -49,7 +50,7 @@ internal sealed class TaskWorker : IAsyncDisposable
             {
                 exceptionAction?.Invoke(exception);
             }
-        }, CancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        }, CancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
     }
 
     #endregion
@@ -81,9 +82,6 @@ internal sealed class TaskWorker : IAsyncDisposable
         catch (OperationCanceledException)
         {
         }
-
-        // Some system code can still use CancellationToken, so we wait
-        await Task.Delay(TimeSpan.FromMilliseconds(1)).ConfigureAwait(false);
 
         CancellationTokenSource.Dispose();
         Task.Dispose();
