@@ -13,18 +13,18 @@
 
   <ItemGroup>
     <PackageReference Include="Inferno" Version="1.6.8" />
-    <PackageReference Include="PolySharp" Version="1.17.0">
+    <PackageReference Include="PolySharp" Version="1.17.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.14" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="11.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net4.6.2' ">
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.14" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="11.0.0" />
   </ItemGroup>
 
   <ItemGroup>
